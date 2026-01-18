@@ -393,7 +393,38 @@ class SymphonyOrchestrator:
                             self.selector.update(x, bonus)
 
             if return_mode == "trace":
+                # ✅ Build traces dict compatible with non-planner mode for Pre-train.py
+                # Extract runs from winning plan's records to build a compatible trace structure
+                traces_dict: Dict[str, Any] = {}
+                all_runs: List[Dict[str, Any]] = []
+                
+                # Extract runs from winning plan's trace (records are the run_records)
+                if plan_traces and best_i < len(plan_traces):
+                    winning_trace = plan_traces[best_i].get("trace", {})
+                    if isinstance(winning_trace, dict):
+                        # _run_plan_chain_v1 returns {"steps": [...], "records": [...]}
+                        records = winning_trace.get("records", [])
+                        if isinstance(records, list):
+                            # records are the run_records from plan chain execution
+                            all_runs = records
+                
+                # Build a single trace entry compatible with Pre-train.py (expects {"traces": {"sub_1": {...}}})
+                if all_runs or final_text:
+                    traces_dict["sub_1"] = {
+                        "requirement": "planning",
+                        "context": ctx,
+                        "gold": gold,
+                        "vote_count": dict(Counter(plan_keys)),
+                        "vote_weight_by_match_score": {k: w for k, w in zip(plan_keys, plan_weights)},
+                        "correct": correct,
+                        "runs": all_runs,
+                        "voted": final_text,
+                        "voted_final": win_key,
+                    }
+                
                 return {
+                    "results": {"sub_1": final_text} if final_text else {},
+                    "traces": traces_dict,
                     "final": win_key,
                     "final_text": final_text,
                     "answers": plan_answers,
@@ -1154,6 +1185,37 @@ class SymphonyOrchestrator:
     def _extract_final_from_text(s: str) -> Optional[str]:
         if not isinstance(s, str):
             return None
+
+        # 0) JSON format: {"final_answer": "...", "confidence": 0.9, "valid": 1, "abstain": 0}
+        # ✅ Priority 1: Try to parse JSON and extract final_answer field
+        try:
+            import json
+            # Try to extract JSON object from text
+            s_clean = s.strip()
+            if s_clean.startswith("{") and s_clean.endswith("}"):
+                # Direct JSON string
+                data = json.loads(s_clean)
+                if isinstance(data, dict) and "final_answer" in data:
+                    final_ans = str(data.get("final_answer", "")).strip()
+                    if final_ans:
+                        return final_ans
+            else:
+                # Try to find JSON object within text
+                start_idx = s_clean.find("{")
+                end_idx = s_clean.rfind("}")
+                if start_idx >= 0 and end_idx > start_idx:
+                    json_str = s_clean[start_idx:end_idx + 1]
+                    data = json.loads(json_str)
+                    if isinstance(data, dict) and "final_answer" in data:
+                        final_ans = str(data.get("final_answer", "")).strip()
+                        if final_ans:
+                            return final_ans
+        except (json.JSONDecodeError, ValueError, KeyError):
+            # JSON parsing failed, continue with regex-based extraction
+            pass
+        except Exception:
+            # Any other exception (e.g., json module not available), fall through
+            pass
 
         # 1) boxed
         m = re.findall(r"\\boxed\{([^}]*)\}", s)

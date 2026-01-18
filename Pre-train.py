@@ -241,6 +241,27 @@ def run_phase(
 		agent_ids: List[str] = []
 		if isinstance(trace, dict):
 			traces = trace.get("traces", {}) or {}
+			# ✅ DEBUG: Print trace structure for first task to diagnose ok=0 issue
+			if i == start_index:
+				print(f"\n[DEBUG] === Trace structure for first task (step={i}) ===")
+				print(f"[DEBUG] trace type: {type(trace)}, is_dict: {isinstance(trace, dict)}")
+				print(f"[DEBUG] traces type: {type(traces)}, is_dict: {isinstance(traces, dict)}, len: {len(traces) if isinstance(traces, dict) else 0}")
+				if traces:
+					first = next(iter(traces.values()))
+					print(f"[DEBUG] first type: {type(first)}, is_dict: {isinstance(first, dict)}")
+					if isinstance(first, dict):
+						print(f"[DEBUG] first keys: {list(first.keys())}")
+						print(f"[DEBUG] voted: {repr(first.get('voted', 'MISSING'))[:200]}")
+						print(f"[DEBUG] voted_final: {repr(first.get('voted_final', 'MISSING'))[:200]}")
+						print(f"[DEBUG] runs type: {type(first.get('runs'))}, len: {len(first.get('runs', []))}")
+						if first.get("runs"):
+							first_run = first["runs"][0]
+							print(f"[DEBUG] first_run type: {type(first_run)}, keys: {list(first_run.keys()) if isinstance(first_run, dict) else 'NOT_DICT'}")
+							if isinstance(first_run, dict):
+								print(f"[DEBUG] first_run agent_id: {repr(first_run.get('agent_id', 'MISSING'))}")
+				else:
+					print(f"[DEBUG] WARNING: traces is empty!")
+				print(f"[DEBUG] ============================================\n")
 			if traces:
 				first = next(iter(traces.values()))
 				if isinstance(first, dict):
@@ -334,6 +355,8 @@ def main() -> None:
 	ap.add_argument("--cot-count", type=int, default=1)
 	ap.add_argument("--plan-k", type=int, default=1)
 	ap.add_argument("--multi-plan", action="store_true", help="Use all agents as planners (plan_k = agent count)")
+	ap.add_argument("--agents", type=str, default="11,12,13,14,15",
+	                help="Comma-separated agent IDs to load from runtime-dir (default: 11,12,13,14,15)")
 	ap.add_argument("--outdir", type=str, default="pretrain_results")
 	ap.add_argument("--runtime-dir", type=str, default="runtime")
 	ap.add_argument("--save-selector", type=str, default=None, help="Save UCB state after pretrain")
@@ -360,8 +383,9 @@ def main() -> None:
 	pretrain_tasks = tasks[args.cold_n : args.cold_n + args.pretrain_n]
 	val_tasks = tasks[args.cold_n + args.pretrain_n : args.cold_n + args.pretrain_n + args.val_n]
 
-	# load agents 1-10
-	agents = load_agents_from_runtime(args.runtime_dir, list(range(1, 11)))
+	# load agents from command-line argument
+	agent_ids = [int(x.strip()) for x in args.agents.split(",") if x.strip()]
+	agents = load_agents_from_runtime(args.runtime_dir, agent_ids)
 	for ag in agents:
 		symphony_module.register_agent(ag)
 	if args.multi_plan:
