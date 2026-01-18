@@ -245,11 +245,48 @@ def run_phase(
 	outdir: str,
 	verbose: bool,
 	print_each_step: bool,
+	agents: Optional[List[Any]] = None,  # ✅ For cold_start round-robin
 ) -> Tuple[int, List[Dict[str, Any]]]:
 	logs: List[Dict[str, Any]] = []
+	
+	# ✅ Cold_start mode: round-robin agent assignment (each task -> one agent)
+	# If phase is "cold_start" and agents provided, use round-robin
+	use_cold_start_round_robin = (phase == "cold_start" and agents is not None)
+	
 	for i, task in enumerate(tasks, start=start_index):
 		t0 = time.time()
 		task_obj = build_task_obj(task, i=i)
+		
+		# ✅ Cold_start: inject task_index into context for round-robin selection
+		if use_cold_start_round_robin:
+			# Inject task_index (0-based from start_index) into context
+			ctx = getattr(task_obj, "context", {}) or {}
+			if not isinstance(ctx, dict):
+				ctx = {}
+			ctx["_cold_start_task_index"] = i - start_index  # 0-based index within this phase
+			# Get agent keys using symphony's _resolve_agent_key (sorted for consistent order)
+			agent_keys = []
+			for ag in agents:
+				aid = (
+					str(getattr(ag, "agent_id", "")) or
+					str(getattr(ag, "node_id", "")) or
+					str(getattr(ag, "name", "")) or
+					str(getattr(ag, "id", "")) or
+					""
+				).strip()
+				if aid:
+					agent_keys.append(aid)
+			# ✅ Sort agent keys to ensure consistent round-robin order
+			agent_keys.sort()
+			ctx["_cold_start_agents"] = agent_keys  # Agent keys for round-robin (sorted)
+			try:
+				task_obj.context = ctx
+			except Exception:
+				pass
+			# Force cot_count=1 for cold_start (each task runs once)
+			actual_cot_count = 1
+		else:
+			actual_cot_count = cot_count
 		
 		# ✅ Error handling: retry on transient errors (e.g., server_500)
 		# Retry up to 3 times to avoid occasional upstream failures killing the entire experiment
@@ -257,7 +294,7 @@ def run_phase(
 		err_msg = None
 		for attempt in range(3):
 			try:
-				trace = symphony_module.execute_task(task_obj, cot_count=cot_count, return_mode="trace")
+				trace = symphony_module.execute_task(task_obj, cot_count=actual_cot_count, return_mode="trace")
 				break
 			except Exception as e:
 				err_msg = f"{type(e).__name__}: {str(e)}"
@@ -460,14 +497,16 @@ def main() -> None:
 			idx, logs = run_phase("validation", val_tasks, idx, args.cot_count, args.outdir, args.verbose, args.print_each_step)
 			all_logs.extend(logs)
 	else:
-		# cold start: static Top-L
+		# cold start: static Top-L (no planner, no multi-CoT)
 		symphony_module.init(
 			use_dynamic=False,
 			topL=int(args.topL),
-			plan_k=int(args.plan_k),
+			# plan_k=int(args.plan_k),
+			plan_k=1,  # ✅ B: cold_start 不启用 planner
 		)
 		if cold_tasks:
-			idx, logs = run_phase("cold_start", cold_tasks, idx, args.cot_count, args.outdir, args.verbose, args.print_each_step)
+			# idx, logs = run_phase("cold_start", cold_tasks, idx, args.cot_count, args.outdir, args.verbose, args.print_each_step, agents=agents) 
+			idx, logs = run_phase("cold_start", cold_tasks, idx, 1, args.outdir, args.verbose, args.print_each_step, agents=agents)  # ✅ C: cold_start 强制 cot_count=1
 			all_logs.extend(logs)
 
 		# pretrain: Top-L + UCB (updates enabled)

@@ -2,7 +2,7 @@
 debug: true
 role: "agent"
 node_id: "agent-openrouter-deepseek-v3-004"
-base_model: "openrouter:deepseek/deepseek-chat"
+base_model: "openrouter:deepseek/deepseek-chat-v3-0324"
 sys_prompt: |
   [ROLE]
   You are a retrieval-and-evidence agent. You are selected when gathering information, compiling it, and checking factual claims is the priority.
@@ -46,8 +46,8 @@ gpu_id: 0
 
 # Pricing information (used by all experiments)
 provider: openai  # "openai", "google", or "local"
-price_in_per_1M: 0.30  # USD per 1M input tokens (DeepSeek V3)
-price_out_per_1M: 1.20  # USD per 1M output tokens (DeepSeek V3)
+price_in_per_1M: 0.19  # USD per 1M input tokens (DeepSeek V3 0324)
+price_out_per_1M: 0.87  # USD per 1M output tokens (DeepSeek V3 0324)
 gpu_hour_price: null  # USD per GPU hour (for local models, null for API models)
 cost_weight: 0.30  # Relative cost weight (fallback if pricing not available)
 

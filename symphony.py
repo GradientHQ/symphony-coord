@@ -741,6 +741,114 @@ class SymphonyOrchestrator:
                     traces_by_subtask[sid] = {"error": err, "runs": [], "voted": err, "requirement": req}
                 continue
 
+            # ✅ Cold_start round-robin mode: check if context has _cold_start_task_index
+            ctx = st.get("context", {}) or {}
+            cold_start_task_index = ctx.get("_cold_start_task_index")
+            cold_start_agent_keys = ctx.get("_cold_start_agents", [])
+            
+            if cold_start_task_index is not None and cold_start_agent_keys:
+                # ✅ Cold_start round-robin: each task -> exactly one agent (round-robin)
+                # Select agent by round-robin: task_index % len(agents)
+                agent_key_idx = int(cold_start_task_index) % len(cold_start_agent_keys) if cold_start_agent_keys else 0
+                target_agent_key = cold_start_agent_keys[agent_key_idx]
+                
+                # Find agent by key
+                selected_agent = None
+                selected_candidate = None
+                for c in candidates:
+                    ag = c["agent"]
+                    aid = self._resolve_agent_key(ag)
+                    if aid == target_agent_key:
+                        selected_agent = ag
+                        selected_candidate = c
+                        break
+                
+                if selected_agent is None:
+                    # ✅ Fallback: still use round-robin from available candidates
+                    # Match agents in candidates by key, then pick by round-robin index
+                    available_candidates = []
+                    candidate_keys = []
+                    for c in candidates:
+                        ag = c["agent"]
+                        stt = self._agent_state(ag)
+                        if bool(stt.get("available", True)):
+                            aid = self._resolve_agent_key(ag)
+                            available_candidates.append((aid, ag, c))
+                            candidate_keys.append(aid)
+                    
+                    if available_candidates:
+                        # Find target_agent_key's position in sorted agent_keys list
+                        # Use that position to select from available candidates
+                        try:
+                            target_idx_in_all = cold_start_agent_keys.index(target_agent_key)
+                            # Find the first available candidate whose key matches any agent in sorted list at same relative position
+                            # Simplified: use round-robin index directly on available candidates
+                            fallback_idx = int(cold_start_task_index) % len(available_candidates) if available_candidates else 0
+                            selected_agent = available_candidates[fallback_idx][1]
+                            selected_candidate = available_candidates[fallback_idx][2]
+                        except (ValueError, IndexError):
+                            # If target not found or index error, use first available
+                            selected_agent = available_candidates[0][1]
+                            selected_candidate = available_candidates[0][2]
+                
+                if selected_agent is None:
+                    err = f"[ERROR] No agent found for cold_start round-robin (key={target_agent_key})"
+                    results[sid] = err
+                    if return_mode == "trace":
+                        traces_by_subtask[sid] = {"error": err, "runs": [], "voted": err, "requirement": req}
+                    continue
+                
+                # Execute once with selected agent
+                aid = self._resolve_agent_key(selected_agent)
+                if not aid:
+                    aid = f"agent_{id(selected_agent)}"
+                stt = self._agent_state(selected_agent)
+                match_score = float(selected_candidate.get("match_score", 0.0)) if selected_candidate else 0.0
+                x = self._build_x_from_candidate_or_fallback(
+                    candidate=selected_candidate or {"agent": selected_agent, "sim_emb": 0.5, "prior_success": 0.5},
+                    agent=selected_agent,
+                    dynamic_state=stt,
+                )
+                
+                t0 = time.time()
+                try:
+                    if self.dispatch_mode == "shared_bb":
+                        requester = self._get_requester_agent()
+                        if requester is None:
+                            text = "[ERROR] dispatch_mode=shared_bb but no requester"
+                        else:
+                            run_tag = str(ctx.get("_run_id", "run")) + f":{sid}:cold_start"
+                            text = self._execute_subtask_via_shared_bb(requester, st, run_tag=run_tag)
+                    else:
+                        text = self._execute_subtask_on_agent(selected_agent, st)
+                except Exception as e:
+                    text = f"[AGENT_ERROR] {str(e)}"
+                
+                dt_ms = (time.time() - t0) * 1000.0
+                final_result = text
+                run_records = [{
+                    "agent_id": aid,
+                    "match_score": float(match_score),
+                    "sim_emb": float(selected_candidate.get("sim_emb", 0.5)) if selected_candidate else 0.5,
+                    "prior_success": float(selected_candidate.get("prior_success", 0.5)) if selected_candidate else 0.5,
+                    "x": x,
+                    "latency_ms": float(dt_ms),
+                    "text": text,
+                    "final": self._extract_final_from_text(text) or "",
+                }]
+                
+                results[sid] = final_result
+                if return_mode == "trace":
+                    traces_by_subtask[sid] = {
+                        "requirement": req,
+                        "context": ctx,
+                        "runs": run_records,
+                        "voted": final_result,
+                        "voted_final": self._extract_final_from_text(final_result) or "",
+                    }
+                continue
+
+            # Normal mode: filter available and use Top-L + Multi-CoT
             # filter available
             candidates_avail: List[Dict[str, Any]] = []
             for c in candidates:
@@ -1403,7 +1511,7 @@ Problem:
         s.append(f"Current sub-task: {q}")
         return "\n\n".join(s).strip()
 
-    def _execute_one_subtask_beacon(self, st: Dict[str, Any], used_ids: set, base_ctx: Dict[str, Any]) -> Dict[
+    def _execute_one_subtask_beacon(self, st: Dict[str, Any], used_ids: set, base_ctx: Dict[str, Any], step_index: int = 0) -> Dict[
         str, Any]:
         """
         Planner step execution:
@@ -1417,19 +1525,34 @@ Problem:
             return {"text": "[ERROR] No agents", "match_score": 0.0, "x": None, "latency_ms": 0.0, "agent_id": None,
                     "final": ""}
 
-        # Prefer available within TopL
-        topL = cands[: max(1, self.topL)]
+        # ✅ Exploration constraint 1: Top-L must be unique (deduplicate by agent_id)
+        seen_agent_ids = set()
+        topL_unique: List[Dict[str, Any]] = []
+        for c in cands:
+            ag = c["agent"]
+            aid = self._resolve_agent_key(ag)
+            if not aid:
+                aid = f"agent_{id(ag)}"
+            if aid not in seen_agent_ids:
+                seen_agent_ids.add(aid)
+                topL_unique.append(c)
+                if len(topL_unique) >= self.topL:
+                    break
+        topL = topL_unique[: max(1, self.topL)] if topL_unique else cands[:1]
 
         if self.use_dynamic and self.selector is not None:
             agent, x, _st, raw_ms = self._select_agent_dynamic(topL, used_ids)
             match_score = float(raw_ms)
         else:
-            # ✅ P0-2: Use unified helper for consistent feature definitions
-            agent = topL[0]["agent"]
-            match_score = float(topL[0].get("match_score", 0.0))
+            # ✅ cold_start: static Top-L but round-robin across agents (no repeat)
+            # Use step_index % len(topL) to cycle through topL candidates
+            candidate_idx = step_index % len(topL) if topL else 0
+            candidate = topL[candidate_idx]
+            agent = candidate["agent"]
+            match_score = float(candidate.get("match_score", 0.0))
             stt = self._agent_state(agent)
             x = self._build_x_from_candidate_or_fallback(
-                candidate=topL[0],
+                candidate=candidate,
                 agent=agent,
                 dynamic_state=stt,
             )
@@ -1474,7 +1597,7 @@ Problem:
         steps_trace: List[Dict[str, Any]] = []
         step_records: List[Dict[str, Any]] = []
 
-        for st in chain:
+        for step_idx, st in enumerate(chain):
             st2 = dict(st)
             st2["input"] = self._format_executor_input(base_task=base_task, q=str(st.get("input", "")), prev=prev)
 
@@ -1483,7 +1606,7 @@ Problem:
             st2_ctx.update(st2.get("context", {}) or {})
             st2["context"] = st2_ctx
 
-            rec = self._execute_one_subtask_beacon(st2, used_ids, base_ctx=st2_ctx)
+            rec = self._execute_one_subtask_beacon(st2, used_ids, base_ctx=st2_ctx, step_index=step_idx)
             txt = str(rec.get("text", ""))
             ms = float(rec.get("match_score", 0.0))
 
