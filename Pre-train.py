@@ -250,7 +250,45 @@ def run_phase(
 	for i, task in enumerate(tasks, start=start_index):
 		t0 = time.time()
 		task_obj = build_task_obj(task, i=i)
-		trace = symphony_module.execute_task(task_obj, cot_count=cot_count, return_mode="trace")
+		
+		# ✅ Error handling: retry on transient errors (e.g., server_500)
+		# Retry up to 3 times to avoid occasional upstream failures killing the entire experiment
+		trace = None
+		err_msg = None
+		for attempt in range(3):
+			try:
+				trace = symphony_module.execute_task(task_obj, cot_count=cot_count, return_mode="trace")
+				break
+			except Exception as e:
+				err_msg = f"{type(e).__name__}: {str(e)}"
+				# Simple backoff to reduce transient jitter
+				if attempt < 2:  # Don't sleep on last attempt
+					time.sleep(1.5 * (attempt + 1))
+		
+		# If still failed: record error log but don't crash
+		if trace is None:
+			dt = time.time() - t0
+			gold_text = extract_gold_text(task)
+			logs.append(
+				{
+					"i": i,
+					"phase": phase,
+					"task_id": task.get("task_id") or task.get("id"),
+					"benchmark": task.get("benchmark"),
+					"difficulty_bin": task.get("difficulty_bin"),
+					"agent_ids": [],
+					"ok": 0,
+					"pred": "",
+					"gold": gold_text,
+					"acc": 0,
+					"latency_s": dt,
+					"error": err_msg,
+				}
+			)
+			if print_each_step:
+				print(f"[{phase}] step={i} agent=NA ok=0 acc=0 latency={dt:.2f}s err={err_msg}")
+			continue
+		
 		final_text = ""
 		agent_ids: List[str] = []
 		if isinstance(trace, dict):
