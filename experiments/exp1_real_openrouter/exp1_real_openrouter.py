@@ -635,6 +635,7 @@ def pick_topL_candidates(
     task: Optional[RealTask] = None,
     latency_scale_ms: float = 2000.0,
     use_embedding: bool = True,
+    strict_routing: bool = False,
 ) -> List[Dict[str, Any]]:
     """
     ✅ Pick top L candidates using new routing system (embedding + priors).
@@ -694,6 +695,12 @@ def pick_topL_candidates(
             if result:
                 return result
         except Exception as e:
+            # ✅ Strict routing mode: raise if routing fails (experiment mode)
+            if strict_routing:
+                raise RuntimeError(
+                    f"Routing.select_topL failed with strict_routing=True. "
+                    f"Error: {e}"
+                )
             print(f"[WARN] Routing selection failed: {e}, falling back to legacy")
     
     # ✅ Fallback to legacy: match_score only
@@ -880,6 +887,8 @@ def run_policy(
     drift: bool,
     seed_for_policy: int,
     exp1_config: Optional[Dict] = None,
+    strict_routing: bool = False,  # ✅ Symphony 2.0: Strict routing mode
+    use_embedding: bool = True,  # ✅ Symphony 2.0: Use embedding-based routing
 ) -> Tuple[SummaryRow, List[StepLog]]:
     """
     Run one policy from scratch (reset agent states).
@@ -909,11 +918,6 @@ def run_policy(
     
     # helper: get agent by id
     agent_by_id = {a.agent_id: a for a in agents}
-    # Get strong agent from config (default: "D" for SOP-Strong)
-    strong_agent_id = "D"
-    if exp1_config and "baselines" in exp1_config:
-        sop_strong_cfg = exp1_config["baselines"].get("sop_strong", {})
-        strong_agent_id = sop_strong_cfg.get("strong_model", "D")
     
     for t, task in enumerate(tasks):
         # decay load for all agents each round (global dynamics)
@@ -927,7 +931,8 @@ def run_policy(
             topL=topL,
             task=task,  # Pass task for routing.select_topL()
             latency_scale_ms=latency_scale_ms,
-            use_embedding=True,
+            use_embedding=use_embedding,  # ✅ Use parameter from run_policy
+            strict_routing=strict_routing,  # ✅ Use parameter from run_policy
         )
         
         # ✅ Filter available candidates (top is now List[Dict] instead of List[Tuple])
@@ -948,24 +953,8 @@ def run_policy(
         chosen_ms: float
         chosen_x: Optional[List[float]] = None
         
-        if policy_name == "always_A" or policy_name == "sop_strong":
-            # SOP-Strong: Always select strong model (D from config)
-            strong_model_id = "D"  # From config: baselines.sop_strong.strong_model
-            chosen_ag = agent_by_id.get(strong_model_id, agent_by_id.get("A", agents[0]))
-            chosen_ms = chosen_ag.match_score(task.requirement)
-        
-        elif policy_name == "static_rule" or policy_name == "sop_rule":
-            # SOP-Rule: easy→cheap, hard→strong
-            # From config: baselines.sop_rule.cheap_model="A", strong_model="D"
-            cheap_model_id = "A"
-            strong_model_id = "D"
-            # Map difficulty: "simple"/"easy" → cheap, "hard" → strong
-            is_easy = task.difficulty in ["simple", "easy"]
-            chosen_id = cheap_model_id if is_easy else strong_model_id
-            chosen_ag = agent_by_id.get(chosen_id, agent_by_id.get(strong_model_id, agents[0]))
-            chosen_ms = chosen_ag.match_score(task.requirement)
-        
-        elif policy_name == "random":
+        # ✅ Only Random and LinUCB policies are used in this experiment
+        if policy_name == "random":
             # ✅ avail is now (agent, match_score, sim_emb, prior_success)
             chosen_ag, chosen_ms, _, _ = rng.choice(avail)
         
@@ -1052,10 +1041,11 @@ def run_policy(
         # Determine if fallback is allowed for this error type
         fallback_allowed = error_type_primary in ["payment_required", "server_500", "timeout", "none"]
         
-        if fallback and (not ok) and fallback_allowed and (chosen_ag.agent_id != strong_agent_id):
+        # Fallback to agent "D" if chosen agent fails (avoid self-fallback)
+        if fallback and (not ok) and fallback_allowed and (chosen_ag.agent_id != "D"):
             fallback_used = 1
             fallback_cnt += 1
-            fallback_ag = agent_by_id[strong_agent_id]
+            fallback_ag = agent_by_id["D"]
             ok2, lat2, fallback_metadata = fallback_ag.execute(
                 task, 
                 drift=drift, 
@@ -1169,11 +1159,8 @@ def try_plot(outdir: str, summary: List[SummaryRow], traj: Dict[str, List[StepLo
     import os  # ✅ 必须有
     
     # ---------- nicer labels ----------
+    # ✅ Only Random and LinUCB policies are used in this experiment
     name_map = {
-        "always_A": "SOP-Strong",
-        "sop_strong": "SOP-Strong",
-        "static_rule": "SOP-Rule",
-        "sop_rule": "SOP-Rule",
         "random": "Random",
         "linucb": "LinUCB (Ours)",
     }
@@ -1239,13 +1226,14 @@ def try_plot(outdir: str, summary: List[SummaryRow], traj: Dict[str, List[StepLo
     # ---------- plot 4 policies on one figure ----------
     def plot_all_policies_curves_clean(rolling: int = 50) -> None:
         """
-        两张图（不同策略集合）：
-          1) 成本：不画 Always-A，y轴固定 0~0.6
-          2) 成功率：画 Always-A + 其它三种
+        两张图（只画 Random 和 LinUCB）：
+          1) 成本：Random vs LinUCB
+          2) 成功率：Random vs LinUCB
         rolling: 滑动平均窗口（仅用于视觉平滑，不改变最终值）
         """
-        order_cost = ["sop_rule", "random", "linucb"]  # ✅ cost 不画 sop_strong
-        order_succ = ["sop_strong", "sop_rule", "random", "linucb"]  # ✅ success 画 sop_strong
+        # ✅ Only plot Random and LinUCB (main experiments)
+        order_cost = ["random", "linucb"]
+        order_succ = ["random", "linucb"]
         
         def _rolling_mean(arr, window: int):
             if window <= 1:
@@ -1325,13 +1313,9 @@ def try_plot(outdir: str, summary: List[SummaryRow], traj: Dict[str, List[StepLo
             cum = _rolling_mean(cum, rolling)
             xs = list(range(1, len(cum) + 1))
             
-            if pol in ["always_A", "sop_strong"]:
-                # ✅ 让 SOP-Strong 更"弱存在感"：虚线 + 半透明 + 略细
-                ax.plot(xs, cum, linewidth=0.95, linestyle="--", alpha=0.65,
-                        label=name_map.get(pol, pol))
-            else:
-                ax.plot(xs, cum, linewidth=1.05, alpha=0.90,
-                        label=name_map.get(pol, pol))
+            # ✅ Plot Random and LinUCB with consistent styling
+            ax.plot(xs, cum, linewidth=1.05, alpha=0.90,
+                    label=name_map.get(pol, pol))
         
         ax.set_xlabel("t")
         ax.set_ylabel("Cumulative avg success (final)")
@@ -1388,8 +1372,13 @@ def main():
     ap.add_argument("--cost-lambda", type=float, default=0.3, help="penalty multiplier for cost (default 0.3 from config)")
     
     # realism toggles
-    ap.add_argument("--fallback", action="store_true", help="if chosen agent fails, fallback to strong agent A")
+    ap.add_argument("--fallback", action="store_true", help="if chosen agent fails, fallback to agent D")
     ap.add_argument("--drift", action="store_true", help="enable non-stationary drift after t>=500")
+    
+    # ✅ Symphony 2.0 routing params
+    ap.add_argument("--priors-path", type=str, default=None, help="Path to warmup_priors.json (default: auto-detect)")
+    ap.add_argument("--strict-routing", action="store_true", help="Strict routing mode: fail if routing/embedding unavailable (experiment mode)")
+    ap.add_argument("--use-embedding", action="store_true", default=True, help="Use embedding-based routing (default: True)")
     
     args = ap.parse_args()
     
@@ -1405,7 +1394,8 @@ def main():
     
     # ✅ Load learned priors from warmup (if available)
     priors = {}
-    priors_file = os.path.join(args.outdir, "..", "warmup_priors.json")
+    # ✅ Use --priors-path if provided, else auto-detect
+    priors_file = args.priors_path or os.path.join(args.outdir, "..", "warmup_priors.json")
     if os.path.exists(priors_file):
         try:
             if HAS_ROUTING:
@@ -1425,13 +1415,30 @@ def main():
         print("❌ No real OpenRouter agents loaded! Exiting.")
         return
     
-    # ✅ Inject learned priors into agents
+    # ✅ Inject learned priors into agents (ensure key alignment)
     for aid, ag_wrapper in agent_dict.items():
         agent_obj = ag_wrapper.agent
+        
+        # ✅ P0-4: Try multiple key variants to ensure priors injection works
+        # Priority: agent_id (aid) -> node_id -> name -> id
+        injected = False
         if aid in priors:
-            # Inject learned_priors into agent object
             agent_obj.learned_priors = priors[aid]
             print(f"✅ Injected priors for agent {aid} ({len(priors[aid])} buckets)")
+            injected = True
+        else:
+            # Try node_id if different from agent_id
+            node_id = getattr(ag_wrapper.agent, "node_id", None) or ""
+            if node_id and node_id in priors:
+                agent_obj.learned_priors = priors[node_id]
+                print(f"✅ Injected priors for agent {aid} (via node_id={node_id}, {len(priors[node_id])} buckets)")
+                injected = True
+        
+        if not injected and priors:
+            # Log miss for first few agents (for debugging)
+            available_keys = list(priors.keys())[:3]
+            if len(available_keys) > 0:
+                print(f"[PRIORS] ⚠️  Miss agent={aid}, available_priors_keys={available_keys}")
     
     # Convert to list for consistent indexing
     agents_list = list(agent_dict.values())
@@ -1454,8 +1461,8 @@ def main():
     # Generate tasks (using the same logic as sim_efficiency_cost.py)
     tasks = generate_tasks(args.n, args.p_hard, base_rng, use_real_data=True, benchmarks=benchmarks_list)
     
-    # Define policies (updated to match config: SOP-Strong and SOP-Rule)
-    policies = ["sop_strong", "sop_rule", "random", "linucb"]
+    # ✅ Define policies: only Random and LinUCB (main experiments)
+    policies = ["random", "linucb"]
     summary_rows: List[SummaryRow] = []
     traj_logs: Dict[str, List[StepLog]] = {}
     
@@ -1478,6 +1485,8 @@ def main():
             drift=bool(args.drift),
             seed_for_policy=pol_seed,
             exp1_config=exp1_config,
+            strict_routing=bool(args.strict_routing),  # ✅ Pass strict_routing to run_policy
+            use_embedding=bool(args.use_embedding),  # ✅ Pass use_embedding to run_policy
         )
         summary_rows.append(row)
         traj_logs[pol] = logs
