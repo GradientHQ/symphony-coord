@@ -1,0 +1,14 @@
+# Basic user configuration
+node:
+  id: "user_001"
+  type: "task_requester"
+  
+network:
+  host: "localhost"
+  port: 9001
+  discovery_method: "local"
+  
+task_settings:
+  cot_count: 3
+  timeout: 300
+  max_agents: 10

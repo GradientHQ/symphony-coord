@@ -1,0 +1,15 @@
+*.pyc
+# Environment variables
+.env
+.env.local
+
+# Python venv
+venv/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.so
+*.dylib
+*.dll

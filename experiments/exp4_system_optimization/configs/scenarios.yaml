@@ -1,0 +1,156 @@
+# Exp4: System Performance Optimization
+# Test LinUCB's ability to optimize system-level metrics (latency, load balancing)
+# under heterogeneous and dynamic conditions
+
+experiment:
+  name: "exp4_system_optimization"
+  description: "Validate LinUCB's ability to learn system performance optimization"
+  
+  # Task stream configuration
+  n_tasks: 1000
+  topL: 3
+  seed: 123
+  p_hard: 0.2
+  
+  # Policies to compare (aligned with Exp1 - 4 policies)
+  policies:
+    - always_A            # Upper bound: always select strongest agent A
+    - static_rule         # Static rule: select by highest match_score
+    - random              # Baseline: random selection from TopL
+    - linucb              # LinUCB intelligent routing (Symphony 2.0)
+  
+  # Agent profiles (aligned with Exp1)
+  agents:
+    A:
+      capabilities: ["code"]
+      call_cost: 1.00          # Most expensive (aligned with Exp1)
+      hard_capability: 0.99    # Strongest (aligned with Exp1)
+      easy_capability: 0.99    # Strongest (aligned with Exp1)
+      base_latency_ms: 900
+      latency_std_ms: 200
+    B:
+      capabilities: ["math"]
+      call_cost: 0.10          # Cheapest (aligned with Exp1)
+      hard_capability: 0.18    # Weak on hard (aligned with Exp1)
+      easy_capability: 0.88    # Good on simple (aligned with Exp1)
+      base_latency_ms: 350
+      latency_std_ms: 80
+    C:
+      capabilities: ["code", "math"]
+      call_cost: 0.35          # Medium (aligned with Exp1)
+      hard_capability: 0.65    # Medium (aligned with Exp1)
+      easy_capability: 0.92    # Medium (aligned with Exp1)
+      base_latency_ms: 550
+      latency_std_ms: 120
+    D:
+      capabilities: ["reason"]
+      call_cost: 0.22          # Medium-low (aligned with Exp1)
+      hard_capability: 0.45    # Mediocre on hard (aligned with Exp1)
+      easy_capability: 0.90    # OK on simple (aligned with Exp1)
+      base_latency_ms: 420
+      latency_std_ms: 100
+    E:
+      capabilities: ["code", "reason"]
+      call_cost: 0.60          # Medium-high (aligned with Exp1)
+      hard_capability: 0.85    # Strong on hard (aligned with Exp1)
+      easy_capability: 0.95    # Strong overall (aligned with Exp1)
+      base_latency_ms: 780
+      latency_std_ms: 150
+
+# Scenarios to test
+scenarios:
+  
+  # Scenario 1: Baseline (same as Exp1)
+  baseline:
+    description: "Normal conditions - same as Exp1 for comparison"
+    enabled: true
+    agent_latency_multipliers:
+      A: 1.0
+      B: 1.0
+      C: 1.0
+      D: 1.0
+      E: 1.0
+    load_bursts: []
+  
+  # Scenario 2: Latency Heterogeneous
+  # Test: Can LinUCB learn to avoid high-latency agents?
+  latency_heterogeneous:
+    description: "Agents have significantly different latencies"
+    enabled: true
+    agent_latency_multipliers:
+      A: 2.5   # 900ms → 2250ms (very slow)
+      B: 0.5   # 350ms → 175ms  (very fast)
+      C: 1.0   # 550ms → 550ms  (normal)
+      D: 0.7   # 420ms → 294ms  (fast)
+      E: 1.8   # 780ms → 1404ms (slow)
+    load_bursts: []
+    expected_behavior: "LinUCB should learn to prefer agents B and D (low latency)"
+  
+  # Scenario 3: Load Burst
+  # Test: Can LinUCB adapt to dynamic load changes?
+  load_burst:
+    description: "Periodic load bursts on specific agents"
+    enabled: true
+    agent_latency_multipliers:
+      A: 1.0
+      B: 1.0
+      C: 1.0
+      D: 1.0
+      E: 1.0
+    load_bursts:
+      - agent: A
+        start_t: 200
+        end_t: 400
+        load_increase: 0.7  # Force load += 0.7 during this period
+      - agent: B
+        start_t: 500
+        end_t: 700
+        load_increase: 0.7
+    expected_behavior: "LinUCB should learn to avoid agents during their burst periods"
+  
+  # Scenario 4: Combined Challenge
+  # Test: Can LinUCB optimize both latency and load simultaneously?
+  combined:
+    description: "Latency heterogeneous + load bursts"
+    enabled: true
+    agent_latency_multipliers:
+      A: 2.0   # Slow
+      B: 0.6   # Fast, but will have burst
+      C: 1.0   # Normal
+      D: 0.8   # Relatively fast
+      E: 1.5   # Relatively slow
+    load_bursts:
+      - agent: B  # Fast agent becomes overloaded
+        start_t: 300
+        end_t: 500
+        load_increase: 0.8
+    expected_behavior: "LinUCB should dynamically balance between latency and load"
+
+# LinUCB reward configuration (fully aligned with Exp1 and Core)
+reward:
+  # Reward formula: 1(success) - latency_penalty*sqrt(lat_norm) - cost_lambda*cost_norm
+  # where lat_norm = latency_ms / latency_scale_ms ∈ [0,1]
+  latency_scale_ms: 2000.0   # Normalize latency to [0,1] (same as Exp1/Core)
+  latency_penalty: 0.2       # Penalty for normalized latency (same as Exp1/Core)
+  cost_lambda: 0.15          # Penalty for normalized cost (same as Exp1)
+  
+  # This encourages LinUCB to:
+  # 1. Maximize success (base reward = 1.0)
+  # 2. Minimize latency (penalty on sqrt of normalized latency)
+  # 3. Minimize cost (penalty on normalized cost)
+  # Result: reward ∈ [0,1] (符合 LinUCB 理论假设)
+  # 
+  # ✅ Parameters aligned with Exp1 and Core for consistency
+
+# Output configuration
+output:
+  result_dir: "experiments/result/exp4_system_optimization"
+  save_step_logs: true
+  save_agent_selection_history: true
+  plot_types:
+    - scenario_comparison
+    - latency_learning_curves
+    - load_burst_response
+    - agent_utilization_heatmap
+    - efficiency_comparison
+

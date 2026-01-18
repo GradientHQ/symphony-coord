@@ -1,0 +1,76 @@
+exp:
+  seed: 123
+  n_tasks: 500
+
+output:
+  outdir: "experiments/exp3_real/results"
+  save_sampled_tasks: true
+
+agent_loading:
+  config_dir: "runtime"
+  file_pattern: "config_agent_openrouter_{id}.yaml"
+  agent_ids: [1,2,3,4,5,6,7,8,9,10]
+  letter_order: ["A","B","C","D","E","F","G","H","I","J"]
+
+task_pool:
+  mode: "real_replay"
+  real:
+    data_path: "symphony-data-generator/data/exp3/task_pool.jsonl"
+    benchmark_filter: "gsm8k"
+    sample_with_replacement: true
+    map_easy_to: "simple"
+    map_hard_to: "hard"
+
+decoding:
+  temperature: 0.2
+  top_p: 0.95
+  max_output_tokens:
+    gsm8k: 256
+    humaneval: 256
+    bbh: 256
+    amc: 256
+    medical_qa: 256
+
+# Natural Drift：不注入（Outage/Shock 另开 config）
+shock:
+  enabled: false
+
+routing:
+  topL: 3
+  stageA_weights:
+    match: 1.0
+    reputation: 0.5
+    available: 0.2
+    latency: 0.2
+    load: 0.0
+  features:
+    latency_norm_div: 2000.0
+
+runtime:
+  stats_ema_alpha: 0.15
+  latency_ema_init_ms: 800.0
+
+linucb:
+  alpha: 1.0
+  l2: 1.0
+
+reward:
+  shaped:
+    latency_scale_ms: 2000.0
+    token_scale: 2000.0
+    lambda: 0.2
+    mu: 0.1
+
+fallback:
+  enabled: true
+  max_retries: 2
+  bandit_update_mode: "final"
+
+policies:
+  - name: "linucb"
+  - name: "static_rule"
+  - name: "random_topL"
+  - name: "random"
+
+
+

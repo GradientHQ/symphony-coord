@@ -1,0 +1,20 @@
+﻿experiment:
+  name: exp1_sim_efficiency_cost
+  seed: 123
+  n_tasks: 2000
+  p_hard: 0.21
+
+routing:
+  topL: 3
+  policy_set: ["always_A", "static_rule", "random", "linucb"]
+  fallback: true
+
+plot:
+  rolling: 50
+  cost_ylim: [0.0, 0.6]
+  plot_alwaysA_in_cost: false
+  plot_alwaysA_in_success: true
+  success_ylim: [0.94, 1.0]
+
+output:
+  outdir: runtime/sim_efficiency_cost

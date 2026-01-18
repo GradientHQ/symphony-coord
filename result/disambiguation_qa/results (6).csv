@@ -1,0 +1,304 @@
+task,idx,problem,gt,pred_norm,pred_raw,ok,sec
+disambiguation_qa,0,"In the following sentences, explain the antecedent of the pronoun (which thing the pronoun refers to), or state that it is ambiguous.
+Sentence: The patient was referred to the specialist because he had a rare skin condition.
+Options:
+(A) The patient had a skin condition
+(B) The specialist had a skin condition
+(C) Ambiguous",(A),A,A,0,55.8
+disambiguation_qa,1,"In the following sentences, explain the antecedent of the pronoun (which thing the pronoun refers to), or state that it is ambiguous.
+Sentence: The scientist collaborated with the artist, and he shared a story.
+Options:
+(A) The scientist shared a story
+(B) The artist shared a story
+(C) Ambiguous",(C),B,B,0,29.19
+disambiguation_qa,2,"In the following sentences, explain the antecedent of the pronoun (which thing the pronoun refers to), or state that it is ambiguous.
+Sentence: The developer was unable to communicate with the writer because she used big words.
+Options:
+(A) The developer uses big words
+(B) The writer uses big words
+(C) Ambiguous",(C),B,B,0,55.81
+disambiguation_qa,3,"In the following sentences, explain the antecedent of the pronoun (which thing the pronoun refers to), or state that it is ambiguous.
+Sentence: The scientist will collaborate with the artist, and he will share a story.
+Options:
+(A) The scientist will share a story
+(B) The artist will share a story
+(C) Ambiguous",(C),B,B,0,55.83
+disambiguation_qa,4,"In the following sentences, explain the antecedent of the pronoun (which thing the pronoun refers to), or state that it is ambiguous.
+Sentence: Bailey planned to meet the director at their office
+Options:
+(A) The office was the director's office
+(B) The office was Bailey's office
+(C) Ambiguous",(C),A,A,0,55.82
+disambiguation_qa,5,"In the following sentences, explain the antecedent of the pronoun (which thing the pronoun refers to), or state that it is ambiguous.
+Sentence: The developer argued with the designer because she liked the design.
+Options:
+(A) The developer liked the design
+(B) The designer liked the design
+(C) Ambiguous",(C),B,B,0,55.85
+disambiguation_qa,6,"In the following sentences, explain the antecedent of the pronoun (which thing the pronoun refers to), or state that it is ambiguous.
+Sentence: The investigator wanted to interview the witness in person, but she was too late.
+Options:
+(A) The investigator was too late
+(B) The witness was too late
+(C) Ambiguous",(C),B,B,0,29.15
+disambiguation_qa,7,"In the following sentences, explain the antecedent of the pronoun (which thing the pronoun refers to), or state that it is ambiguous.
+Sentence: The guard called the cleaner and asked them to open the door.
+Options:
+(A) Asked the guard
+(B) Asked the cleaner
+(C) Ambiguous",(B),B,B,0,55.84
+disambiguation_qa,8,"In the following sentences, explain the antecedent of the pronoun (which thing the pronoun refers to), or state that it is ambiguous.
+Sentence: The scientist collaborates with the artist, and he shares a story.
+Options:
+(A) The scientist shares a story
+(B) The artist shares a story
+(C) Ambiguous",(C),B,B,0,55.82
+disambiguation_qa,9,"In the following sentences, explain the antecedent of the pronoun (which thing the pronoun refers to), or state that it is ambiguous.
+Sentence: The customer and the chef discuss his culinary training.
+Options:
+(A) It is the customer's culinary training
+(B) It is the chef's culinary training
+(C) Ambiguous",(B),B,B,0,55.85
+disambiguation_qa,10,"In the following sentences, explain the antecedent of the pronoun (which thing the pronoun refers to), or state that it is ambiguous.
+Sentence: The mechanic disliked the cashier because he is arrogant.
+Options:
+(A) The mechanic is arrogant
+(B) The cashier is arrogant
+(C) Ambiguous",(C),B,B,0,55.81
+disambiguation_qa,11,"In the following sentences, explain the antecedent of the pronoun (which thing the pronoun refers to), or state that it is ambiguous.
+Sentence: Bailey planned to meet the director at his office
+Options:
+(A) The office was the director's office
+(B) The office was Bailey's office
+(C) Ambiguous",(C),A,A,0,55.83
+disambiguation_qa,12,"In the following sentences, explain the antecedent of the pronoun (which thing the pronoun refers to), or state that it is ambiguous.
+Sentence: The writer tried to fool the salesperson and told them a fake story.
+Options:
+(A) Told the writer a fake story
+(B) Told the salesperson a fake story
+(C) Ambiguous",(B),B,B,0,29.42
+disambiguation_qa,13,"In the following sentences, explain the antecedent of the pronoun (which thing the pronoun refers to), or state that it is ambiguous.
+Sentence: This story could not be published without the writer and their friends' support.
+Options:
+(A) They were the writer's friends
+(B) They were the friends' friends
+(C) They were the story's friends
+(D) Ambiguous",(A),A,A,0,55.81
+disambiguation_qa,14,"In the following sentences, explain the antecedent of the pronoun (which thing the pronoun refers to), or state that it is ambiguous.
+Sentence: The chief thanked the housekeeper and gave her some tips.
+Options:
+(A) Gave the chief some tips
+(B) Gave the housekeeper some tips
+(C) Ambiguous",(B),B,B,0,28.95
+disambiguation_qa,15,"In the following sentences, explain the antecedent of the pronoun (which thing the pronoun refers to), or state that it is ambiguous.
+Sentence: The homeowner asked the inspector if the house they had purchased was structurally sound.
+Options:
+(A) The homeowner had purchased
+(B) The inspector had purchased
+(C) Ambiguous",(A),A,A,0,29.05
+disambiguation_qa,16,"In the following sentences, explain the antecedent of the pronoun (which thing the pronoun refers to), or state that it is ambiguous.
+Sentence: The developer was unable to communicate with the writer because he focuses on code.
+Options:
+(A) The developer focuses on code
+(B) The writer focuses on code
+(C) Ambiguous",(A),A,A,0,28.71
+disambiguation_qa,17,"In the following sentences, explain the antecedent of the pronoun (which thing the pronoun refers to), or state that it is ambiguous.
+Sentence: The supervisor gave the employee feedback on his stellar performance.
+Options:
+(A) It was the supervisor's performance
+(B) It was the employee's performance
+(C) Ambiguous",(B),B,B,0,28.96
+disambiguation_qa,18,"In the following sentences, explain the antecedent of the pronoun (which thing the pronoun refers to), or state that it is ambiguous.
+Sentence: The lawyer looked into illegal accusations against the cashier, because he needed to understand the case.
+Options:
+(A) The lawyer needed to understand
+(B) The cashier needed to understand
+(C) Ambiguous",(A),A,A,0,28.84
+disambiguation_qa,19,"In the following sentences, explain the antecedent of the pronoun (which thing the pronoun refers to), or state that it is ambiguous.
+Sentence: The mechanic called to inform the customer that his car would be ready in the morning.
+Options:
+(A) It was the mechanic's car
+(B) It was the customer's car
+(C) Ambiguous",(B),B,B,0,29.16
+disambiguation_qa,20,"In the following sentences, explain the antecedent of the pronoun (which thing the pronoun refers to), or state that it is ambiguous.
+Sentence: The worker told the pedestrian that they were repairing the sidewalk as quickly as possible.
+Options:
+(A) The worker was repairing
+(B) The pedestrian was repairing
+(C) Ambiguous",(A),A,A,0,1.85
+disambiguation_qa,21,"In the following sentences, explain the antecedent of the pronoun (which thing the pronoun refers to), or state that it is ambiguous.
+Sentence: The taxpayer met with the accountant to find out if they could help with tax preparation.
+Options:
+(A) The taxpayer could help
+(B) The accountant could help
+(C) Ambiguous",(B),B,B,0,55.8
+disambiguation_qa,22,"In the following sentences, explain the antecedent of the pronoun (which thing the pronoun refers to), or state that it is ambiguous.
+Sentence: The developer argued with the designer because he liked the design.
+Options:
+(A) The developer liked the design
+(B) The designer liked the design
+(C) Ambiguous",(C),A,A,0,55.8
+disambiguation_qa,23,"In the following sentences, explain the antecedent of the pronoun (which thing the pronoun refers to), or state that it is ambiguous.
+Sentence: The cook is always teaching the assistant new techniques because they like to teach others.
+Options:
+(A) The cook likes to teach
+(B) The assistant likes to teach
+(C) Ambiguous",(A),A,A,0,29.26
+disambiguation_qa,24,"In the following sentences, explain the antecedent of the pronoun (which thing the pronoun refers to), or state that it is ambiguous.
+Sentence: The patient was referred to the specialist because he is an expert on rare skin conditions.
+Options:
+(A) The patient is an expert
+(B) The specialist is an expert
+(C) Ambiguous",(B),B,B,0,55.57
+disambiguation_qa,25,"In the following sentences, explain the antecedent of the pronoun (which thing the pronoun refers to), or state that it is ambiguous.
+Sentence: The technician told the customer that she had completed the repair.
+Options:
+(A) The technician completed the repair
+(B) The customer completed the repair
+(C) Ambiguous",(A),A,A,0,55.83
+disambiguation_qa,26,"In the following sentences, explain the antecedent of the pronoun (which thing the pronoun refers to), or state that it is ambiguous.
+Sentence: The carpenter collaborated with the designer and gave him a prototype.
+Options:
+(A) Gave the carpenter a prototype
+(B) Gave the designer a prototype
+(C) Ambiguous",(B),B,B,0,55.83
+disambiguation_qa,27,"In the following sentences, explain the antecedent of the pronoun (which thing the pronoun refers to), or state that it is ambiguous.
+Sentence: The secretary corrected the developer because they better understood the problem.
+Options:
+(A) The secretary understood the problem
+(B) The developer understood the problem
+(C) Ambiguous",(A),A,A,0,55.8
+disambiguation_qa,28,"In the following sentences, explain the antecedent of the pronoun (which thing the pronoun refers to), or state that it is ambiguous.
+Sentence: The undergraduate applied to work with the scientist because he needed a lab assistant.
+Options:
+(A) The undergraduate needed an assistant
+(B) The scientist needed an assistant
+(C) Ambiguous",(B),A,A,0,55.61
+disambiguation_qa,29,"In the following sentences, explain the antecedent of the pronoun (which thing the pronoun refers to), or state that it is ambiguous.
+Sentence: The supervisor gave the employee feedback on their stellar performance.
+Options:
+(A) It was the supervisor's performance
+(B) It was the employee's performance
+(C) Ambiguous",(B),B,B,0,55.92
+disambiguation_qa,30,"In the following sentences, explain the antecedent of the pronoun (which thing the pronoun refers to), or state that it is ambiguous.
+Sentence: The salesperson tried to fool the writer and sold them some garbage.
+Options:
+(A) Sold the salesperson some garbage
+(B) Sold the writer some garbage
+(C) Ambiguous",(B),B,B,0,55.58
+disambiguation_qa,31,"In the following sentences, explain the antecedent of the pronoun (which thing the pronoun refers to), or state that it is ambiguous.
+Sentence: The driver yelled at the tailor after he broke a window.
+Options:
+(A) The driver broke a window
+(B) The tailor broke a window
+(C) Ambiguous",(C),B,B,0,55.8
+disambiguation_qa,32,"In the following sentences, explain the antecedent of the pronoun (which thing the pronoun refers to), or state that it is ambiguous.
+Sentence: The visitor told the teacher that he liked the cake.
+Options:
+(A) The visitor liked the cake
+(B) The teacher liked the cake
+(C) Ambiguous",(A),A,A,0,55.8
+disambiguation_qa,33,"In the following sentences, explain the antecedent of the pronoun (which thing the pronoun refers to), or state that it is ambiguous.
+Sentence: The scientist will collaborate with the artist, and she will share a story.
+Options:
+(A) The scientist will share a story
+(B) The artist will share a story
+(C) Ambiguous",(C),B,B,0,55.81
+disambiguation_qa,34,"In the following sentences, explain the antecedent of the pronoun (which thing the pronoun refers to), or state that it is ambiguous.
+Sentence: The designer showed the cook a blueprint and asked him for feedback.
+Options:
+(A) Asked the designer
+(B) Asked the cook
+(C) Ambiguous",(B),B,B,0,28.79
+disambiguation_qa,35,"In the following sentences, explain the antecedent of the pronoun (which thing the pronoun refers to), or state that it is ambiguous.
+Sentence: My parent called his secretary for more information
+Options:
+(A) They were my parent's secretary
+(B) They were the secretary's secretary
+(C) Ambiguous",(A),C,C,0,55.85
+disambiguation_qa,36,"In the following sentences, explain the antecedent of the pronoun (which thing the pronoun refers to), or state that it is ambiguous.
+Sentence: The janitor warned the child not to step on the wet floor, otherwise she would have to mop it all over again.
+Options:
+(A) The janitor would have to mop
+(B) The child would have to mop
+(C) Ambiguous",(A),B,B,0,29.09
+disambiguation_qa,37,"In the following sentences, explain the antecedent of the pronoun (which thing the pronoun refers to), or state that it is ambiguous.
+Sentence: The developer was unable to communicate with the writer because she focuses on code.
+Options:
+(A) The developer focuses on code
+(B) The writer focuses on code
+(C) Ambiguous",(A),B,B,0,29.61
+disambiguation_qa,38,"In the following sentences, explain the antecedent of the pronoun (which thing the pronoun refers to), or state that it is ambiguous.
+Sentence: The carpenter told the onlooker that they had been working on the house for three weeks.
+Options:
+(A) The carpenter had been working on the house
+(B) The onlooker had been working on the house
+(C) Ambiguous",(A),A,A,0,55.87
+disambiguation_qa,39,"In the following sentences, explain the antecedent of the pronoun (which thing the pronoun refers to), or state that it is ambiguous.
+Sentence: This story could not be published without the writer and her friends' support.
+Options:
+(A) They were the writer's friends
+(B) They were the friends' friends
+(C) They were the story's friends
+(D) Ambiguous",(A),A,A,0,55.83
+disambiguation_qa,40,"In the following sentences, explain the antecedent of the pronoun (which thing the pronoun refers to), or state that it is ambiguous.
+Sentence: The assistant asked the physician if they could borrow some money.
+Options:
+(A) Asked if the assistant could borrow money
+(B) Asked if the physician could borrow money
+(C) Ambiguous",(A),B,B,0,55.79
+disambiguation_qa,41,"In the following sentences, explain the antecedent of the pronoun (which thing the pronoun refers to), or state that it is ambiguous.
+Sentence: The cleaner called the guard and asked them to open the door.
+Options:
+(A) Asked the cleaner
+(B) Asked the guard
+(C) Ambiguous",(B),B,B,0,55.81
+disambiguation_qa,42,"In the following sentences, explain the antecedent of the pronoun (which thing the pronoun refers to), or state that it is ambiguous.
+Sentence: The mechanic greets the receptionist because he is standing in front of the door.
+Options:
+(A) The mechanic is standing in front of the door
+(B) The receptionist is standing in front of the door
+(C) Ambiguous",(C),A,A,0,28.76
+disambiguation_qa,43,"In the following sentences, explain the antecedent of the pronoun (which thing the pronoun refers to), or state that it is ambiguous.
+Sentence: The educator was meeting with a student to discuss his grading policy.
+Options:
+(A) It was the educator's grading policy
+(B) It was the student's grading policy
+(C) Ambiguous",(A),A,A,0,55.81
+disambiguation_qa,44,"In the following sentences, explain the antecedent of the pronoun (which thing the pronoun refers to), or state that it is ambiguous.
+Sentence: The investigator wanted to interview the witness in person, but he was too late.
+Options:
+(A) The investigator was too late
+(B) The witness was too late
+(C) Ambiguous",(C),B,B,0,55.78
+disambiguation_qa,45,"In the following sentences, explain the antecedent of the pronoun (which thing the pronoun refers to), or state that it is ambiguous.
+Sentence: Alex tells us that they could not meet.
+Options:
+(A) Alex could not meet
+(B) We could not meet
+(C) Ambiguous",(A),Ambiguous,Ambiguous,0,29.52
+disambiguation_qa,46,"In the following sentences, explain the antecedent of the pronoun (which thing the pronoun refers to), or state that it is ambiguous.
+Sentence: The lawyer looked into illegal accusations against the cashier, because they needed to understand the case.
+Options:
+(A) The lawyer needed to understand
+(B) The cashier needed to understand
+(C) Ambiguous",(A),A,A,0,28.79
+disambiguation_qa,47,"In the following sentences, explain the antecedent of the pronoun (which thing the pronoun refers to), or state that it is ambiguous.
+Sentence: The nurse was running from the laborer because he smelled awful.
+Options:
+(A) The nurse smelled awful
+(B) The laborer smelled awful
+(C) Ambiguous",(C),B,B,0,55.83
+disambiguation_qa,48,"In the following sentences, explain the antecedent of the pronoun (which thing the pronoun refers to), or state that it is ambiguous.
+Sentence: This story could not be published without the writer and his friends' support.
+Options:
+(A) They were the writer's friends
+(B) They were the friends' friends
+(C) They were the story's friends
+(D) Ambiguous",(A),A,A,0,55.79
+disambiguation_qa,49,"In the following sentences, explain the antecedent of the pronoun (which thing the pronoun refers to), or state that it is ambiguous.
+Sentence: The mechanic greets the receptionist because she is standing in front of the door.
+Options:
+(A) The mechanic is standing in front of the door
+(B) The receptionist is standing in front of the door
+(C) Ambiguous",(C),B,B,0,29.57

@@ -1,0 +1,22 @@
+# Basic agent configuration for development
+node:
+  id: "agent_basic"
+  type: "compute_provider"
+  
+model:
+  path: "test"  # Use 'test' for development without actual model loading
+  device: "cpu"
+  max_tokens: 512
+  temperature: 0.7
+  
+capabilities:
+  - "text-processing"
+  - "general-reasoning"
+  
+network:
+  host: "localhost"
+  port: 8001
+  topology: "local"
+  
+storage:
+  memory_limit: "2GB"

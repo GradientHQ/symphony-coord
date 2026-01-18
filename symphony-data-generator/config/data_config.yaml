@@ -1,0 +1,67 @@
+# Configuration for Symphony 2.0 Data Generator
+# Controls which benchmarks are enabled and stream generation settings
+
+benchmarks:
+  humaneval:
+    enabled: true
+    path: datasets:openai_humaneval
+    description: "OpenAI HumanEval - Code generation benchmark"
+
+  gsm8k:
+    enabled: true
+    path: datasets:gsm8k/main
+    description: "Grade School Math 8K - Mathematics word problems"
+
+  bbh:
+    enabled: true
+    path: datasets:lukaemon/bbh
+    description: "Big-Bench Hard - Multi-hop reasoning tasks"
+    # BBH requires specific task configs
+    configs:
+      [
+        "boolean_expressions",
+        "causal_judgement",
+        "date_understanding",
+        "disambiguation_qa",
+        "logical_deduction_three_objects",
+        "movie_recommendation",
+        "navigate",
+        "sports_understanding",
+        "tracking_shuffled_objects_three_objects",
+        "web_of_lies",
+      ]
+
+  amc:
+    enabled: true
+    path: datasets:AI-MO/aimo-validation-amc
+    description: "American Mathematical Competition - Official competition problems"
+
+  medical_qa:
+    enabled: true
+    path: datasets:GBaker/MedQA-USMLE-4-options
+    description: "Medical Question Answering - Domain-specific QA"
+
+# Stream generation settings
+stream_generation:
+  # Difficulty percentile thresholds: [low_pct, high_pct]
+  # Tasks with scores ≤ low_pct are "easy", scores ≥ high_pct are "hard"
+  # Thresholds are computed from FULL preprocessed datasets for stability
+  difficulty_percentiles:
+    humaneval: [20, 80] # Bottom 20% = easy, top 20% = hard
+    gsm8k: [20, 80]
+    bbh: [20, 80]
+    amc: [20, 80]
+    medical_qa: [20, 80]
+
+  # Whether to allow duplicate tasks in experiment streams
+  # Set to false to avoid duplicates (recommended when full datasets are large enough)
+  sample_with_replacement: true
+  
+# Mixing rules
+mixing_rules:
+  # List of benchmark pairs that should not be mixed together
+  # Empty list means all combinations are allowed
+  exclude_combinations: []
+  # Example: Prevent specific combinations
+  # - [humaneval, amc]  # Don't mix code generation with math competition
+  # - [gsm8k, amc]      # Don't mix elementary math with competition math

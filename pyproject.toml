@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "symphony"
+version = "0.0.0"
+description = "Symphony 2.0 research codebase"
+requires-python = ">=3.9"
+
+[tool.setuptools]
+packages = ["core"]
+

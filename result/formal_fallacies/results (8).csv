@@ -1,0 +1,251 @@
+task,idx,problem,gt,pred_norm,pred_raw,ok,sec
+formal_fallacies,0,"""Here comes a perfectly valid argument: First of all, whoever is a schoolmate of Sondra is not a stepsister of Pricilla. In consequence, whoever is not a stepsister of Pricilla is a schoolmate of Sondra.""
+Is the argument, given the explicitly stated premises, deductively valid or invalid?
+Options:
+- valid 
+- invalid",invalid,valid,valid,0,28.46
+formal_fallacies,1,"""Here comes a perfectly valid argument: First, being a cousin of Chris is sufficient for not being a son of Kermit. We may conclude that whoever is not a son of Kermit is a cousin of Chris.""
+Is the argument, given the explicitly stated premises, deductively valid or invalid?
+Options:
+- valid 
+- invalid",invalid,valid,valid,0,29.15
+formal_fallacies,2,"""It is not always easy to see which chemicals are contained in our consumer products. The following argument pertains to this question: First, vitamin A is an ingredient of LIQUID EYELINER. Second, every ingredient of BC Eye Cream 15 ml is not an ingredient of Mango Lip Butter or not an ingredient of LIQUID EYELINER. Therefore, it is not the case that Vitamin A is an ingredient of BC Eye Cream 15 ml.""
+Is the argument, given the explicitly stated premises, deductively valid or invalid?
+Options:
+- valid 
+- invalid",invalid,valid,valid,0,28.99
+formal_fallacies,3,"""Some football fans admire various clubs, others love only a single team. But who is a fan of whom precisely? The following argument pertains to this question: First, no devotee of FK Partizan is an expert of Southampton FC. Second, no critic of FC Spartak Moskva is an expert of Southampton FC. Third, to be a critic of FC Spartak Moskva or a devotee of FK Partizan is necessary for being an admirer of Qarabağ FK. Hence, no admirer of Qarabağ FK is an expert of Southampton FC.""
+Is the argument, given the explicitly stated premises, deductively valid or invalid?
+Options:
+- valid 
+- invalid",valid,valid,valid,1,29.39
+formal_fallacies,4,"""Some football fans admire various clubs, others love only a single team. But who is a fan of whom precisely? The following argument pertains to this question: First premise: Being an expert of Aberdeen FC is sufficient for not being a follower of Club Atlético de Madrid. Second premise: Every expert of Aberdeen FC is not a fan of AZ Alkmaar or not a follower of Club Atlético de Madrid. Therefore, whoever is an expert of Aberdeen FC is not a fan of AZ Alkmaar.""
+Is the argument, given the explicitly stated premises, deductively valid or invalid?
+Options:
+- valid 
+- invalid",invalid,valid,valid,0,55.71
+formal_fallacies,5,"""Here comes a perfectly valid argument: First premise: No son of Alexander who is an ancestor of Ahmed is a great-grandfather of Ronny. It follows that no great-grandfather of Ronny is an ancestor of Ahmed or a son of Alexander.""
+Is the argument, given the explicitly stated premises, deductively valid or invalid?
+Options:
+- valid 
+- invalid",invalid,valid,valid,0,55.61
+formal_fallacies,6,"""Is Titanium oxide an ingredient of my washing power? Which chemicals does my perfume contain? It is really difficult to keep track of all chemicals one is regularly exposed to. The following argument seeks to clarify some such relations: Every ingredient of Sahara Saphire is both an ingredient of Pink Lotion Soap and an ingredient of Brushless Mascara. Cocamide is an ingredient of Pink Lotion Soap. Therefore, Cocamide is an ingredient of Sahara Saphire.""
+Is the argument, given the explicitly stated premises, deductively valid or invalid?
+Options:
+- valid 
+- invalid",invalid,invalid,invalid,1,1.73
+formal_fallacies,7,"""It is not always easy to see which chemicals are contained in our consumer products. The following argument pertains to this question: Being an ingredient of Peach Paint is sufficient for being an ingredient of AUTOGRAPH EYELINER. Every ingredient of AUTOGRAPH EYELINER is an ingredient of Brow Filler Blonde or an ingredient of Calming Shampoo. From this follows: Every ingredient of Peach Paint is an ingredient of Calming Shampoo or an ingredient of Brow Filler Blonde.""
+Is the argument, given the explicitly stated premises, deductively valid or invalid?
+Options:
+- valid 
+- invalid",valid,valid,valid,1,28.71
+formal_fallacies,8,"""Some football fans admire various clubs, others love only a single team. But who is a fan of whom precisely? The following argument pertains to this question: First of all, not being an opponent to FC Utrecht is sufficient for not being an admirer of St Johnstone FC. All this entails that everyone who is an admirer of St Johnstone FC is an opponent to FC Utrecht, too.""
+Is the argument, given the explicitly stated premises, deductively valid or invalid?
+Options:
+- valid 
+- invalid",valid,invalid,invalid,0,1.87
+formal_fallacies,9,"""It is not always easy to see who is related to whom -- and in which ways. The following argument pertains to this question: To begin with, everyone who is a grandson of Dominic is a workmate of James, too. Moreover, whoever is neither a son of Cody nor a son of Ivan is a grandson of Dominic. We may conclude: Whoever is none of this: a son of Cody or son of Ivan, is a workmate of James.""
+Is the argument, given the explicitly stated premises, deductively valid or invalid?
+Options:
+- valid 
+- invalid",valid,invalid,invalid,0,1.47
+formal_fallacies,10,"""Is Fred a fan of Liverpool? Are supporters of Real Madrid devotees of PSG? In European football, it is sometimes difficult to keep track of the mutual admiration and dislike. The following argument seeks to clarify some such relations: First of all, no member of Juventus is an expert of Getafe CF. Next, somebody is a follower of West Ham United FC and an expert of Getafe CF. So, necessarily, not every follower of West Ham United FC is a member of Juventus.""
+Is the argument, given the explicitly stated premises, deductively valid or invalid?
+Options:
+- valid 
+- invalid",valid,valid,valid,1,28.56
+formal_fallacies,11,"""Here comes a perfectly valid argument: First, being a rare consumer of Nubian Heritage soap is necessary for being an owner of a Lever soap. Second, being an infrequent user of American Crew shampoo is sufficient for being a rare consumer of Nubian Heritage soap. In consequence, every infrequent user of American Crew shampoo is an owner of a Lever soap.""
+Is the argument, given the explicitly stated premises, deductively valid or invalid?
+Options:
+- valid 
+- invalid",invalid,valid,valid,0,1.74
+formal_fallacies,12,"""It is not always easy to see which chemicals are contained in our consumer products. The following argument pertains to this question: Every ingredient of SILKY EYE PENCIL 13 is an ingredient of Eye Restore or an ingredient of 03 Bronzing Powder. No ingredient of SILKY EYE PENCIL 13 is an ingredient of 03 Bronzing Powder. We may conclude: Being an ingredient of SILKY EYE PENCIL 13 is sufficient for being an ingredient of Eye Restore.""
+Is the argument, given the explicitly stated premises, deductively valid or invalid?
+Options:
+- valid 
+- invalid",valid,valid,valid,1,1.93
+formal_fallacies,13,"""Here comes a perfectly valid argument: First, being an ancestor of Jonathan is sufficient for not being a grandson of Carmelo. Second, whoever is an ancestor of Jonathan is not a schoolmate of Reyes. Third, every grandson of Carmelo who is a schoolmate of Reyes is also a close friend of Clifford. We may conclude: Being an ancestor of Jonathan is sufficient for being a close friend of Clifford.""
+Is the argument, given the explicitly stated premises, deductively valid or invalid?
+Options:
+- valid 
+- invalid",invalid,invalid,invalid,1,1.52
+formal_fallacies,14,"""Is Fred a fan of Liverpool? Are supporters of Real Madrid devotees of PSG? In European football, it is sometimes difficult to keep track of the mutual admiration and dislike. The following argument seeks to clarify some such relations: First, every opponent to FC Mariupol is an ex-supporter of Hertha BSC Berlin or an ex-supporter of Bayer 04 Leverkusen. Second, every fan of FC Utrecht is not an ex-supporter of Hertha BSC Berlin or not an ex-supporter of Bayer 04 Leverkusen. So, necessarily, being an opponent to FC Mariupol is sufficient for not being a fan of FC Utrecht.""
+Is the argument, given the explicitly stated premises, deductively valid or invalid?
+Options:
+- valid 
+- invalid",invalid,valid,valid,0,1.48
+formal_fallacies,15,"""Some football fans admire various clubs, others love only a single team. But who is a fan of whom precisely? The following argument pertains to this question: First of all, some backer of BSC Young Boys is a critic of Trabzonspor AŞ and an expert of Bayer 04 Leverkusen. Next, being an ex-fan of NK Maribor is sufficient for being a critic of Trabzonspor AŞ. Plus,being an expert of Bayer 04 Leverkusen is necessary for being an ex-fan of NK Maribor. So, necessarily, there is somebody who is a backer of BSC Young Boys and an ex-fan of NK Maribor.""
+Is the argument, given the explicitly stated premises, deductively valid or invalid?
+Options:
+- valid 
+- invalid",invalid,valid,valid,0,55.9
+formal_fallacies,16,"""Here comes a perfectly valid argument: To start with, whoever is an expert of BSC Young Boys is not an ex-fan of Real Betis Balompié. Now, whoever is a friend of FC Dynamo Kyiv is not an expert of BSC Young Boys. Hence, no friend of FC Dynamo Kyiv is an ex-fan of Real Betis Balompié.""
+Is the argument, given the explicitly stated premises, deductively valid or invalid?
+Options:
+- valid 
+- invalid",invalid,valid,valid,0,28.59
+formal_fallacies,17,"""Here comes a perfectly valid argument: First premise: Everyone who is a devotee of Legia Warszawa is a follower of FK Kukësi, too. Second premise: No follower of FK Kukësi is a friend of Olympique de Marseille. Therefore, whoever is a devotee of Legia Warszawa is not a friend of Olympique de Marseille.""
+Is the argument, given the explicitly stated premises, deductively valid or invalid?
+Options:
+- valid 
+- invalid",valid,valid,valid,1,55.69
+formal_fallacies,18,"""Here comes a perfectly valid argument: First, being an ingredient of Hope Moisture Mask is sufficient for being an ingredient of Miracle Concealer. Second, nothing is neither an ingredient of All Day Body Wash nor an ingredient of Hope Moisture Mask. We may conclude: Being an ingredient of All Day Body Wash is sufficient for not being an ingredient of Miracle Concealer.""
+Is the argument, given the explicitly stated premises, deductively valid or invalid?
+Options:
+- valid 
+- invalid",invalid,invalid,invalid,1,1.47
+formal_fallacies,19,"""It is not always easy to see who is related to whom -- and in which ways. The following argument pertains to this question: First of all, everyone who is a close friend of Glenna is a close friend of Tamara, too. Next, whoever is neither a half-sister of Deborah nor a workmate of Nila is a close friend of Glenna. Hence, whoever is none of this: a half-sister of Deborah or workmate of Nila, is a close friend of Tamara.""
+Is the argument, given the explicitly stated premises, deductively valid or invalid?
+Options:
+- valid 
+- invalid",valid,valid,valid,1,28.57
+formal_fallacies,20,"""Is Fred a fan of Liverpool? Are supporters of Real Madrid devotees of PSG? In European football, it is sometimes difficult to keep track of the mutual admiration and dislike. The following argument seeks to clarify some such relations: Every supporter of Tottenham Hotspur is not an expert of Trabzonspor AŞ and not a backer of US Sassuolo Calcio. Every backer of US Sassuolo Calcio who is an expert of Trabzonspor AŞ is a supporter of Tottenham Hotspur or a devotee of FC Zenit. In consequence, everyone who is not both an expert of Trabzonspor AŞ and a backer of US Sassuolo Calcio is a devotee of FC Zenit.""
+Is the argument, given the explicitly stated premises, deductively valid or invalid?
+Options:
+- valid 
+- invalid",invalid,valid,valid,0,1.73
+formal_fallacies,21,"""Is Fred a cousin of Robert? Is Joe related to Bob? In large families, it is sometimes difficult to keep track of all one's relatives. The following argument seeks to clarify some such relations: First, Cecil is a schoolmate of Tyler. Second, nobody is neither a schoolmate of Tyler nor a nephew of Owen. So, necessarily, Cecil is not a nephew of Owen.""
+Is the argument, given the explicitly stated premises, deductively valid or invalid?
+Options:
+- valid 
+- invalid",invalid,invalid,invalid,1,1.56
+formal_fallacies,22,"""Is Fred a cousin of Robert? Is Joe related to Bob? In large families, it is sometimes difficult to keep track of all one's relatives. The following argument seeks to clarify some such relations: First of all, some uncle of Dominic is a schoolmate of Earl. Next, everyone who is both an uncle of Reyes and an uncle of Corey is not a schoolmate of Earl. All this entails that some uncle of Dominic is not an uncle of Reyes or not an uncle of Corey.""
+Is the argument, given the explicitly stated premises, deductively valid or invalid?
+Options:
+- valid 
+- invalid",valid,valid,valid,1,28.69
+formal_fallacies,23,"""It is not always easy to see which chemicals are contained in our consumer products. The following argument pertains to this question: First premise: Whatever is not an ingredient of Shimmer Veil is an ingredient of Snowcastle. Second premise: Every ingredient of Liquid Eye liner is not an ingredient of Love Boat or not an ingredient of Shimmer Veil. Third premise: Being an ingredient of Snowcastle is necessary for not being an ingredient of Love Boat. We may conclude that everything that is an ingredient of Liquid Eye liner is an ingredient of Snowcastle, too.""
+Is the argument, given the explicitly stated premises, deductively valid or invalid?
+Options:
+- valid 
+- invalid",valid,valid,valid,1,1.73
+formal_fallacies,24,"""Consumer research aims at understanding whether users of some products also tend to consume other ones, or not. The following argument seeks to clarify some such relations: To begin with, nobody is neither a frequent consumer of Bath & Body Works soap nor an occasional purchaser of Clearly Natural soap. Moreover, nobody is neither a rare consumer of Nioxin shampoo nor an occasional purchaser of Clearly Natural soap. Finally, every occasional purchaser of Kirk's soap is a frequent consumer of Bath & Body Works soap or a rare consumer of Nioxin shampoo. We may conclude: Being an occasional purchaser of Clearly Natural soap is necessary for being an occasional purchaser of Kirk's soap.""
+Is the argument, given the explicitly stated premises, deductively valid or invalid?
+Options:
+- valid 
+- invalid",invalid,invalid,invalid,1,28.95
+formal_fallacies,25,"""Is Fred a cousin of Robert? Is Joe related to Bob? In large families, it is sometimes difficult to keep track of all one's relatives. The following argument seeks to clarify some such relations: First premise: Nobody is neither a workmate of Calvin nor a schoolmate of Barton. We may conclude: Being a workmate of Calvin is necessary for not being a schoolmate of Barton.""
+Is the argument, given the explicitly stated premises, deductively valid or invalid?
+Options:
+- valid 
+- invalid",valid,valid,valid,1,55.72
+formal_fallacies,26,"""Some football fans admire various clubs, others love only a single team. But who is a fan of whom precisely? The following argument pertains to this question: To begin with, Jose is an admirer of AEK Athens FC. Moreover, every admirer of AEK Athens FC is an expert of Feyenoord. All this entails that Jose is an expert of Feyenoord.""
+Is the argument, given the explicitly stated premises, deductively valid or invalid?
+Options:
+- valid 
+- invalid",valid,valid,valid,1,55.74
+formal_fallacies,27,"""It is not always easy to see who is related to whom -- and in which ways. The following argument pertains to this question: Every schoolmate of Jeffery is a grandson of Todd. Whoever is schoolmate of Jeffery is at least one of these: a grandson of Todd, a brother of Kenneth or an uncle of Lavern. Every schoolmate of Jeffery is an uncle of Lavern. We may conclude: Everyone who is a schoolmate of Jeffery is a brother of Kenneth, too.""
+Is the argument, given the explicitly stated premises, deductively valid or invalid?
+Options:
+- valid 
+- invalid",invalid,invalid,invalid,1,2.25
+formal_fallacies,28,"""It is not always easy to see which chemicals are contained in our consumer products. The following argument pertains to this question: To begin with, being an ingredient of Aquablush is sufficient for being an ingredient of NARS Duo Eyeshadow. Moreover, whatever is neither an ingredient of Stop and Stare nor an ingredient of A.D LIPSTICK CHIC is an ingredient of Lash Tinsel Mascara or an ingredient of Aquablush.finally, everything that is an ingredient of Lash Tinsel Mascara is an ingredient of NARS Duo Eyeshadow, too. Therefore, whatever is not an ingredient of NARS Duo Eyeshadow is however an ingredient of Stop and Stare or an ingredient of A.D LIPSTICK CHIC.""
+Is the argument, given the explicitly stated premises, deductively valid or invalid?
+Options:
+- valid 
+- invalid",valid,invalid,invalid,0,28.94
+formal_fallacies,29,"""Here comes a perfectly valid argument: To start with, whoever is a loyal buyer of Bentley Organic soap is not a regular user of Paul Mitchell soap. Now, whoever is an owner of a Lush soap and an infrequent user of Proactiv soap is not a loyal buyer of Bentley Organic soap. We may conclude: Every owner of a Lush soap who is an infrequent user of Proactiv soap is also a regular user of Paul Mitchell soap.""
+Is the argument, given the explicitly stated premises, deductively valid or invalid?
+Options:
+- valid 
+- invalid",invalid,valid,valid,0,1.48
+formal_fallacies,30,"""Some football fans admire various clubs, others love only a single team. But who is a fan of whom precisely? The following argument pertains to this question: To start with, every opponent to FC Dnipro is an opponent to West Ham United FC or an expert of SCR Altach. Now, being a backer of Chelsea FC is necessary for not being an expert of SCR Altach. Moreover, nobody is neither an opponent to West Ham United FC nor a backer of Chelsea FC. All this entails that being a backer of Chelsea FC is necessary for being an opponent to FC Dnipro.""
+Is the argument, given the explicitly stated premises, deductively valid or invalid?
+Options:
+- valid 
+- invalid",invalid,valid,valid,0,28.72
+formal_fallacies,31,"""Here comes a perfectly valid argument: To start with, no stepbrother of Bryan is both a nephew of Wilburn and a son of Howard. Now, whoever is not a son of Howard is a son of Adrian. Moreover, nobody is neither a nephew of Wilburn nor a son of Adrian. Hence, everyone who is a stepbrother of Bryan is a son of Adrian, too.""
+Is the argument, given the explicitly stated premises, deductively valid or invalid?
+Options:
+- valid 
+- invalid",valid,valid,valid,1,55.75
+formal_fallacies,32,"""Is Fred a fan of Liverpool? Are supporters of Real Madrid devotees of PSG? In European football, it is sometimes difficult to keep track of the mutual admiration and dislike. The following argument seeks to clarify some such relations: First, everyone who is both an opponent to Real Sociedad de Fútbol and an ex-fan of Beşiktaş JK is a follower of Liverpool FC, too. Second, being an admirer of HŠK Zrinjski is sufficient for not being an opponent to Real Sociedad de Fútbol. Third, whoever is an admirer of HŠK Zrinjski is not an ex-fan of Beşiktaş JK. In consequence, every admirer of HŠK Zrinjski is a follower of Liverpool FC.""
+Is the argument, given the explicitly stated premises, deductively valid or invalid?
+Options:
+- valid 
+- invalid",invalid,valid,valid,0,28.89
+formal_fallacies,33,"""Here comes a perfectly valid argument: To begin with, whatever is an ingredient of Vertica Rush and an ingredient of Liqua Versa Gel is not an ingredient of Eyeshadow Quad. It follows that every ingredient of Eyeshadow Quad is not an ingredient of Liqua Versa Gel or not an ingredient of Vertica Rush.""
+Is the argument, given the explicitly stated premises, deductively valid or invalid?
+Options:
+- valid 
+- invalid",valid,valid,valid,1,1.74
+formal_fallacies,34,"""Some football fans admire various clubs, others love only a single team. But who is a fan of whom precisely? The following argument pertains to this question: To begin with, if someone is not a follower of Feyenoord, then that person is not a backer of FC Augsburg or not a devotee of AS Monaco FC. Moreover, being a devotee of AS Monaco FC is necessary for not being a member of AC Milan. Finally, nobody is neither a member of AC Milan nor a backer of FC Augsburg. In consequence, nobody is neither a member of AC Milan nor a follower of Feyenoord.""
+Is the argument, given the explicitly stated premises, deductively valid or invalid?
+Options:
+- valid 
+- invalid",valid,valid,valid,1,1.82
+formal_fallacies,35,"""It is not always easy to see who is related to whom -- and in which ways. The following argument pertains to this question: First premise: Being a workmate of Monte is necessary for not being an ancestor of Patrick. Second premise: Not being an ancestor of Nathan is sufficient for not being a workmate of Monte. It follows that being an ancestor of Nathan is necessary for not being an ancestor of Patrick.""
+Is the argument, given the explicitly stated premises, deductively valid or invalid?
+Options:
+- valid 
+- invalid",valid,invalid,invalid,0,1.51
+formal_fallacies,36,"""It is not always easy to grasp who is consuming which products. The following argument pertains to this question: First, whoever is not a rare consumer of Lever soap is an infrequent user of TRESemmé shampoo. Second, there exists an infrequent user of TRESemmé shampoo who is not an occasional purchaser of Paul Mitchell soap or not an occasional purchaser of Zest soap. In consequence, some rare consumer of Lever soap is not both an occasional purchaser of Paul Mitchell soap and an occasional purchaser of Zest soap.""
+Is the argument, given the explicitly stated premises, deductively valid or invalid?
+Options:
+- valid 
+- invalid",invalid,valid,valid,0,1.75
+formal_fallacies,37,"""It is not always easy to see who is related to whom -- and in which ways. The following argument pertains to this question: First, whoever is an uncle of Owen is not a nephew of Gene. Second, whoever is both a nephew of Ignacio and a brother of David is a schoolmate of Steve or an uncle of Owen.third, everyone who is a schoolmate of Steve is a nephew of Gene, too. We may conclude: Every brother of David who is a nephew of Ignacio is not a nephew of Gene.""
+Is the argument, given the explicitly stated premises, deductively valid or invalid?
+Options:
+- valid 
+- invalid",invalid,invalid,invalid,1,1.58
+formal_fallacies,38,"""It is not always easy to see who is related to whom -- and in which ways. The following argument pertains to this question: First, being an ancestor of Christy is necessary for being a daughter of Denise. Second, not being a cousin of Maryann is sufficient for not being an ancestor of Christy. We may conclude that whoever is not a daughter of Denise is a cousin of Maryann.""
+Is the argument, given the explicitly stated premises, deductively valid or invalid?
+Options:
+- valid 
+- invalid",invalid,invalid,invalid,1,55.74
+formal_fallacies,39,"""Is Fred a cousin of Robert? Is Joe related to Bob? In large families, it is sometimes difficult to keep track of all one's relatives. The following argument seeks to clarify some such relations: First premise: Being a nephew of Henry is necessary for being a brother of Edward. Second premise: Some ancestor of Carlos is a workmate of Efrain and a nephew of Henry. Third premise: Being a brother of Edward is sufficient for being a workmate of Efrain. Hence, somebody is an ancestor of Carlos and a brother of Edward.""
+Is the argument, given the explicitly stated premises, deductively valid or invalid?
+Options:
+- valid 
+- invalid",invalid,valid,valid,0,28.81
+formal_fallacies,40,"""Some football fans admire various clubs, others love only a single team. But who is a fan of whom precisely? The following argument pertains to this question: To start with, every critic of FC Ufa is a supporter of İstanbul Başakşehir. Now, every critic of FC Ufa is a supporter of İstanbul Başakşehir or a critic of PFC CSKA Moskva or an expert of Randers FC. Therefore, every critic of FC Ufa is a critic of PFC CSKA Moskva or an expert of Randers FC.""
+Is the argument, given the explicitly stated premises, deductively valid or invalid?
+Options:
+- valid 
+- invalid",invalid,valid,valid,0,28.71
+formal_fallacies,41,"""Is Siri a stepsister of Mary? Is Susan related to Kate? In large families, it is sometimes difficult to keep track of all one's relatives. The following argument seeks to clarify some such relations: To start with, everyone who is a schoolmate of Mildred is a daughter of Jeanette, too. Now, being a daughter of Jeanette is sufficient for not being a cousin of Cristi. Therefore, no schoolmate of Mildred is a cousin of Cristi.""
+Is the argument, given the explicitly stated premises, deductively valid or invalid?
+Options:
+- valid 
+- invalid",valid,valid,valid,1,55.94
+formal_fallacies,42,"""Here comes a perfectly valid argument: First premise: Every ingredient of Moisturizing Bar is neither an ingredient of 31 EYE COLOUR nor an ingredient of VITAMIN E BB CREAM. So, necessarily, whatever is none of this: an ingredient of VITAMIN E BB CREAM or ingredient of 31 EYE COLOUR, is an ingredient of Moisturizing Bar.""
+Is the argument, given the explicitly stated premises, deductively valid or invalid?
+Options:
+- valid 
+- invalid",invalid,valid,valid,0,1.51
+formal_fallacies,43,"""Is Fred a fan of Liverpool? Are supporters of Real Madrid devotees of PSG? In European football, it is sometimes difficult to keep track of the mutual admiration and dislike. The following argument seeks to clarify some such relations: No member of ŠK Slovan Bratislava is a follower of OGC Nice. Whoever is a member of ŠK Slovan Bratislava is not a devotee of Royal Antwerp FC. Every member of ŠK Slovan Bratislava is a devotee of Royal Antwerp FC or a backer of FC Zenit or a follower of OGC Nice. Therefore, being a backer of FC Zenit is necessary for being a member of ŠK Slovan Bratislava.""
+Is the argument, given the explicitly stated premises, deductively valid or invalid?
+Options:
+- valid 
+- invalid",valid,invalid,invalid,0,1.8
+formal_fallacies,44,"""Here comes a perfectly valid argument: To begin with, whatever is both an ingredient of Immense Mascara and an ingredient of I Adore You is an ingredient of Crawford's Wine or an ingredient of Bioglitz Color 9N.moreover, being an ingredient of lip2cheek is necessary for being an ingredient of Bioglitz Color 9N. Finally, everything that is an ingredient of Crawford's Wine is an ingredient of lip2cheek, too. Therefore, whatever is an ingredient of Immense Mascara and an ingredient of I Adore You is also an ingredient of lip2cheek.""
+Is the argument, given the explicitly stated premises, deductively valid or invalid?
+Options:
+- valid 
+- invalid",valid,valid,valid,1,28.8
+formal_fallacies,45,"""It is not always easy to see who is related to whom -- and in which ways. The following argument pertains to this question: First premise: Not being a close friend of Williams is sufficient for not being a nephew of Rolando. All this entails that every nephew of Rolando is a close friend of Williams.""
+Is the argument, given the explicitly stated premises, deductively valid or invalid?
+Options:
+- valid 
+- invalid",valid,invalid,invalid,0,28.86
+formal_fallacies,46,"""Here comes a perfectly valid argument: To start with, no half-sister of Nelda is a close friend of Terrie or a cousin of Amanda. Now, it is false that Gretchen is a close friend of Terrie. Moreover, it is false that Gretchen is a cousin of Amanda. We may conclude: It is not the case that Gretchen is a half-sister of Nelda.""
+Is the argument, given the explicitly stated premises, deductively valid or invalid?
+Options:
+- valid 
+- invalid",invalid,valid,valid,0,28.84
+formal_fallacies,47,"""It is not always easy to see who is related to whom -- and in which ways. The following argument pertains to this question: First of all, every close friend of Myra is neither a cousin of Sue nor a daughter of Tommy. We may conclude that no cousin of Sue and no daughter of Tommy is a close friend of Myra.""
+Is the argument, given the explicitly stated premises, deductively valid or invalid?
+Options:
+- valid 
+- invalid",valid,valid,valid,1,55.63
+formal_fallacies,48,"""Here comes a perfectly valid argument: To begin with, Carmen is a daughter of Hattie. Moreover, being a niece of Shona is sufficient for not being a daughter of Hattie. From this follows: Carmen is not a niece of Shona.""
+Is the argument, given the explicitly stated premises, deductively valid or invalid?
+Options:
+- valid 
+- invalid",valid,invalid,invalid,0,1.51
+formal_fallacies,49,"""Here comes a perfectly valid argument: First, no ex-supporter of Getafe CF is a critic of Kilmarnock FC. Second, everyone who is a friend of R. Charleroi SC is a critic of Kilmarnock FC, too. Therefore, whoever is not a friend of R. Charleroi SC is an ex-supporter of Getafe CF.""
+Is the argument, given the explicitly stated premises, deductively valid or invalid?
+Options:
+- valid 
+- invalid",invalid,invalid,invalid,1,1.6

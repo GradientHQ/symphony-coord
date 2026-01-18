@@ -1,0 +1,16 @@
+# Symphony 2.0 Data Generator - Requirements
+# Core dependencies (required)
+pyyaml>=6.0
+numpy>=1.24.0
+pandas>=2.0.0
+datasets>=2.14.0
+urllib3<2.0  # Fix for LibreSSL compatibility on macOS (see doc/TROUBLESHOOTING_HUMANEVAL.md)
+
+# Optional dependencies (for validation)
+openai>=1.0.0
+
+# Development dependencies (optional)
+pytest>=7.4.0
+black>=23.0.0
+flake8>=6.0.0
+

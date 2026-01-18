@@ -1,0 +1,22 @@
+{
+  "task": "date_understanding",
+  "items": 50,
+  "total_items_in_source": 250,
+  "accuracy": 0.0,
+  "cot": 3,
+  "models": {
+    "deepseek": "openai:http://127.0.0.1:8001#model=deepseek-7b",
+    "qwen": "openai:http://127.0.0.1:8003#model=qwen2_5-7b-int4",
+    "mistral": "openai:http://127.0.0.1:8002#model=mistral-7b-int8"
+  },
+  "gpus": {
+    "deepseek": 0,
+    "qwen": 0,
+    "mistral": 0
+  },
+  "total_time_sec": 574.7,
+  "avg_time_per_item_sec": 11.49,
+  "outdir": "runs/bbh_smallmix/20251013_122444/date_understanding",
+  "source": "",
+  "benchmark": "BBH"
+}

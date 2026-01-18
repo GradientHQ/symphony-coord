@@ -1,0 +1,26 @@
+# Code specialist agent configuration
+node:
+  id: "code_specialist"
+  type: "compute_provider"
+  
+model:
+  path: "test"
+  device: "cpu"
+  max_tokens: 1024
+  temperature: 0.6
+  
+capabilities:
+  - "code-generation"
+  - "debugging"
+  - "optimization"
+  - "software-engineering"
+  
+network:
+  host: "0.0.0.0"
+  port: 8002
+  neighbors:
+    - "localhost:8001"
+    - "localhost:8003"
+    
+storage:
+  memory_limit: "4GB"

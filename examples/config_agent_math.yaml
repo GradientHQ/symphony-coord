@@ -1,0 +1,26 @@
+# Math specialist agent configuration
+node:
+  id: "math_specialist"
+  type: "compute_provider"
+  
+model:
+  path: "test"  
+  device: "cpu"
+  max_tokens: 1024
+  temperature: 0.5
+  
+capabilities:
+  - "mathematical-reasoning"
+  - "calculus"
+  - "statistics"
+  - "data-analysis"
+  
+network:
+  host: "0.0.0.0"
+  port: 8001
+  neighbors:
+    - "localhost:8002"
+    - "localhost:8003"
+    
+storage:
+  memory_limit: "4GB"

@@ -1,0 +1,7 @@
+Metadata-Version: 2.4
+Name: symphony
+Version: 0.0.0
+Summary: Symphony 2.0 research codebase
+Requires-Python: >=3.9
+License-File: LICENSE
+Dynamic: license-file

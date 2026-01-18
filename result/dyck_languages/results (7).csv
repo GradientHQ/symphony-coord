@@ -1,0 +1,51 @@
+task,idx,problem,gt,pred_norm,pred_raw,ok,sec
+dyck_languages,0,"Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: [ [",] ],[],[],0,10.93
+dyck_languages,1,"Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: < [ [",] ] >,[]>],[]>],0,13.59
+dyck_languages,2,"Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: { < { { [ ] } } { < [ { { < > } } [ ( ) ( ) ] [ [ [ [ ( { < ( < ( [ ] ) > ) > } ) ] ] ] ] ] ( ) ( [ ] { } ) > } > [ { ( ( ) ) } ]",},BBH,BBH,0,63.68
+dyck_languages,3,"Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: < [ ] { < ( ) > } [ ] ( { }",) >,BBH,BBH,0,59.6
+dyck_languages,4,"Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: < ( ( ( < > ) ) ( { { } [ { } ] [ ] < ( ) > } ) )",>,BBH,BBH,0,47.35
+dyck_languages,5,"Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: ( [ [ [ { } ] ] { < [ < [ { } ] > ] > }",] ),BBH,BBH,0,32.21
+dyck_languages,6,"Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: ( { { } }",),BBH,BBH,0,28.67
+dyck_languages,7,"Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: < ( ( ( [ { } ] )",) ) >,( ),( ),0,29.03
+dyck_languages,8,"Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: [ < > ] [ [ < > ]",],[<[>]>,[<[>]>,0,29.3
+dyck_languages,9,"Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: [ ] ( [ [ { < { { ( < > [ ] ) } } < > > } ] ] { }",),BBH,BBH,0,51.65
+dyck_languages,10,"Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: [ < [ ] ( ) ( ( { { } } ) ) < { < > } > [ ] > ] < ( ) > ( ( ( ) ) ) ( < >",),BBH,BBH,0,36.35
+dyck_languages,11,"Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: [ { < ( ) > }",],C,C,0,6.08
+dyck_languages,12,"Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: [ < [ ( ( ) < ( ) > ( { { } } [ [ [ < ( [ ] ) ( ) > ] ] ] { { { { { } } } { { } { < [ [ ] ] > } } { } } } ) ) ] >",],],],1,36.05
+dyck_languages,13,"Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: < ( ( [ < > { [ { ( ) } ] < { < { } > [ ( < > ) ] } > } [ < > ] ] ) { { ( { ( ( [ ( [ ] ) ] < { } > ) ) { { ( [ [ ] ] ) } [ ( ) ] { { [ ] } } } } ) } ( { } ) }",) >,BBH,BBH,0,62.76
+dyck_languages,14,"Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: [ ] { ( ( < { ( ( ( { < > ( ) } ) ) [ { } ] { { ( ) } } ) } < > >",) ) },BBH,BBH,0,61.07
+dyck_languages,15,"Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: < { < > } { (",) } >,({),({),0,2.03
+dyck_languages,16,"Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: [ [ < < { } >",> ] ],B,B,0,30.79
+dyck_languages,17,"Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: < ( ( )",) >,BBH,BBH,0,12.17
+dyck_languages,18,"Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: ( ( ) ) [ { ( < > ) }",],BBH,BBH,0,29.43
+dyck_languages,19,"Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: [ < < > > < ( < < < [ [ [ [ ] ] ] ] > > > ) [ < < [ ] > > ] { [ < > ] < > [ ( ) ] } { [ ]",} > ],\{[<[]><>[(],\{[<[]><>[(],0,62.27
+dyck_languages,20,"Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: { ( < [ < > ]",> ) },[,[,0,3.05
+dyck_languages,21,"Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: { ( [ ] )",},1,1,0,1.99
+dyck_languages,22,"Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: { ( < > ) } ( ( [ ] ) < [ ( [ [ ] ] [ { } ] { } [ < { [ ] } > ] ( ) ) ]",> ),BBH,BBH,0,62.88
+dyck_languages,23,"Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: < { < [ [ ( { } ) ] ]",> } >,BBH,BBH,0,29.14
+dyck_languages,24,"Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: { ( [ [ ] ( ) ]",) },( ),( ),0,32.41
+dyck_languages,25,"Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: [ < { [ ] } >",],[<{],[<{],0,1.81
+dyck_languages,26,"Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: ( ( < >",) ),>),>),0,29.69
+dyck_languages,27,"Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: < < { ( < ( ) > ) }",> >,<<><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>>>,<<><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>>>,0,60.08
+dyck_languages,28,"Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: [ [ < [ [ ] ] > ] ] { } { ( { ( ( ) ) ( ) { { [ [ ( { < { [ { [ ( < ( ( < < < [ ( ) ] [ ] > > > ) ) > < [ < { < ( ) > } > ] > ) ] } ] } > ( ( ) ) } ) [ ( ) ] ] ( < > ) ] } } } ) } [",],[],[],0,64.22
+dyck_languages,29,"Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: { { } ( ( ) )",},BBH,BBH,0,55.91
+dyck_languages,30,"Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: < [ { { < ( ) > { < { } > ( < ( ) > { < [ ( { { ( < [ ] > ) } } { ( ( [ [ { } [ ] ] ] ) ) } ) ] > } ) } }",} ] >,<Answer>,<Answer>,0,62.82
+dyck_languages,31,"Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: ( < [ ( )",] > ),),),0,56.17
+dyck_languages,32,"Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: [ < [ ( [ < > ] { < > } [ [ ] ] ) ]",> ],[<{><,[<{><,0,30.56
+dyck_languages,33,"Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: < ( ( [ ( [ ] ) ] ) )",>,<>()[],<>()[],0,3.04
+dyck_languages,34,"Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: < [ ]",>,[],[],0,36.52
+dyck_languages,35,"Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: [ { ( { } ) } < < ( ) { { < [ { [ ( ) ] } ] > } } > >",],>,>,0,35.42
+dyck_languages,36,"Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: ( ( { }",) ),( ),( ),0,29.57
+dyck_languages,37,"Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: [ [ [ [ < { ( ) } ( ) > { ( ) } ] { ( ) }",] ] ],BBH,BBH,0,56.36
+dyck_languages,38,"Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: { } < { } < > (",) >,BBH,BBH,0,4.66
+dyck_languages,39,"Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: ( ( [ < < > [ < { } > ] { < [ ] > ( ( ( [ [ { < > } ] ] ) ) ) ( < < > > ) } > ]",) ),BBH,BBH,0,59.99
+dyck_languages,40,"Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: { < { } > { (",) } },B,B,0,29.87
+dyck_languages,41,"Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: ( [ [ { < > { } { } < < < < { } > > ( < ( ( ) ) [ ( [ ] ) ] > ) > > { } } [ < < > > ] < ( ) > ] ]",),BBH,BBH,0,62.84
+dyck_languages,42,"Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: { < <",> > },BBH,BBH,0,32.1
+dyck_languages,43,"Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: { { { } }",},BBH,BBH,0,7.37
+dyck_languages,44,"Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: < { } [ [ ( ( < { < { [ ] } > } > ) )",] ] >,<>,<>,0,62.0
+dyck_languages,45,"Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: < { ( ( )",) } >,B,B,0,1.79
+dyck_languages,46,"Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: [ ( < { [ ( ) ] } >",) ],BBH,BBH,0,55.74
+dyck_languages,47,"Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: ( ( { < { < { < > } > } > } ) ( ) ( { [ ( < ( < < { ( { < > } ) } > > ) > ) { ( { < ( { [ ] } ( ) ) > } < { < { { ( ) } } > { < [ { ( ) } ] > } } > ) } [ [ ( ) ] ] ]",} ) ),BBH,BBH,0,64.29
+dyck_languages,48,"Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: [ ] < { < { [ ( ) ] } > }",>,BBH,BBH,0,5.76
+dyck_languages,49,"Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: [ < [ ] > ] [ { [ ] }",],[<{[],[<{[],0,2.89

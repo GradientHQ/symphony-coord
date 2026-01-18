@@ -1,0 +1,235 @@
+# Exp1 Real OpenRouter: Routing Efficiency & Cost
+# 实验配置 - 所有必须固定的参数
+
+# ============================================================================
+# 1. Agent Pool (7个模型作为"臂")
+# ============================================================================
+agents:
+  # Agent letter mapping (config_id -> letter)
+  # All other agent attributes (pricing, match_simple, match_hard, base_latency_ms, etc.)
+  # are now defined in runtime/config_agent_openrouter_*.yaml files
+  A:
+    config_id: 1  # Maps to runtime/config_agent_openrouter_1.yaml
+  B:
+    config_id: 2  # Maps to runtime/config_agent_openrouter_2.yaml
+  C:
+    config_id: 3  # Maps to runtime/config_agent_openrouter_3.yaml
+  D:
+    config_id: 4  # Maps to runtime/config_agent_openrouter_4.yaml (SOP-Strong baseline)
+  E:
+    config_id: 5  # Maps to runtime/config_agent_openrouter_5.yaml
+  F:
+    config_id: 6  # Maps to runtime/config_agent_openrouter_6.yaml
+  G:
+    config_id: 7  # Maps to runtime/config_agent_openrouter_7.yaml
+
+# ============================================================================
+# 2. 数据流与复现实验
+# ============================================================================
+data:
+  # 任务池
+  task_pools:
+    humaneval:
+      size: 164
+      modality: code
+    gsm8k:
+      size: 200
+      modality: math
+    total: 364
+  
+  # 采样设置
+  sampling:
+    with_replacement: true  # 允许重复，利于在线学习曲线稳定
+    stream_length: 2000     # 主结果用2000，附录给1000
+    stream_lengths: [1000, 2000]  # 支持多个长度
+  
+  # 组成比例
+  mix_ratio:
+    easy_hard: [0.8, 0.2]   # Mixed-80/20
+    code_math: [0.5, 0.5]   # code/math ≈ 1:1
+  
+  # Seed & runs
+  seeds: [1, 2, 3, 4, 5]    # 至少5个独立seeds
+  report_format: "mean ± std"
+
+# ============================================================================
+# 3. Prompt 与解码（统一设置）
+# ============================================================================
+decoding:
+  # 解码参数（全模型通用）
+  temperature: 0.2
+  top_p: 0.95
+  
+  # 最大输出tokens
+  max_output_tokens:
+    gsm8k: 256
+    humaneval: 512
+  
+  # 超时设置
+  timeout_s: 90  # API模型建议90~120，本地看vLLM
+  
+  # 重试策略
+  retry_policy:
+    max_retries: 3
+    retry_on: [429, 500, 502, 503, 504]
+    backoff_factor: 2.0
+  
+  # 系统提示（统一）
+  system_prompts:
+    gsm8k: |
+      Solve the following math problem step by step.
+      Output your final answer in the format: FINAL: <number>
+      Do not include any other text after the final answer.
+    
+    humaneval: |
+      Write a Python function to solve the given problem.
+      Output ONLY the Python code, no explanations, no markdown.
+      Do not read from stdin, do not print, do not use additional packages.
+
+# ============================================================================
+# 4. Cost 定义（路线A：真实美元成本）
+# ============================================================================
+cost:
+  mode: "real_dollar"  # 或 "relative_weight"
+  
+  # 价格信息现在统一在 runtime/config_agent_openrouter_*.yaml 中定义
+  # Pricing info is now unified in runtime/config_agent_openrouter_*.yaml files
+  # - API models: price_in_per_1M, price_out_per_1M
+  # - Local models: gpu_hour_price
+  # - All models: cost_weight (fallback)
+  
+  # 真实美元成本设置
+  real_dollar:
+    # API模型：用返回的prompt_tokens/completion_tokens × 单价（从agent配置文件读取）
+    # Local模型：GPU-hour成本折算（从agent配置文件读取）
+    # 所有价格信息从 agent 配置文件中自动加载
+  
+  # 相对成本权重（如果不用真实价格）
+  relative_weight:
+    # cost_weight 从 agent 配置文件中加载
+
+# ============================================================================
+# 5. Reward 设计（LinUCB学习）
+# ============================================================================
+reward:
+  # Reward公式: r = 1[correct] - λ_c * c_norm - λ_t * t_norm
+  formula: "correct - lambda_c * cost_norm - lambda_t * latency_norm"
+  
+  # 默认参数
+  lambda_c: 0.3   # 成本惩罚
+  lambda_t: 0.05  # 延迟惩罚（小一点，别喧宾夺主）
+  
+  # Ablation参数（附录用）
+  lambda_c_ablation: [0.1, 0.3, 0.5]
+  
+  # 归一化方法
+  normalization:
+    cost: "cost / max_cost_over_agents"
+    latency: "latency / p95_latency_over_agents"  # 或 max
+
+# ============================================================================
+# 6. Symphony 2.0 路由设置
+# ============================================================================
+routing:
+  # Top-L 候选过滤
+  topL: 3
+  
+  # LinUCB 参数
+  linucb:
+    lambda: 1.0   # ridge正则化
+    alpha: 1.0    # 探索强度
+    delta: 0.1    # 置信度（理论版β_t计算）
+    S: 1.0        # ||theta*||的上界
+  
+  # Context特征（EX1推荐）
+  context_features:
+    task_feat:
+      - is_code  # one-hot
+      - is_math  # one-hot
+      - is_easy  # one-hot
+      - is_hard  # one-hot
+      # 可选: task embedding低维投影（32/64维）
+    
+    agent_feat:
+      - model_id_onehot  # 7维
+      - log_price  # 或 cost_weight
+    
+    state_feat:  # 动态特征
+      - ema_success_j    # 该模型最近成功率EMA
+      - ema_latency_j    # 该模型最近延迟EMA
+      - ema_cost_j       # 该模型最近成本EMA（可选）
+  
+  # 特征归一化
+  feature_normalization: "L2"  # L2 normalize
+
+# ============================================================================
+# 7. Baselines 设置
+# ============================================================================
+baselines:
+  # SOP-Strong（永远选最强/最贵）
+  sop_strong:
+    strong_model: "D"  # GPT-5.1-Codex-Mini
+    description: "Always select the strongest/most expensive model"
+  
+  # SOP-Rule（hard→Strong, easy→Cheap，不学习）
+  sop_rule:
+    cheap_model: "A"   # Gemini 2.5 Flash-Lite（最便宜稳定）
+    strong_model: "D"  # GPT-5.1-Codex-Mini
+    rule: "if easy: cheap_model, if hard: strong_model"
+    description: "Static rule: easy→cheap, hard→strong"
+
+# ============================================================================
+# 8. 输出设置
+# ============================================================================
+output:
+  # 主表指标
+  metrics:
+    - overall_success
+    - success_by_modality: [code, math]
+    - success_by_difficulty: [easy, hard]
+    - avg_tokens_per_task
+    - avg_cost_per_task
+    - avg_latency_per_task
+    - cost_per_correct  # 主指标
+    - routing_behavior:  # 路由行为
+        - easy_to_cheap_ratio
+        - hard_to_strong_ratio
+        - selection_distribution: "7×(easy/hard, code/math)"
+  
+  # 主图
+  plots:
+    - learning_curve: "Cumulative Cost per Correct over time"
+    - routing_behavior: "Cheap/Strong selection ratio over time"
+  
+  # 报告格式
+  report_format: "mean ± std"
+
+# ============================================================================
+# 9. 默认值总结（主结果用这一套）
+# ============================================================================
+defaults:
+  T: 2000
+  seeds: [1, 2, 3, 4, 5]
+  mix_easy_hard: [0.8, 0.2]
+  mix_code_math: [0.5, 0.5]
+  decoding:
+    temp: 0.2
+    top_p: 0.95
+  max_out:
+    gsm8k: 256
+    humaneval: 512
+  timeout_s: 90
+  TopL: 3
+  LinUCB:
+    lambda: 1.0
+    alpha: 1.0
+  reward:
+    correct: 1.0
+    lambda_c: 0.3
+    lambda_t: 0.05
+  SOP_Strong:
+    strong_model: "D"
+  SOP_Rule:
+    cheap_model: "A"
+    strong_model: "D"
+

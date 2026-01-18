@@ -1,0 +1,46 @@
+# User Configuration File
+# Configuration for user node in Symphony Network
+
+# Basic configuration
+debug: true
+role: "user"         
+node_id: "user-001"
+
+# Model loading configuration
+base_model: "/workspace/deepseek-math-7b-instruct"
+sys_prompt: "Please solve the subtask and output the final result strictly within the \\Answer{} tag. Do not add any extra text, explanations, or formatting outside of this tag."
+load_quantized: true
+use_lora: true
+
+# Capability registration (automatically matched with tools)
+capabilities:
+  - math
+  - translation
+  - search
+
+# Peer-to-peer network parameters
+p2p:
+  port: 7788
+  enable_dht: true
+  beacon_ttl: 2
+  heartbeat_interval: 15
+
+# LoRA (Low-Rank Adaptation) storage configuration
+lora:
+  save_dir: "checkpoints/"
+  patch_interval: 300
+
+# Logging configuration
+log_level: "INFO"
+
+# Network adapter configuration
+network:
+  host: "127.0.0.1"  # Replace with TaskRequester server IP address
+  port: 4001
+
+# GPU configuration
+gpu_id: 0  # Assuming server has 4 GPU cards
+
+# Neighbor nodes configuration
+neighbours: [["agent-001", "127.0.0.1", 5001],
+             ["agent-002", "127.0.0.1", 6001]]
