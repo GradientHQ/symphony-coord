@@ -67,7 +67,7 @@ def build_task_obj(task: Dict[str, Any], i: int) -> Task:
 		{
 			"task_id": str(task.get("task_id") or task.get("id") or f"task_{i}"),
 			"description": task_text,
-			"requirements": ["general-reasoning"],
+			"requirements": ["analysis"],  # ✅ Use standard vocab to avoid routing NA
 			"context": {
 				"benchmark": task.get("benchmark", ""),
 				"difficulty_bin": task.get("difficulty_bin", ""),
@@ -121,8 +121,22 @@ def _extract_last_number(text: str) -> str:
 def _try_json_final_answer(text: str) -> str:
 	if not text:
 		return ""
+	t = text.strip()
+
+	# 1) strip ```json ... ``` fences if present
+	if t.startswith("```"):
+		lines = t.splitlines()
+		# remove first fence line (```json or ```)
+		if lines and lines[0].startswith("```"):
+			lines = lines[1:]
+		# remove last fence line if it is ```
+		if lines and lines[-1].strip() == "```":
+			lines = lines[:-1]
+		t = "\n".join(lines).strip()
+
+	# 2) try parse as JSON
 	try:
-		obj = json.loads(text)
+		obj = json.loads(t)
 		if isinstance(obj, dict):
 			for key in ["final_answer", "answer", "final", "output"]:
 				if key in obj and obj[key] is not None:
@@ -274,7 +288,13 @@ def run_phase(
 								agent_ids.append(str(aid))
 		dt = time.time() - t0
 		ok = is_success(final_text)
-		pred = extract_pred(final_text)
+		# ✅ Store both raw and clean pred: raw for debugging, clean for evaluation
+		pred_raw = final_text  # Original voted output (may contain ```json fences)
+		pred = extract_pred(final_text)  # Clean extracted answer
+		# ✅ Ensure pred is not empty if ok=1 (fallback to raw if extraction failed)
+		if ok == 1 and not pred:
+			# If extraction failed but text is valid, use stripped raw text as fallback
+			pred = final_text.strip() if final_text else ""
 		gold_text = extract_gold_text(task)
 		acc = is_correct(pred, gold_text, str(task.get("benchmark", "")))
 		logs.append(
@@ -286,7 +306,8 @@ def run_phase(
 				"difficulty_bin": task.get("difficulty_bin"),
 				"agent_ids": agent_ids,
 				"ok": ok,
-				"pred": pred,
+				"pred_raw": pred_raw,  # ✅ Raw output for debugging
+				"pred": pred,  # ✅ Clean answer for evaluation (used in acc calculation)
 				"gold": gold_text,
 				"acc": acc,
 				"latency_s": dt,

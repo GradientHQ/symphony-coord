@@ -756,8 +756,27 @@ class SymphonyOrchestrator:
                     traces_by_subtask[sid] = {"error": err, "runs": [], "voted": err, "requirement": req}
                 continue
 
-            topL = candidates_avail[: max(1, self.topL)]
-            runs = min(int(cot_count), len(topL)) if topL else 0
+            # ✅ Exploration constraint 1: Top-L must be unique (deduplicate by agent_id)
+            # Ensure no duplicate agents in topL (critical for exploration)
+            seen_agent_ids = set()
+            topL_unique: List[Dict[str, Any]] = []
+            for c in candidates_avail:
+                ag = c["agent"]
+                aid = self._resolve_agent_key(ag)
+                if not aid:
+                    aid = f"agent_{id(ag)}"
+                if aid not in seen_agent_ids:
+                    seen_agent_ids.add(aid)
+                    topL_unique.append(c)
+                    if len(topL_unique) >= self.topL:
+                        break
+            
+            # If not enough unique agents, use what we have (at least 1)
+            topL = topL_unique[: max(1, self.topL)] if topL_unique else candidates_avail[:1]
+            
+            # ✅ Exploration constraint 2: Fixed exploration budget K (don't vary with topL length)
+            # For cold_start exploration, always use cot_count as the fixed budget
+            runs = int(cot_count) if cot_count > 0 else 0
             if runs <= 0:
                 err = f"[ERROR] All agents filtered out for subtask: {req}"
                 results[sid] = err
@@ -769,16 +788,20 @@ class SymphonyOrchestrator:
             run_records: List[Dict[str, Any]] = []
             cot_results: List[str] = []
 
-            for _ in range(runs):
+            for j in range(runs):
                 if self.use_dynamic and self.selector is not None:
                     agent, x, _st, match_score = self._select_agent_dynamic(topL, used_ids)
                 else:
-                    agent = topL[0]["agent"]
+                    # ✅ cold_start: static Top-L but round-robin across agents (no repeat)
+                    # Use j % len(topL) to cycle through topL candidates
+                    candidate_idx = j % len(topL) if topL else 0
+                    candidate = topL[candidate_idx]
+                    agent = candidate["agent"]
                     stt = self._agent_state(agent)
                     # ✅ P0-4: Use unified helper (ensures ms=sim_emb, rep=prior_success)
-                    match_score = float(topL[0].get("match_score", 0.0))  # For logging
+                    match_score = float(candidate.get("match_score", 0.0))  # For logging
                     x = self._build_x_from_candidate_or_fallback(
-                        candidate=topL[0],
+                        candidate=candidate,
                         agent=agent,
                         dynamic_state=stt,
                     )

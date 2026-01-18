@@ -145,7 +145,42 @@ python3 experiments/exp1_real_openrouter/exp1_real_openrouter.py \
   --fallback \
   --drift \
   --agents 1,2,3,4,5,6
+
+
+# 运行不包含drift的实验
+python3 experiments/exp1_real_openrouter/exp1_real_openrouter.py \
+  --n 1000 \
+  --p-hard 0.2 \
+  --seed 123 \
+  --topL 3 \
+  --alpha 1.0 \
+  --l2 1.0 \
+  --latency-scale-ms 2000 \
+  --latency-penalty 0.05 \
+  --cost-lambda 0.3 \
+  --fallback \
+  --drift \
+  --agents 1,2,3,4,5,6,7,8,9,10 \
+  --benchmarks humaneval,gsm8k,bbh,amc,medical_qa
+
 ```
+python3 /Users/caohuixi/symphony2.0/Pre-train.py \
+  --task-pool symphony-data-generator/data/benchmarks/full/gsm8k_full.jsonl \
+  --benchmark gsm8k \
+  --agents "11,12,13,14,15" \
+  --plan-k 3 \
+  --topL 3 \
+  --cot-count 5 \
+  --cold-n 50 \
+  --pretrain-n 200 \
+  --val-n 0 \
+  --seed 42 \
+  --plot-acc \
+  --print-each-step
+
+
+
+
 
 python3 experiments/exp1_real_openrouter/exp1_real_openrouter.py \
   --n 100 \
@@ -154,7 +189,7 @@ python3 experiments/exp1_real_openrouter/exp1_real_openrouter.py \
   --topL 2 \
   --fallback \
   --drift \
-  --agents 1,2,3,4,5,6,7 \
+  --agents 1,2,3,4,5,6,7,8,9,10 \
   --benchmarks humaneval,gsm8k
 
 ## 参数说明
