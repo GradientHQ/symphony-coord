@@ -101,9 +101,12 @@ api_key = os.getenv('OPENROUTER_API_KEY', os.getenv('OPENAI_API_KEY', 'EMPTY'))
 
 ## Agent 配置
 
+> ✅ 现在建议的结构是按模型/agent 名字分文件夹：
+> `runtime/configs/openrouter/<agent-name>/config_agent_openrouter_<id>.yaml`
+
 ### Agent 1: Gemini 2.5 Flash-Lite
 
-创建 `runtime/config_agent_openrouter_1.yaml`:
+创建 `runtime/configs/openrouter/<agent-name>/config_agent_openrouter_1.yaml`:
 
 ```yaml
 # Agent 1: Gemini 2.5 Flash-Lite
@@ -124,7 +127,7 @@ gpu_id: 0
 
 ### Agent 2: GPT-5 Nano
 
-创建 `runtime/config_agent_openrouter_2.yaml`:
+创建 `runtime/configs/openrouter/config_agent_openrouter_2.yaml`:
 
 ```yaml
 # Agent 2: GPT-5 Nano
@@ -145,7 +148,7 @@ gpu_id: 0
 
 ### Agent 3: GPT-4o Mini
 
-创建 `runtime/config_agent_openrouter_3.yaml`:
+创建 `runtime/configs/openrouter/config_agent_openrouter_3.yaml`:
 
 ```yaml
 # Agent 3: GPT-4o Mini
@@ -166,7 +169,7 @@ gpu_id: 0
 
 ### Agent 4: GPT-5.1 Codex Mini
 
-创建 `runtime/config_agent_openrouter_4.yaml`:
+创建 `runtime/configs/openrouter/config_agent_openrouter_4.yaml`:
 
 ```yaml
 # Agent 4: GPT-5.1 Codex Mini
@@ -187,7 +190,7 @@ gpu_id: 0
 
 ### Agent 5: Qwen2.5-7B-Instruct
 
-创建 `runtime/config_agent_openrouter_5.yaml`:
+创建 `runtime/configs/openrouter/config_agent_openrouter_5.yaml`:
 
 ```yaml
 # Agent 5: Qwen2.5-7B-Instruct
@@ -208,7 +211,7 @@ gpu_id: 0
 
 ### Agent 6: Qwen3-8B
 
-创建 `runtime/config_agent_openrouter_6.yaml`:
+创建 `runtime/configs/openrouter/config_agent_openrouter_6.yaml`:
 
 ```yaml
 # Agent 6: Qwen3-8B
@@ -232,10 +235,10 @@ gpu_id: 0
 使用以下命令快速创建所有配置文件：
 
 ```bash
-cd /Users/caohuixi/symphony2.0/runtime
+cd /Users/caohuixi/symphony2.0/runtime/configs/openrouter
 
 # Agent 1: Gemini 2.5 Flash-Lite
-cat > config_agent_openrouter_1.yaml << 'EOF'
+cat > runtime/configs/openrouter/config_agent_openrouter_1.yaml << 'EOF'
 debug: true
 role: "agent"
 node_id: "agent-openrouter-001"
@@ -252,7 +255,7 @@ gpu_id: 0
 EOF
 
 # Agent 2: GPT-5 Nano
-cat > config_agent_openrouter_2.yaml << 'EOF'
+cat > runtime/configs/openrouter/config_agent_openrouter_2.yaml << 'EOF'
 debug: true
 role: "agent"
 node_id: "agent-openrouter-002"
@@ -269,7 +272,7 @@ gpu_id: 0
 EOF
 
 # Agent 3: GPT-4o Mini
-cat > config_agent_openrouter_3.yaml << 'EOF'
+cat > runtime/configs/openrouter/config_agent_openrouter_3.yaml << 'EOF'
 debug: true
 role: "agent"
 node_id: "agent-openrouter-003"
@@ -286,7 +289,7 @@ gpu_id: 0
 EOF
 
 # Agent 4: GPT-5.1 Codex Mini
-cat > config_agent_openrouter_4.yaml << 'EOF'
+cat > runtime/configs/openrouter/config_agent_openrouter_4.yaml << 'EOF'
 debug: true
 role: "agent"
 node_id: "agent-openrouter-004"
@@ -303,7 +306,7 @@ gpu_id: 0
 EOF
 
 # Agent 5: Qwen2.5-7B-Instruct
-cat > config_agent_openrouter_5.yaml << 'EOF'
+cat > runtime/configs/openrouter/config_agent_openrouter_5.yaml << 'EOF'
 debug: true
 role: "agent"
 node_id: "agent-openrouter-005"
@@ -320,7 +323,7 @@ gpu_id: 0
 EOF
 
 # Agent 6: Qwen3-8B
-cat > config_agent_openrouter_6.yaml << 'EOF'
+cat > runtime/configs/openrouter/config_agent_openrouter_6.yaml << 'EOF'
 debug: true
 role: "agent"
 node_id: "agent-openrouter-006"
@@ -363,7 +366,7 @@ from agents.agent import Agent
 import yaml
 
 # 加载配置
-with open('runtime/config_agent_openrouter_1.yaml', 'r') as f:
+with open('runtime/configs/openrouter/config_agent_openrouter_1.yaml', 'r') as f:
     config = yaml.safe_load(f)
 
 # 创建 Agent

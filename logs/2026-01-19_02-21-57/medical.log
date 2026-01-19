@@ -1,0 +1,201 @@
+[2026-01-19 02:26:40] Medical split: total=10, cold=1, pretrain=7, test=2
+[2026-01-19 02:26:40] Medical | deepseek-v3 start
+[cold_start] step=1 agent=agent-openrouter-deepseek-v3-006 ok=1 acc=0 latency=1.17s
+[EMBEDDING_PROVIDER] Selected: OpenRouter, model: text-embedding-3-small, endpoint: https://openrouter.ai/api/v1/embeddings
+[EMBEDDING_DIM] Vector dimension: 1536
+
+[DEBUG] === Trace structure for first task (step=2) ===
+[DEBUG] trace type: <class 'dict'>, is_dict: True
+[DEBUG] traces type: <class 'dict'>, is_dict: True, len: 1
+[DEBUG] first type: <class 'dict'>, is_dict: True
+[DEBUG] first keys: ['requirement', 'context', 'gold', 'vote_count', 'vote_weight_by_match_score', 'correct', 'runs', 'voted', 'voted_final']
+[DEBUG] voted: '{"final_answer": "A", "confidence": 0.8, "valid": 1, "abstain": 0}'
+[DEBUG] voted_final: 'A'
+[DEBUG] runs type: <class 'list'>, len: 1
+[DEBUG] first_run type: <class 'dict'>, keys: ['agent_id', 'match_score', 'sim_emb', 'prior_success', 'x', 'latency_ms', 'text', 'final', 'vote_voted_final', 'vote_ok', 'vote_is_winner', 'vote_base_term', 'vote_win_term', 'vote_corr_term', 'vote_latency_penalty', 'vote_reward']
+[DEBUG] first_run agent_id: 'agent-openrouter-deepseek-v3-009'
+[DEBUG] ============================================
+
+[pretrain] step=2 agent=agent-openrouter-deepseek-v3-009 ok=1 acc=1 latency=5.61s
+[pretrain] step=3 agent=agent-openrouter-deepseek-v3-009 ok=1 acc=1 latency=1.53s
+[pretrain] step=4 agent=agent-openrouter-deepseek-v3-007 ok=1 acc=0 latency=1.24s
+[pretrain] step=5 agent=agent-openrouter-deepseek-v3-009 ok=1 acc=0 latency=1.79s
+[pretrain] step=6 agent=agent-openrouter-deepseek-v3-009 ok=1 acc=0 latency=1.77s
+[pretrain] step=7 agent=agent-openrouter-deepseek-v3-007 ok=1 acc=1 latency=1.53s
+[pretrain] step=8 agent=agent-openrouter-deepseek-v3-008 ok=1 acc=1 latency=2.45s
+
+[DEBUG] === Trace structure for first task (step=9) ===
+[DEBUG] trace type: <class 'dict'>, is_dict: True
+[DEBUG] traces type: <class 'dict'>, is_dict: True, len: 1
+[DEBUG] first type: <class 'dict'>, is_dict: True
+[DEBUG] first keys: ['requirement', 'context', 'gold', 'vote_count', 'vote_weight_by_match_score', 'correct', 'runs', 'voted', 'voted_final']
+[DEBUG] voted: '```json\n{"final_answer": "B", "confidence": 0.9, "valid": 1, "abstain": 0}\n```'
+[DEBUG] voted_final: 'B'
+[DEBUG] runs type: <class 'list'>, len: 1
+[DEBUG] first_run type: <class 'dict'>, keys: ['agent_id', 'match_score', 'sim_emb', 'prior_success', 'x', 'latency_ms', 'text', 'final', 'vote_voted_final', 'vote_ok', 'vote_is_winner', 'vote_base_term', 'vote_win_term', 'vote_corr_term', 'vote_latency_penalty', 'vote_reward']
+[DEBUG] first_run agent_id: 'agent-openrouter-deepseek-v3-008'
+[DEBUG] ============================================
+
+[test] step=9 agent=agent-openrouter-deepseek-v3-008 ok=1 acc=0 latency=2.98s
+[test] step=10 agent=agent-openrouter-deepseek-v3-009 ok=1 acc=1 latency=1.34s
+[OK] Pre-train done. outdir=pretrain_results/2026-01-19_02-21-57/medical_qa/deepseek-v3/2026-01-19_02-26-41
+[2026-01-19 02:27:03] Medical | deepseek-v3-0324 start
+[cold_start] step=1 agent=agent-openrouter-deepseek-v3-0324-001 ok=1 acc=0 latency=1.96s
+[EMBEDDING_PROVIDER] Selected: OpenRouter, model: text-embedding-3-small, endpoint: https://openrouter.ai/api/v1/embeddings
+[EMBEDDING_DIM] Vector dimension: 1536
+
+[DEBUG] === Trace structure for first task (step=2) ===
+[DEBUG] trace type: <class 'dict'>, is_dict: True
+[DEBUG] traces type: <class 'dict'>, is_dict: True, len: 1
+[DEBUG] first type: <class 'dict'>, is_dict: True
+[DEBUG] first keys: ['requirement', 'context', 'gold', 'vote_count', 'vote_weight_by_match_score', 'correct', 'runs', 'voted', 'voted_final']
+[DEBUG] voted: '{"final_answer": "A", "confidence": 0.8, "valid": 1, "abstain": 0}'
+[DEBUG] voted_final: 'A'
+[DEBUG] runs type: <class 'list'>, len: 1
+[DEBUG] first_run type: <class 'dict'>, keys: ['agent_id', 'match_score', 'sim_emb', 'prior_success', 'x', 'latency_ms', 'text', 'final', 'vote_voted_final', 'vote_ok', 'vote_is_winner', 'vote_base_term', 'vote_win_term', 'vote_corr_term', 'vote_latency_penalty', 'vote_reward']
+[DEBUG] first_run agent_id: 'agent-openrouter-deepseek-v3-0324-004'
+[DEBUG] ============================================
+
+[pretrain] step=2 agent=agent-openrouter-deepseek-v3-0324-004 ok=1 acc=1 latency=3.48s
+[pretrain] step=3 agent=agent-openrouter-deepseek-v3-0324-004 ok=1 acc=1 latency=2.73s
+[pretrain] step=4 agent=agent-openrouter-deepseek-v3-0324-002 ok=1 acc=0 latency=1.81s
+[pretrain] step=5 agent=agent-openrouter-deepseek-v3-0324-004 ok=1 acc=1 latency=2.02s
+[pretrain] step=6 agent=agent-openrouter-deepseek-v3-0324-004 ok=1 acc=0 latency=2.62s
+[pretrain] step=7 agent=agent-openrouter-deepseek-v3-0324-002 ok=1 acc=1 latency=2.75s
+[pretrain] step=8 agent=agent-openrouter-deepseek-v3-0324-003 ok=1 acc=1 latency=1.78s
+
+[DEBUG] === Trace structure for first task (step=9) ===
+[DEBUG] trace type: <class 'dict'>, is_dict: True
+[DEBUG] traces type: <class 'dict'>, is_dict: True, len: 1
+[DEBUG] first type: <class 'dict'>, is_dict: True
+[DEBUG] first keys: ['requirement', 'context', 'gold', 'vote_count', 'vote_weight_by_match_score', 'correct', 'runs', 'voted', 'voted_final']
+[DEBUG] voted: '{"final_answer": "D", "confidence": 0.85, "valid": 1, "abstain": 0}'
+[DEBUG] voted_final: 'D'
+[DEBUG] runs type: <class 'list'>, len: 1
+[DEBUG] first_run type: <class 'dict'>, keys: ['agent_id', 'match_score', 'sim_emb', 'prior_success', 'x', 'latency_ms', 'text', 'final', 'vote_voted_final', 'vote_ok', 'vote_is_winner', 'vote_base_term', 'vote_win_term', 'vote_corr_term', 'vote_latency_penalty', 'vote_reward']
+[DEBUG] first_run agent_id: 'agent-openrouter-deepseek-v3-0324-003'
+[DEBUG] ============================================
+
+[test] step=9 agent=agent-openrouter-deepseek-v3-0324-003 ok=1 acc=1 latency=3.90s
+[test] step=10 agent=agent-openrouter-deepseek-v3-0324-004 ok=1 acc=1 latency=7.38s
+[OK] Pre-train done. outdir=pretrain_results/2026-01-19_02-21-57/medical_qa/deepseek-v3-0324/2026-01-19_02-27-03
+[2026-01-19 02:27:34] Medical | openai-gpt-5-nano start
+[cold_start] step=1 agent=agent-openrouter-openai-gpt-5-nano-001 ok=0 acc=0 latency=11.90s
+[EMBEDDING_PROVIDER] Selected: OpenRouter, model: text-embedding-3-small, endpoint: https://openrouter.ai/api/v1/embeddings
+[EMBEDDING_DIM] Vector dimension: 1536
+
+[DEBUG] === Trace structure for first task (step=2) ===
+[DEBUG] trace type: <class 'dict'>, is_dict: True
+[DEBUG] traces type: <class 'dict'>, is_dict: True, len: 1
+[DEBUG] first type: <class 'dict'>, is_dict: True
+[DEBUG] first keys: ['requirement', 'context', 'gold', 'vote_count', 'vote_weight_by_match_score', 'correct', 'runs', 'voted', 'voted_final']
+[DEBUG] voted: ''
+[DEBUG] voted_final: ''
+[DEBUG] runs type: <class 'list'>, len: 1
+[DEBUG] first_run type: <class 'dict'>, keys: ['agent_id', 'match_score', 'sim_emb', 'prior_success', 'x', 'latency_ms', 'text', 'final', 'vote_voted_final', 'vote_ok', 'vote_is_winner', 'vote_base_term', 'vote_win_term', 'vote_corr_term', 'vote_latency_penalty', 'vote_reward']
+[DEBUG] first_run agent_id: 'agent-openrouter-openai-gpt-5-nano-004'
+[DEBUG] ============================================
+
+[pretrain] step=2 agent=agent-openrouter-openai-gpt-5-nano-004 ok=0 acc=0 latency=27.04s
+[pretrain] step=3 agent=agent-openrouter-openai-gpt-5-nano-004 ok=0 acc=0 latency=15.69s
+[pretrain] step=4 agent=agent-openrouter-openai-gpt-5-nano-002 ok=1 acc=1 latency=11.38s
+[pretrain] step=5 agent=agent-openrouter-openai-gpt-5-nano-004 ok=0 acc=0 latency=18.99s
+[pretrain] step=6 agent=agent-openrouter-openai-gpt-5-nano-004 ok=0 acc=0 latency=15.80s
+[pretrain] step=7 agent=agent-openrouter-openai-gpt-5-nano-002 ok=1 acc=1 latency=7.16s
+[pretrain] step=8 agent=agent-openrouter-openai-gpt-5-nano-003 ok=1 acc=1 latency=9.59s
+
+[DEBUG] === Trace structure for first task (step=9) ===
+[DEBUG] trace type: <class 'dict'>, is_dict: True
+[DEBUG] traces type: <class 'dict'>, is_dict: True, len: 1
+[DEBUG] first type: <class 'dict'>, is_dict: True
+[DEBUG] first keys: ['requirement', 'context', 'gold', 'vote_count', 'vote_weight_by_match_score', 'correct', 'runs', 'voted', 'voted_final']
+[DEBUG] voted: ''
+[DEBUG] voted_final: ''
+[DEBUG] runs type: <class 'list'>, len: 1
+[DEBUG] first_run type: <class 'dict'>, keys: ['agent_id', 'match_score', 'sim_emb', 'prior_success', 'x', 'latency_ms', 'text', 'final', 'vote_voted_final', 'vote_ok', 'vote_is_winner', 'vote_base_term', 'vote_win_term', 'vote_corr_term', 'vote_latency_penalty', 'vote_reward']
+[DEBUG] first_run agent_id: 'agent-openrouter-openai-gpt-5-nano-003'
+[DEBUG] ============================================
+
+[test] step=9 agent=agent-openrouter-openai-gpt-5-nano-003 ok=0 acc=0 latency=21.64s
+[test] step=10 agent=agent-openrouter-openai-gpt-5-nano-004 ok=0 acc=0 latency=11.87s
+[OK] Pre-train done. outdir=pretrain_results/2026-01-19_02-21-57/medical_qa/openai-gpt-5-nano/2026-01-19_02-27-35
+[2026-01-19 02:30:07] Medical | openai-gpt-4-1-nano start
+[cold_start] step=1 agent=agent-openrouter-openai-gpt-4-1-nano-001 ok=1 acc=0 latency=0.63s
+[EMBEDDING_PROVIDER] Selected: OpenRouter, model: text-embedding-3-small, endpoint: https://openrouter.ai/api/v1/embeddings
+[EMBEDDING_DIM] Vector dimension: 1536
+
+[DEBUG] === Trace structure for first task (step=2) ===
+[DEBUG] trace type: <class 'dict'>, is_dict: True
+[DEBUG] traces type: <class 'dict'>, is_dict: True, len: 1
+[DEBUG] first type: <class 'dict'>, is_dict: True
+[DEBUG] first keys: ['requirement', 'context', 'gold', 'vote_count', 'vote_weight_by_match_score', 'correct', 'runs', 'voted', 'voted_final']
+[DEBUG] voted: '{"final_answer": "A", "confidence": 0.8, "valid": 1, "abstain": 0}'
+[DEBUG] voted_final: 'A'
+[DEBUG] runs type: <class 'list'>, len: 1
+[DEBUG] first_run type: <class 'dict'>, keys: ['agent_id', 'match_score', 'sim_emb', 'prior_success', 'x', 'latency_ms', 'text', 'final', 'vote_voted_final', 'vote_ok', 'vote_is_winner', 'vote_base_term', 'vote_win_term', 'vote_corr_term', 'vote_latency_penalty', 'vote_reward']
+[DEBUG] first_run agent_id: 'agent-openrouter-openai-gpt-4-1-nano-004'
+[DEBUG] ============================================
+
+[pretrain] step=2 agent=agent-openrouter-openai-gpt-4-1-nano-004 ok=1 acc=1 latency=3.54s
+[pretrain] step=3 agent=agent-openrouter-openai-gpt-4-1-nano-004 ok=1 acc=1 latency=0.93s
+[pretrain] step=4 agent=agent-openrouter-openai-gpt-4-1-nano-002 ok=1 acc=0 latency=0.87s
+[pretrain] step=5 agent=agent-openrouter-openai-gpt-4-1-nano-004 ok=1 acc=1 latency=0.94s
+[pretrain] step=6 agent=agent-openrouter-openai-gpt-4-1-nano-004 ok=1 acc=0 latency=1.05s
+[pretrain] step=7 agent=agent-openrouter-openai-gpt-4-1-nano-002 ok=1 acc=1 latency=1.02s
+[pretrain] step=8 agent=agent-openrouter-openai-gpt-4-1-nano-003 ok=1 acc=1 latency=1.12s
+
+[DEBUG] === Trace structure for first task (step=9) ===
+[DEBUG] trace type: <class 'dict'>, is_dict: True
+[DEBUG] traces type: <class 'dict'>, is_dict: True, len: 1
+[DEBUG] first type: <class 'dict'>, is_dict: True
+[DEBUG] first keys: ['requirement', 'context', 'gold', 'vote_count', 'vote_weight_by_match_score', 'correct', 'runs', 'voted', 'voted_final']
+[DEBUG] voted: '{"final_answer": "A", "confidence": 0.9, "valid": 1, "abstain": 0}'
+[DEBUG] voted_final: 'A'
+[DEBUG] runs type: <class 'list'>, len: 1
+[DEBUG] first_run type: <class 'dict'>, keys: ['agent_id', 'match_score', 'sim_emb', 'prior_success', 'x', 'latency_ms', 'text', 'final', 'vote_voted_final', 'vote_ok', 'vote_is_winner', 'vote_base_term', 'vote_win_term', 'vote_corr_term', 'vote_latency_penalty', 'vote_reward']
+[DEBUG] first_run agent_id: 'agent-openrouter-openai-gpt-4-1-nano-003'
+[DEBUG] ============================================
+
+[test] step=9 agent=agent-openrouter-openai-gpt-4-1-nano-003 ok=1 acc=0 latency=0.89s
+[test] step=10 agent=agent-openrouter-openai-gpt-4-1-nano-004 ok=1 acc=1 latency=1.22s
+[OK] Pre-train done. outdir=pretrain_results/2026-01-19_02-21-57/medical_qa/openai-gpt-4-1-nano/2026-01-19_02-30-07
+[2026-01-19 02:30:20] Medical | openai-gpt-oss-120b start
+[cold_start] step=1 agent=agent-openrouter-openai-gpt-oss-120b-001 ok=1 acc=0 latency=4.96s
+[EMBEDDING_PROVIDER] Selected: OpenRouter, model: text-embedding-3-small, endpoint: https://openrouter.ai/api/v1/embeddings
+[EMBEDDING_DIM] Vector dimension: 1536
+
+[DEBUG] === Trace structure for first task (step=2) ===
+[DEBUG] trace type: <class 'dict'>, is_dict: True
+[DEBUG] traces type: <class 'dict'>, is_dict: True, len: 1
+[DEBUG] first type: <class 'dict'>, is_dict: True
+[DEBUG] first keys: ['requirement', 'context', 'gold', 'vote_count', 'vote_weight_by_match_score', 'correct', 'runs', 'voted', 'voted_final']
+[DEBUG] voted: '{"final_answer":"A","confidence":0.95,"valid":1,"abstain":0}'
+[DEBUG] voted_final: 'A'
+[DEBUG] runs type: <class 'list'>, len: 1
+[DEBUG] first_run type: <class 'dict'>, keys: ['agent_id', 'match_score', 'sim_emb', 'prior_success', 'x', 'latency_ms', 'text', 'final', 'vote_voted_final', 'vote_ok', 'vote_is_winner', 'vote_base_term', 'vote_win_term', 'vote_corr_term', 'vote_latency_penalty', 'vote_reward']
+[DEBUG] first_run agent_id: 'agent-openrouter-openai-gpt-oss-120b-004'
+[DEBUG] ============================================
+
+[pretrain] step=2 agent=agent-openrouter-openai-gpt-oss-120b-004 ok=1 acc=1 latency=12.73s
+[pretrain] step=3 agent=agent-openrouter-openai-gpt-oss-120b-004 ok=1 acc=1 latency=3.82s
+[pretrain] step=4 agent=agent-openrouter-openai-gpt-oss-120b-002 ok=1 acc=1 latency=5.28s
+[pretrain] step=5 agent=agent-openrouter-openai-gpt-oss-120b-004 ok=0 acc=0 latency=4.40s
+[pretrain] step=6 agent=agent-openrouter-openai-gpt-oss-120b-004 ok=1 acc=0 latency=2.67s
+[pretrain] step=7 agent=agent-openrouter-openai-gpt-oss-120b-002 ok=1 acc=1 latency=3.12s
+[pretrain] step=8 agent=agent-openrouter-openai-gpt-oss-120b-003 ok=1 acc=1 latency=4.67s
+
+[DEBUG] === Trace structure for first task (step=9) ===
+[DEBUG] trace type: <class 'dict'>, is_dict: True
+[DEBUG] traces type: <class 'dict'>, is_dict: True, len: 1
+[DEBUG] first type: <class 'dict'>, is_dict: True
+[DEBUG] first keys: ['requirement', 'context', 'gold', 'vote_count', 'vote_weight_by_match_score', 'correct', 'runs', 'voted', 'voted_final']
+[DEBUG] voted: '{"final_answer":"D","confidence":0.93,"valid":1,"abstain":0}'
+[DEBUG] voted_final: 'D'
+[DEBUG] runs type: <class 'list'>, len: 1
+[DEBUG] first_run type: <class 'dict'>, keys: ['agent_id', 'match_score', 'sim_emb', 'prior_success', 'x', 'latency_ms', 'text', 'final', 'vote_voted_final', 'vote_ok', 'vote_is_winner', 'vote_base_term', 'vote_win_term', 'vote_corr_term', 'vote_latency_penalty', 'vote_reward']
+[DEBUG] first_run agent_id: 'agent-openrouter-openai-gpt-oss-120b-003'
+[DEBUG] ============================================
+
+[test] step=9 agent=agent-openrouter-openai-gpt-oss-120b-003 ok=1 acc=1 latency=2.98s
+[test] step=10 agent=agent-openrouter-openai-gpt-oss-120b-004 ok=0 acc=0 latency=9.99s
+[OK] Pre-train done. outdir=pretrain_results/2026-01-19_02-21-57/medical_qa/openai-gpt-oss-120b/2026-01-19_02-30-21

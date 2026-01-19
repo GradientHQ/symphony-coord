@@ -70,7 +70,7 @@ cd ..
 
 1. **Python 环境**：已设置虚拟环境并安装所有依赖（见上方）
 2. **API Key**：已设置 `OPENROUTER_API_KEY` 环境变量
-3. **配置文件**：确保以下配置文件存在于 `runtime/` 目录：
+3. **配置文件**：确保以下配置文件存在于 `runtime/configs/openrouter/<agent-name>/` 目录：
    - `config_agent_openrouter_1.yaml` (Agent A)
    - `config_agent_openrouter_2.yaml` (Agent B)
    - `config_agent_openrouter_3.yaml` (Agent C)
@@ -152,6 +152,7 @@ python3 experiments/exp1_real_openrouter/exp1_real_openrouter.py \
   --n 1000 \
   --p-hard 0.2 \
   --seed 123 \
+  --config-dir runtime/configs/openrouter \
   --topL 3 \
   --alpha 1.0 \
   --l2 1.0 \
@@ -168,12 +169,13 @@ python3 /Users/caohuixi/symphony2.0/Pre-train.py \
   --task-pool symphony-data-generator/data/benchmarks/full/gsm8k_full.jsonl \
   --benchmark gsm8k \
   --agents "11,12,13,14,15" \
+  --runtime-dir runtime/configs/openrouter \
   --plan-k 3 \
   --topL 3 \
   --cot-count 5 \
   --cold-n 50 \
   --pretrain-n 200 \
-  --val-n 0 \
+  --test-n 0 \
   --seed 42 \
   --plot-acc \
   --print-each-step
@@ -186,6 +188,7 @@ python3 experiments/exp1_real_openrouter/exp1_real_openrouter.py \
   --n 100 \
   --p-hard 0.2 \
   --seed 123 \
+  --config-dir runtime/configs/openrouter \
   --topL 2 \
   --fallback \
   --drift \
@@ -203,7 +206,7 @@ python3 experiments/exp1_real_openrouter/exp1_real_openrouter.py \
   - 可选值：`humaneval`, `gsm8k`, 或 `humaneval,gsm8k`
 - `--outdir`: 输出目录（默认：`experiments/exp1_real_openrouter/results`）
 - `--no-plots`: 不生成图表
-- `--config-dir`: 配置文件目录（默认：`runtime`）
+- `--config-dir`: 配置文件目录（默认：`runtime/configs/openrouter`）
 - `--agents`: 要使用的 agent ID 列表，逗号分隔（默认：`1,2,3,4,5,6,7`，所有 7 个 agents）
 
 ### LinUCB 参数
@@ -312,3 +315,152 @@ Running Policies
 
 3. **查看错误信息**：运行时会打印详细的错误信息，包括失败的 API 调用。
 
+```bash
+python3 /Users/caohuixi/symphony2.0/Pre-train.py \
+  --task-pool symphony-data-generator/data/benchmarks/full/gsm8k_full.jsonl \
+  --benchmark gsm8k \
+  --agents "11,12,13,14,15" \
+  --runtime-dir runtime/configs/openrouter \
+  --plan-k 3 \
+  --topL 3 \
+  --cot-count 100 \
+  --cold-n 300 \
+  --pretrain-n 200 \
+  --test-n 0 \
+  --seed 42 \
+  --plot-acc \
+  --print-each-step
+
+
+python3 /Users/caohuixi/symphony2.0/Pre-train.py \
+  --task-pool symphony-data-generator/data/exp5/task_pool.jsonl \
+  --agents "11,12,13,14,15" \
+  --runtime-dir runtime/configs/openrouter \
+  --plan-k 3 \
+  --topL 5 \
+  --cot-count 5 \
+  --cold-n 30 \
+  --pretrain-n 80 \
+  --test-n 0 \
+  --seed 42 \
+  --plot-acc \
+  --print-each-step
+
+
+
+
+
+python3 /Users/caohuixi/symphony2.0/Pre-train.py \
+  --task-pool symphony-data-generator/data/benchmarks/full/gsm8k_full.jsonl \
+  --benchmark gsm8k \
+  --agents "11,12,13,14,15" \
+  --runtime-dir runtime/configs/openrouter \
+  --plan-k 3 \
+  --topL 3 \
+  --cot-count 3 \
+  --cold-n 10 \
+  --pretrain-n 10 \
+  --test-n 0 \
+  --seed 42 \
+  --plot-acc \
+  --print-each-step
+
+
+
+python3 /Users/caohuixi/symphony2.0/Pre-train.py \
+  --task-pool symphony-data-generator/data/benchmarks/full/medical_qa_full.jsonl \
+  --benchmark medical_qa \
+  --agents "16,17,18,19,20" \
+  --runtime-dir runtime/configs/openrouter \
+  --n 60 \
+  --plan-k 3 \
+  --topL 3 \
+  --cot-count 3 \
+  --cold-n 20 \
+  --pretrain-n 20 \
+  --test-n 0 \
+  --seed 42 \
+  --plot-acc \
+  --print-each-step
+
+
+
+
+python3 /Users/caohuixi/symphony2.0/Pre-train.py \
+  --task-pool symphony-data-generator/data/benchmarks/full/bbh_full.jsonl \
+  --benchmark bbh \
+  --agents deepseek-v3 \
+  --runtime-dir runtime/configs/openrouter \
+  --n 90 \
+  --plan-k 3 \
+  --topL 3 \
+  --cot-count 3 \
+  --cold-n 30 \
+  --pretrain-n 30 \
+  --test-n 30 \
+  --seed 42 \
+  --plot-acc \
+  --save-selector ucb_state.json \
+  --print-each-step
+
+
+python3 /Users/caohuixi/symphony2.0/Pre-train.py \
+  --task-pool symphony-data-generator/data/benchmarks/full/bbh_full.jsonl \
+  --benchmark bbh \
+  --agents deepseek-v3 \
+  --runtime-dir runtime/configs/openrouter \
+  --n 90 \
+  --plan-k 1 \
+  --topL 1 \
+  --cot-count 1 \
+  --cold-n 30 \
+  --pretrain-n 30 \
+  --val-n 30 \
+  --seed 42 \
+  --plot-acc \
+  --save-selector ucb_state.json \
+  --print-each-step
+
+python3 /Users/caohuixi/symphony2.0/Pre-train.py \
+  --task-pool symphony-data-generator/data/benchmarks/full/gsm8k_full.jsonl \
+  --benchmark gsm8k \
+  --agents deepseek-v3 \
+  --runtime-dir runtime/configs/openrouter \
+  --n 90 \
+  --plan-k 3 \
+  --topL 3 \
+  --cot-count 3 \
+  --cold-n 15 \
+  --pretrain-n 15 \
+  --val-n 60 \
+  --seed 42 \
+  --plot-acc \
+  --save-selector ucb_state.json \
+  --print-each-step
+
+python3 /Users/caohuixi/symphony2.0/Pre-train.py \
+  --task-pool symphony-data-generator/data/benchmarks/full/gsm8k_full.jsonl \
+  --benchmark gsm8k \
+  --agents 18 \
+  --runtime-dir runtime/configs/openrouter \
+  --n 90 \
+  --plan-k 1 \
+  --topL 1 \
+  --cot-count 1 \
+  --cold-n 0 \
+  --pretrain-n 0 \
+  --val-n 60 \
+  --seed 42 \
+  --plot-acc \
+  --save-selector ucb_state.json \
+  --print-each-step
+
+
+
+
+  ```
+
+、、、
+
+
+、、、

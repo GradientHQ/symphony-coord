@@ -1,0 +1,11 @@
+phase,task_id,node_id,subtask_count,acc,ok,cum_acc
+cold_start,gsm8k_1309,agent-openrouter-openai-gpt-oss-120b-001,0,0,1,0.0
+pretrain,gsm8k_228,agent-openrouter-openai-gpt-oss-120b-002,1,1,1,1.0
+pretrain,gsm8k_51,agent-openrouter-openai-gpt-oss-120b-005,1,1,1,1.0
+pretrain,gsm8k_563,agent-openrouter-openai-gpt-oss-120b-003,1,1,1,1.0
+pretrain,gsm8k_501,agent-openrouter-openai-gpt-oss-120b-003,1,1,1,1.0
+pretrain,gsm8k_457,agent-openrouter-openai-gpt-oss-120b-003,1,1,1,1.0
+pretrain,gsm8k_285,agent-openrouter-openai-gpt-oss-120b-003,1,1,1,1.0
+pretrain,gsm8k_209,agent-openrouter-openai-gpt-oss-120b-003,1,1,1,1.0
+test,gsm8k_1116,agent-openrouter-openai-gpt-oss-120b-005,1,1,1,1.0
+test,gsm8k_178,agent-openrouter-openai-gpt-oss-120b-003,1,1,1,1.0

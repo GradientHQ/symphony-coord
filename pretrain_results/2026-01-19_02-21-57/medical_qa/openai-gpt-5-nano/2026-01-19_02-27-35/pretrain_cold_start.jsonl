@@ -1,0 +1,1 @@
+{"i": 1, "phase": "cold_start", "task_id": "medical_qa_228", "benchmark": "medical_qa", "difficulty_bin": "", "agent_ids": ["agent-openrouter-openai-gpt-5-nano-001"], "subtask_count": 0, "subtask_meta": {"mode": "no_subtask"}, "ok": 0, "pred_raw": "", "pred": "", "gold": "Chikungunya", "acc": 0, "latency_s": 11.904658794403076}

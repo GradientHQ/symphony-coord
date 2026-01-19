@@ -1,0 +1,9 @@
+{"phase": "pretrain", "i": 2, "task_id": "gsm8k_228", "ok": 1, "acc": 0, "ts": "2026-01-19T02:22:03"}
+{"phase": "pretrain", "i": 3, "task_id": "gsm8k_51", "ok": 1, "acc": 0, "ts": "2026-01-19T02:22:05"}
+{"phase": "pretrain", "i": 4, "task_id": "gsm8k_563", "ok": 1, "acc": 0, "ts": "2026-01-19T02:22:09"}
+{"phase": "pretrain", "i": 5, "task_id": "gsm8k_501", "ok": 1, "acc": 1, "ts": "2026-01-19T02:22:12"}
+{"phase": "pretrain", "i": 6, "task_id": "gsm8k_457", "ok": 1, "acc": 1, "ts": "2026-01-19T02:22:15"}
+{"phase": "pretrain", "i": 7, "task_id": "gsm8k_285", "ok": 1, "acc": 1, "ts": "2026-01-19T02:22:17"}
+{"phase": "pretrain", "i": 8, "task_id": "gsm8k_209", "ok": 1, "acc": 0, "ts": "2026-01-19T02:22:20"}
+{"phase": "test", "i": 9, "task_id": "gsm8k_1116", "ok": 1, "acc": 1, "ts": "2026-01-19T02:22:21"}
+{"phase": "test", "i": 10, "task_id": "gsm8k_178", "ok": 1, "acc": 0, "ts": "2026-01-19T02:22:25"}

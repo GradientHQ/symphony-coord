@@ -497,8 +497,23 @@ def generate_tasks(
     return tasks
 
 
+def _resolve_openrouter_config_path(config_dir: str, config_id: int) -> str:
+    filename = f"config_agent_openrouter_{config_id}.yaml"
+    candidates = [
+        os.path.join(config_dir, filename),
+        os.path.join(config_dir, "configs", "openrouter", filename),
+    ]
+    for p in candidates:
+        if os.path.exists(p):
+            return p
+    for root, _dirs, files in os.walk(config_dir):
+        if filename in files:
+            return os.path.join(root, filename)
+    return candidates[0]
+
+
 def load_openrouter_agents(
-    config_dir: str = "runtime", 
+    config_dir: str = "runtime/configs/openrouter", 
     agent_ids: List[int] = None, 
     project_root: str = None,
     exp1_config: Optional[Dict] = None
@@ -534,7 +549,7 @@ def load_openrouter_agents(
     wrappers = {}
     
     for config_id in agent_ids:
-        config_path = os.path.join(config_dir, f"config_agent_openrouter_{config_id}.yaml")
+        config_path = _resolve_openrouter_config_path(config_dir, config_id)
         if not os.path.exists(config_path):
             print(f"[WARN] Config file not found: {config_path}, skipping")
             continue
@@ -1354,7 +1369,12 @@ def main():
     ap.add_argument("--topL", type=int, default=3, help="Top-L candidates by static match_score (default: 3 from config)")
     ap.add_argument("--outdir", type=str, default="experiments/exp1_real_openrouter/results", help="output directory")
     ap.add_argument("--no-plots", action="store_true", help="do not generate png plots")
-    ap.add_argument("--config-dir", type=str, default="runtime", help="Config file directory for agents")
+    ap.add_argument(
+        "--config-dir",
+        type=str,
+        default="runtime/configs/openrouter",
+        help="Config file directory for agents",
+    )
     ap.add_argument("--agents", type=str, default="1,2,3,4,5,6,7", help="Comma-separated list of agent IDs to use (default: 1,2,3,4,5,6,7 - all 7 agents)")
     ap.add_argument("--config", type=str, default=None, help="Path to config_exp1.yaml (default: auto-detect)")
     ap.add_argument("--benchmarks", type=str, default="humaneval,gsm8k", 

@@ -7,21 +7,21 @@
 agents:
   # Agent letter mapping (config_id -> letter)
   # All other agent attributes (pricing, match_simple, match_hard, base_latency_ms, etc.)
-  # are now defined in runtime/config_agent_openrouter_*.yaml files
+  # are now defined in runtime/configs/openrouter/config_agent_openrouter_*.yaml files
   A:
-    config_id: 1  # Maps to runtime/config_agent_openrouter_1.yaml
+    config_id: 1  # Maps to runtime/configs/openrouter/config_agent_openrouter_1.yaml
   B:
-    config_id: 2  # Maps to runtime/config_agent_openrouter_2.yaml
+    config_id: 2  # Maps to runtime/configs/openrouter/config_agent_openrouter_2.yaml
   C:
-    config_id: 3  # Maps to runtime/config_agent_openrouter_3.yaml
+    config_id: 3  # Maps to runtime/configs/openrouter/config_agent_openrouter_3.yaml
   D:
-    config_id: 4  # Maps to runtime/config_agent_openrouter_4.yaml (SOP-Strong baseline)
+    config_id: 4  # Maps to runtime/configs/openrouter/config_agent_openrouter_4.yaml (SOP-Strong baseline)
   E:
-    config_id: 5  # Maps to runtime/config_agent_openrouter_5.yaml
+    config_id: 5  # Maps to runtime/configs/openrouter/config_agent_openrouter_5.yaml
   F:
-    config_id: 6  # Maps to runtime/config_agent_openrouter_6.yaml
+    config_id: 6  # Maps to runtime/configs/openrouter/config_agent_openrouter_6.yaml
   G:
-    config_id: 7  # Maps to runtime/config_agent_openrouter_7.yaml
+    config_id: 7  # Maps to runtime/configs/openrouter/config_agent_openrouter_7.yaml
 
 # ============================================================================
 # 2. 数据流与复现实验
@@ -92,8 +92,8 @@ decoding:
 cost:
   mode: "real_dollar"  # 或 "relative_weight"
   
-  # 价格信息现在统一在 runtime/config_agent_openrouter_*.yaml 中定义
-  # Pricing info is now unified in runtime/config_agent_openrouter_*.yaml files
+  # 价格信息现在统一在 runtime/configs/openrouter/config_agent_openrouter_*.yaml 中定义
+  # Pricing info is now unified in runtime/configs/openrouter/config_agent_openrouter_*.yaml files
   # - API models: price_in_per_1M, price_out_per_1M
   # - Local models: gpu_hour_price
   # - All models: cost_weight (fallback)

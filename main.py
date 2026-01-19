@@ -63,15 +63,17 @@ def load_openrouter_agents_from_dir(
     pattern_prefix: str = "config_agent_openrouter_",
 ) -> Dict[str, Agent]:
     """
-    Load agents from runtime/config_agent_openrouter_*.yaml
+    Load agents from runtime/configs/openrouter/config_agent_openrouter_*.yaml
     Returns: {node_id: Agent}
     """
     agents: Dict[str, Agent] = {}
 
     files: List[str] = []
-    for name in os.listdir(config_dir):
-        if name.startswith(pattern_prefix) and name.endswith(".yaml"):
-            files.append(os.path.join(config_dir, name))
+    if os.path.isdir(config_dir):
+        for root, _dirs, names in os.walk(config_dir):
+            for name in names:
+                if name.startswith(pattern_prefix) and name.endswith(".yaml"):
+                    files.append(os.path.join(root, name))
     files.sort()
 
     if not files:
@@ -218,7 +220,11 @@ def run_tasks_with_symphony(
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--agent-config-dir", type=str, default=os.path.join(_ROOT, "runtime"))
+    ap.add_argument(
+        "--agent-config-dir",
+        type=str,
+        default=os.path.join(_ROOT, "runtime", "configs", "openrouter"),
+    )
     ap.add_argument("--task-pool", type=str, required=True, help="jsonl task pool path")
     ap.add_argument("--n", type=int, default=50)
     ap.add_argument("--seed", type=int, default=1)

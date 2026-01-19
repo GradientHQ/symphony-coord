@@ -57,6 +57,21 @@ def test_code_support():
         traceback.print_exc()
         return False
 
+def _resolve_config_path(i: int) -> str:
+    filename = f"config_agent_openrouter_{i}.yaml"
+    candidates = [
+        os.path.join("runtime", "configs", "openrouter", filename),
+        os.path.join("runtime", filename),
+    ]
+    for p in candidates:
+        if os.path.exists(p):
+            return p
+    for root, _dirs, files in os.walk(os.path.join("runtime", "configs", "openrouter")):
+        if filename in files:
+            return os.path.join(root, filename)
+    return candidates[0]
+
+
 def test_config_files():
     """测试配置文件"""
     print("\n" + "=" * 60)
@@ -65,7 +80,7 @@ def test_config_files():
     
     config_files = []
     for i in range(1, 7):
-        config_path = f'runtime/config_agent_openrouter_{i}.yaml'
+        config_path = _resolve_config_path(i)
         if os.path.exists(config_path):
             config_files.append(config_path)
             print(f"✅ {config_path} exists")
@@ -83,7 +98,7 @@ def test_agent_creation():
     try:
         from agents.agent import Agent
         
-        config_path = 'runtime/config_agent_openrouter_1.yaml'
+        config_path = _resolve_config_path(1)
         if not os.path.exists(config_path):
             print(f"❌ 配置文件不存在: {config_path}")
             return False

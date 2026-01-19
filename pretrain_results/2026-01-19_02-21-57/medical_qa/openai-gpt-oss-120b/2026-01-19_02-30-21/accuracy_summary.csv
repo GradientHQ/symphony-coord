@@ -1,0 +1,11 @@
+phase,task_id,node_id,subtask_count,acc,ok,cum_acc
+cold_start,medical_qa_228,agent-openrouter-openai-gpt-oss-120b-001,0,0,1,0.0
+pretrain,medical_qa_51,agent-openrouter-openai-gpt-oss-120b-004,1,1,1,1.0
+pretrain,medical_qa_563,agent-openrouter-openai-gpt-oss-120b-004,1,1,1,1.0
+pretrain,medical_qa_501,agent-openrouter-openai-gpt-oss-120b-002,1,1,1,1.0
+pretrain,medical_qa_457,agent-openrouter-openai-gpt-oss-120b-004,1,0,0,0.75
+pretrain,medical_qa_285,agent-openrouter-openai-gpt-oss-120b-004,1,0,1,0.6
+pretrain,medical_qa_209,agent-openrouter-openai-gpt-oss-120b-002,1,1,1,0.6666666666666666
+pretrain,medical_qa_1116,agent-openrouter-openai-gpt-oss-120b-003,1,1,1,0.7142857142857143
+test,medical_qa_178,agent-openrouter-openai-gpt-oss-120b-003,1,1,1,1.0
+test,medical_qa_1209,agent-openrouter-openai-gpt-oss-120b-004,1,0,0,0.5

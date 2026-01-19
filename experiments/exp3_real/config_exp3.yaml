@@ -7,7 +7,7 @@ output:
   save_sampled_tasks: true
 
 agent_loading:
-  config_dir: "runtime"
+  config_dir: "runtime/configs/openrouter"
   file_pattern: "config_agent_openrouter_{id}.yaml"
   agent_ids: [1,2,3,4,5,6,7,8,9,10]
   letter_order: ["A","B","C","D","E","F","G","H","I","J"]

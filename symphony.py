@@ -72,6 +72,8 @@ class SymphonyOrchestrator:
             incorrect_penalty: float = 0.0,  # subtract when voted final mismatches gold
             # ---- Optional Symphony 1.0 planner ----
             plan_k: int = 1,
+            # ---- Use planner to decompose even when plan_k == 1 ----
+            use_planner_decompose: bool = False,
             # ---- Risk Guard ----
             enable_risk_guard: bool = False,
             # ---- Shared Blackboard / by-ref dispatch (Path-2 style, optional) ----
@@ -105,6 +107,7 @@ class SymphonyOrchestrator:
 
         # planner knobs (Symphony 1.0 style)
         self.plan_k = max(1, int(plan_k))
+        self.use_planner_decompose = bool(use_planner_decompose)
 
         # optional risk guard
         self.enable_risk_guard = bool(enable_risk_guard)
@@ -346,8 +349,9 @@ class SymphonyOrchestrator:
             return "[ERROR] No agents registered"
 
         # ---------- (A) Optional planner mode (Symphony 1.0-style, patched to 2.0 loop) ----------
-        if self.plan_k > 1:
-            plans = self._plan_chains_v1(task_text=task_text, ctx=ctx, m=self.plan_k)
+        if self.plan_k > 1 or self.use_planner_decompose:
+            m = self.plan_k if self.plan_k > 1 else 1
+            plans = self._plan_chains_v1(task_text=task_text, ctx=ctx, m=m)
             plan_answers: List[str] = []
             plan_weights: List[float] = []
             plan_traces: List[Dict[str, Any]] = []
@@ -1441,8 +1445,9 @@ Return STRICT JSON ONLY (no markdown), format:
 }
 
 Rules:
+- Decide the number of subtasks based on task complexity, but keep it between 3 and 8 inclusive.
 - No final answer, no intermediate results.
-- The LAST subtask should instruct producing the final answer in the required output format.
+- The LAST subtask must instruct producing the final answer in the required output format for the whole task.
 Problem:
 {user_input}
 """
@@ -1469,6 +1474,24 @@ Problem:
         planners = self._select_planning_agents(m)
         plans: List[Dict[str, Any]] = []
 
+        def _normalize_subtasks(subtasks_txt: List[str]) -> List[str]:
+            # Enforce 3-8 subtasks for planner mode
+            cleaned = [s for s in (subtasks_txt or []) if str(s).strip()]
+            if len(cleaned) > 8:
+                cleaned = cleaned[:8]
+            if len(cleaned) < 3:
+                padding = [
+                    "Identify key quantities and constraints in the problem.",
+                    "Solve the problem step-by-step with clear reasoning.",
+                    "Produce the final answer in the required output format for the whole task.",
+                ]
+                needed = 3 - len(cleaned)
+                cleaned = cleaned + padding[:needed]
+            # Ensure last step instructs final answer
+            if cleaned:
+                cleaned[-1] = "Produce the final answer in the required output format for the whole task."
+            return cleaned
+
         for p in planners:
             tmpl = self._PLANNER_PROMPT
             tmpl = tmpl.replace("{", "{{").replace("}", "}}").replace("{{user_input}}", "{user_input}")
@@ -1489,7 +1512,7 @@ Problem:
                 continue
 
             chain: List[Dict[str, Any]] = []
-            for i, q in enumerate(subtasks_txt, 1):
+            for i, q in enumerate(_normalize_subtasks(subtasks_txt), 1):
                 # ✅ P0-B: Use _mk_subtask() to ensure benchmark/difficulty_bin injection
                 st_base = self._mk_subtask(task_text, ctx or {}, i, "general-reasoning")
                 # Override input/description with planner's subtask text
@@ -1500,8 +1523,15 @@ Problem:
                 plans.append({"planner": getattr(p, "agent_id", ""), "chain": chain})
 
         if not plans:
-            plans = [{"planner": "fallback",
-                      "chain": [self._mk_subtask(task_text, ctx, i=1, requirement="general-reasoning")]}]
+            # Fallback: still respect 3-8 subtasks requirement
+            fallback_subtasks = _normalize_subtasks([])
+            chain: List[Dict[str, Any]] = []
+            for i, q in enumerate(fallback_subtasks, 1):
+                st_base = self._mk_subtask(task_text, ctx, i=i, requirement="general-reasoning")
+                st_base["input"] = q
+                st_base["description"] = q
+                chain.append(st_base)
+            plans = [{"planner": "fallback", "chain": chain}]
         return plans
 
     def _format_executor_input(self, base_task: str, q: str, prev: List[str]) -> str:
@@ -1634,6 +1664,7 @@ _global_orchestrator = SymphonyOrchestrator(
     correctness_bonus=0.0,  # 默认不启用 correctness reward（兼容旧 runner）
     incorrect_penalty=0.0,
     plan_k=1,  # 默认不启用 planner（BBH 先稳定评测）
+    use_planner_decompose=True,  # ✅ All tasks go through prompt-based decomposition
     enable_risk_guard=False,
 )
 
@@ -1646,6 +1677,7 @@ def init(
         linucb_alpha: Optional[float] = None,
         linucb_l2: Optional[float] = None,
         plan_k: Optional[int] = None,
+        use_planner_decompose: Optional[bool] = None,
         enable_risk_guard: Optional[bool] = None,
         # correctness reward knobs
         correctness_bonus: Optional[float] = None,
@@ -1688,6 +1720,8 @@ def init(
 
     if plan_k is not None:
         _global_orchestrator.plan_k = max(1, int(plan_k))
+    if use_planner_decompose is not None:
+        _global_orchestrator.use_planner_decompose = bool(use_planner_decompose)
 
     if enable_risk_guard is not None:
         _global_orchestrator.enable_risk_guard = bool(enable_risk_guard)
