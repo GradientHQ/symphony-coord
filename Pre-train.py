@@ -74,8 +74,18 @@ def _normalize_requirements(reqs: Optional[List[str]]) -> List[str]:
 	return cleaned if cleaned else ["analysis"]
 
 
-def build_task_obj(task: Dict[str, Any], i: int, requirements: Optional[List[str]] = None) -> Task:
+
+def build_task_obj(
+	task: Dict[str, Any],
+	i: int,
+	requirements: Optional[List[str]] = None,
+	solution_mode: Optional[str] = None,
+) -> Task:
 	task_text = task_to_text(task)
+	if solution_mode:
+		mode = str(solution_mode).strip()
+		if mode:
+			task_text = f"SOLUTION_MODE: {mode}\n\n" + task_text
 	bench = str(task.get("benchmark", "")).strip().lower()
 	if bench == "medical_qa":
 		raw = task.get("raw_data") or {}
@@ -93,7 +103,7 @@ def build_task_obj(task: Dict[str, Any], i: int, requirements: Optional[List[str
 			+ "\n\n[ANSWER_FORMAT]\n"
 			+ "ANSWER_FORMAT: MCQ_TOKEN\n"
 			+ "ALLOWED_TOKENS: A,B,C,D,E\n"
-			+ "Return ONLY the single token (e.g., A). No extra words."
+			+ "Return ONLY the single token (e.g., A). No extra words. If unsure, still output one token."
 		)
 		# Previous behavior (kept for reference):
 		# task_text = task_text  # free-form answer text (may cause acc=0 for medical_qa)
@@ -347,18 +357,42 @@ def _map_medical_qa_pred_to_token(task: Optional[Dict[str, Any]], pred: str) -> 
 	return best_key or ""
 
 
+def _map_medical_qa_gold_to_token(task: Optional[Dict[str, Any]], gold_text: str) -> str:
+	if not task:
+		return ""
+	raw = task.get("raw_data") or {}
+	answer_idx = str(raw.get("answer_idx") or "").strip().upper()
+	if answer_idx in {"A", "B", "C", "D", "E"}:
+		return answer_idx
+	# Fallback: map gold text to option token if possible
+	if not gold_text:
+		return ""
+	opts = raw.get("options") or {}
+	if not isinstance(opts, dict) or not opts:
+		return ""
+	norm_gold = _normalize_answer(gold_text)
+	if not norm_gold:
+		return ""
+	for k, v in opts.items():
+		key = str(k).strip().upper()
+		if key not in {"A", "B", "C", "D", "E"}:
+			continue
+		norm_opt = _normalize_answer(v)
+		if norm_opt and (norm_opt == norm_gold or norm_gold in norm_opt or norm_opt in norm_gold):
+			return key
+	return ""
+
+
 def is_correct(pred: str, gold_text: str, benchmark: str, task: Optional[Dict[str, Any]] = None) -> int:
 	bench = (benchmark or "").strip().lower()
 	if bench in {"humaneval", "human_eval"}:
 		return _eval_humaneval(pred, task)
 	if bench in {"medical_qa"}:
-		raw = (task or {}).get("raw_data") or {}
-		answer_idx = str(raw.get("answer_idx") or "").strip().upper()
-		if answer_idx in {"A", "B", "C", "D", "E"}:
-			pred_token = _extract_mcq_token(pred)
-			if pred_token:
-				return 1 if pred_token == answer_idx else 0
-		# Fallback: compare against answer text
+		pred_token = _extract_mcq_token(pred) or _map_medical_qa_pred_to_token(task, pred)
+		gold_token = _map_medical_qa_gold_to_token(task, gold_text)
+		if pred_token and gold_token:
+			return 1 if pred_token == gold_token else 0
+		# Lenient fallback: compare against answer text
 		return 1 if _normalize_answer(pred) and _normalize_answer(pred) == _normalize_answer(gold_text) else 0
 	if bench in {"gsm8k", "gsm"}:
 		pnum = _extract_last_number(pred)
@@ -596,6 +630,43 @@ def _append_jsonl(path: str, record: Dict[str, Any]) -> None:
 		f.write(json.dumps(record, ensure_ascii=False) + "\n")
 
 
+def _to_list(v: Any) -> Any:
+	if hasattr(v, "tolist"):
+		try:
+			return v.tolist()
+		except Exception:
+			pass
+	if isinstance(v, (list, tuple)):
+		return [ _to_list(x) for x in v ]
+	return v
+
+
+def _append_ucb_trace(outdir: str, record: Dict[str, Any]) -> None:
+	path = os.path.join(outdir, "ucb_trace.jsonl")
+	_append_jsonl(path, record)
+
+
+def _write_ucb_trace_doc(outdir: str) -> None:
+	path = os.path.join(outdir, "ucb_trace.md")
+	if os.path.exists(path):
+		return
+	os.makedirs(outdir, exist_ok=True)
+	with open(path, "w", encoding="utf-8") as f:
+		f.write(
+			"# UCB 参数变化记录\n\n"
+			"本文件对应 pretrain 阶段的 UCB 参数轨迹，逐步追加到 ucb_trace.jsonl。\n\n"
+			"字段说明：\n"
+			"- i: 全局 step\n"
+			"- phase: 阶段（pretrain）\n"
+			"- t: UCB 迭代步数\n"
+			"- alpha/l2/delta/S/d: UCB 超参数\n"
+			"- A_inv: A 的逆矩阵（列表）\n"
+			"- b: 向量 b\n"
+			"- theta_hat: 估计参数向量\n"
+			"- beta: 置信半径项\n"
+		)
+
+
 def _write_progress_state(path: str, record: Dict[str, Any]) -> None:
 	os.makedirs(os.path.dirname(path), exist_ok=True)
 	with open(path, "w", encoding="utf-8") as f:
@@ -620,11 +691,14 @@ def run_phase(
 	print_each_step: bool,
 	agents: Optional[List[Any]] = None,  # ✅ For cold_start round-robin
 	requirements_override: Optional[List[str]] = None,
+	solution_mode: Optional[str] = None,
 ) -> Tuple[int, List[Dict[str, Any]]]:
 	logs: List[Dict[str, Any]] = []
 	os.makedirs(outdir, exist_ok=True)
 	progress_path = os.path.join(outdir, "progress.jsonl")
 	progress_state_path = os.path.join(outdir, "progress_state.json")
+	if phase == "pretrain":
+		_write_ucb_trace_doc(outdir)
 	
 	# ✅ Cold_start mode: round-robin agent assignment (each task -> one agent)
 	# If phase is "cold_start" and agents provided, use round-robin
@@ -632,7 +706,7 @@ def run_phase(
 	
 	for i, task in enumerate(tasks, start=start_index):
 		t0 = time.time()
-		task_obj = build_task_obj(task, i=i, requirements=requirements_override)
+		task_obj = build_task_obj(task, i=i, requirements=requirements_override, solution_mode=solution_mode)
 		
 		# ✅ Cold_start: inject task_index into context for round-robin selection
 		if use_cold_start_round_robin:
@@ -720,6 +794,10 @@ def run_phase(
 					reqs = list(getattr(task_obj, "requirements", []) or ["analysis"])
 					req0 = str(reqs[0]) if reqs else "analysis"
 					raw_prompt = task_to_text(task)
+					if solution_mode:
+						mode = str(solution_mode).strip()
+						if mode:
+							raw_prompt = f"SOLUTION_MODE: {mode}\n\n" + raw_prompt
 					legacy = {
 						"subtask_id": 1,
 						"steps": {"1": [raw_prompt, req0]},
@@ -748,6 +826,19 @@ def run_phase(
 			if ok == 1 and not pred:
 				pred = final_text.strip() if final_text else ""
 			gold_text = extract_gold_text(task)
+			medical_extra: Dict[str, Any] = {}
+			if str(task.get("benchmark", "")).strip().lower() == "medical_qa":
+				raw = task.get("raw_data") or {}
+				answer_idx = str(raw.get("answer_idx") or "").strip().upper()
+				options = raw.get("options") if isinstance(raw.get("options"), dict) else None
+				pred_token = _extract_mcq_token(pred) or _map_medical_qa_pred_to_token(task, pred)
+				gold_token = _map_medical_qa_gold_to_token(task, gold_text)
+				medical_extra = {
+					"answer_idx": answer_idx,
+					"pred_token": pred_token,
+					"gold_token": gold_token,
+					"options": options,
+				}
 			acc = is_correct(pred, gold_text, str(task.get("benchmark", "")), task=task)
 			logs.append(
 				{
@@ -763,6 +854,7 @@ def run_phase(
 					"pred_raw": pred_raw,
 					"pred": pred,
 					"gold": gold_text,
+					"medical": medical_extra,
 					"acc": acc,
 					"latency_s": dt,
 				}
@@ -790,6 +882,18 @@ def run_phase(
 		if trace is None:
 			dt = time.time() - t0
 			gold_text = extract_gold_text(task)
+			medical_extra: Dict[str, Any] = {}
+			if str(task.get("benchmark", "")).strip().lower() == "medical_qa":
+				raw = task.get("raw_data") or {}
+				answer_idx = str(raw.get("answer_idx") or "").strip().upper()
+				options = raw.get("options") if isinstance(raw.get("options"), dict) else None
+				gold_token = _map_medical_qa_gold_to_token(task, gold_text)
+				medical_extra = {
+					"answer_idx": answer_idx,
+					"pred_token": "",
+					"gold_token": gold_token,
+					"options": options,
+				}
 			logs.append(
 				{
 					"i": i,
@@ -801,6 +905,7 @@ def run_phase(
 					"ok": 0,
 					"pred": "",
 					"gold": gold_text,
+					"medical": medical_extra,
 					"acc": 0,
 					"latency_s": dt,
 					"error": err_msg,
@@ -865,6 +970,19 @@ def run_phase(
 			# If extraction failed but text is valid, use stripped raw text as fallback
 			pred = final_text.strip() if final_text else ""
 		gold_text = extract_gold_text(task)
+		medical_extra: Dict[str, Any] = {}
+		if str(task.get("benchmark", "")).strip().lower() == "medical_qa":
+			raw = task.get("raw_data") or {}
+			answer_idx = str(raw.get("answer_idx") or "").strip().upper()
+			options = raw.get("options") if isinstance(raw.get("options"), dict) else None
+			pred_token = _extract_mcq_token(pred) or _map_medical_qa_pred_to_token(task, pred)
+			gold_token = _map_medical_qa_gold_to_token(task, gold_text)
+			medical_extra = {
+				"answer_idx": answer_idx,
+				"pred_token": pred_token,
+				"gold_token": gold_token,
+				"options": options,
+			}
 		acc = is_correct(pred, gold_text, str(task.get("benchmark", "")), task=task)
 		logs.append(
 			{
@@ -880,6 +998,7 @@ def run_phase(
 				"pred_raw": pred_raw,  # ✅ Raw output for debugging
 				"pred": pred,  # ✅ Clean answer for evaluation (used in acc calculation)
 				"gold": gold_text,
+				"medical": medical_extra,
 				"acc": acc,
 				"latency_s": dt,
 			}
@@ -895,6 +1014,31 @@ def run_phase(
 		}
 		_append_jsonl(progress_path, prog)
 		_write_progress_state(progress_state_path, prog)
+		# ✅ UCB trace (pretrain only)
+		if phase == "pretrain":
+			selector = getattr(symphony_module, "_global_orchestrator", None)
+			selector = getattr(selector, "selector", None)
+			if selector is not None:
+				try:
+					rec = {
+						"i": i,
+						"phase": phase,
+						"t": int(getattr(selector, "t", 0)),
+						"d": int(getattr(selector, "d", 0)),
+						"alpha": float(getattr(selector, "alpha", 0.0)),
+						"l2": float(getattr(selector, "l2", 0.0)),
+						"delta": float(getattr(selector, "delta", 0.0)),
+						"S": float(getattr(selector, "S", 0.0)),
+						"A_inv": _to_list(getattr(selector, "A_inv", [])),
+						"b": _to_list(getattr(selector, "b", [])),
+						"theta_hat": _to_list(getattr(selector, "theta_hat", lambda: [])()),
+						"beta": float(getattr(selector, "beta", lambda: 0.0)()),
+						"ts": datetime.datetime.now().isoformat(timespec="seconds"),
+					}
+					_append_ucb_trace(outdir, rec)
+				except Exception as e:
+					if verbose:
+						print(f"[WARN] Failed to record UCB trace: {e}")
 		if print_each_step:
 			first_agent = agent_ids[0] if agent_ids else "NA"
 			print(f"[{phase}] step={i} agent={first_agent} ok={ok} acc={acc} latency={dt:.2f}s")
@@ -1018,6 +1162,20 @@ def write_accuracy_summary(all_logs: List[Dict[str, Any]], outdir: str) -> None:
 		writer.writerows(rows)
 
 
+def _print_final_test_acc(all_logs: List[Dict[str, Any]]) -> None:
+	if not all_logs:
+		print("[ACC] test: N=0 acc=0.0000")
+		return
+	test_logs = [r for r in all_logs if str(r.get("phase")) == "test"]
+	if not test_logs:
+		print("[ACC] test: N=0 acc=0.0000")
+		return
+	total = len(test_logs)
+	ok = sum(int(r.get("acc", r.get("ok", 0))) for r in test_logs)
+	acc = ok / max(1, total)
+	print(f"[ACC] test: N={total} acc={acc:.4f}")
+
+
 def main() -> None:
 	ap = argparse.ArgumentParser()
 	ap.add_argument("--task-pool", type=str, required=True, help="Path to JSONL task pool")
@@ -1040,12 +1198,15 @@ def main() -> None:
 	                help="Comma-separated agent IDs or folder names under runtime-dir (default: 11,12,13,14,15)")
 	ap.add_argument("--requirements", type=str, default="",
 	                help="Comma-separated requirements override (default: use task field or ['analysis'])")
+	ap.add_argument("--solution-mode", type=str, default="",
+	                help="Inject SOLUTION_MODE into task prompt (e.g., Direct, ReAct, Synapse, Self-Consistency, Self-Refinement)")
 	ap.add_argument("--outdir", type=str, default="pretrain_results")
 	ap.add_argument("--resume-dir", type=str, default=None, help="Resume from existing outdir (uses progress_state.json)")
 	ap.add_argument("--runtime-dir", type=str, default="runtime")
 	ap.add_argument("--save-selector", type=str, default=None, help="Save UCB state after pretrain")
 	ap.add_argument("--load-selector", type=str, default=None, help="Load UCB state and run test only")
 	ap.add_argument("--plot-acc", action="store_true", help="Plot cumulative ACC curve")
+	ap.add_argument("--print-cold-summary", action="store_true", help="Print cold_start summary accuracy")
 	ap.add_argument("--print-each-step", action="store_true", help="Print agent per step")
 	ap.add_argument("--verbose", action="store_true")
 	args = ap.parse_args()
@@ -1103,26 +1264,33 @@ def main() -> None:
 	req_override: Optional[List[str]] = None
 	if args.requirements:
 		req_override = [r.strip() for r in args.requirements.split(",") if r.strip()]
+	solution_mode = args.solution_mode.strip() if args.solution_mode else None
 
 	if args.load_selector:
 		selector = load_selector(args.load_selector)
 		symphony_module._global_orchestrator.selector = FrozenSelector(selector)
 		symphony_module._global_orchestrator.use_dynamic = True
 		if test_tasks:
-			idx, logs = run_phase("test", test_tasks, idx, args.cot_count, args.outdir, args.verbose, args.print_each_step, requirements_override=req_override)
+			idx, logs = run_phase("test", test_tasks, idx, args.cot_count, args.outdir, args.verbose, args.print_each_step, requirements_override=req_override, solution_mode=solution_mode)
 			all_logs.extend(logs)
 	else:
 		# cold start: static Top-L (no planner, no multi-CoT)
 		symphony_module.init(
 			use_dynamic=False,
-			topL=int(args.topL),
+			topL=1,  # ✅ 冷启动不使用 Top-L
 			# plan_k=int(args.plan_k),
-			plan_k=1,  # ✅ B: cold_start 不启用 planner
+			plan_k=1,  # ✅ 冷启动不使用 planner
+			use_planner_decompose=False,
 		)
 		if cold_tasks:
 			# idx, logs = run_phase("cold_start", cold_tasks, idx, args.cot_count, args.outdir, args.verbose, args.print_each_step, agents=agents) 
-			idx, logs = run_phase("cold_start", cold_tasks, idx, 1, args.outdir, args.verbose, args.print_each_step, agents=agents, requirements_override=req_override)  # ✅ C: cold_start 强制 cot_count=1
+			idx, logs = run_phase("cold_start", cold_tasks, idx, 1, args.outdir, args.verbose, args.print_each_step, agents=agents, requirements_override=req_override, solution_mode=solution_mode)  # ✅ C: cold_start 强制 cot_count=1
 			all_logs.extend(logs)
+			if args.print_cold_summary:
+				cold_acc_sum = sum(1 for r in logs if int(r.get("acc", 0)) == 1)
+				cold_total = len(logs)
+				cold_acc = (cold_acc_sum / cold_total) if cold_total else 0.0
+				print(f"[cold_start] summary acc={cold_acc:.4f} ({cold_acc_sum}/{cold_total})")
 
 		# pretrain: Top-L + UCB (updates enabled)
 		symphony_module.init(
@@ -1134,7 +1302,7 @@ def main() -> None:
 			use_planner_decompose=bool(args.planner_decompose),
 		)
 		if pretrain_tasks:
-			idx, logs = run_phase("pretrain", pretrain_tasks, idx, args.cot_count, args.outdir, args.verbose, args.print_each_step, requirements_override=req_override)
+			idx, logs = run_phase("pretrain", pretrain_tasks, idx, args.cot_count, args.outdir, args.verbose, args.print_each_step, requirements_override=req_override, solution_mode=solution_mode)
 			all_logs.extend(logs)
 
 		selector = symphony_module._global_orchestrator.selector
@@ -1154,12 +1322,13 @@ def main() -> None:
 		symphony_module._global_orchestrator.use_dynamic = True
 
 		if test_tasks:
-			idx, logs = run_phase("test", test_tasks, idx, args.cot_count, args.outdir, args.verbose, args.print_each_step, requirements_override=req_override)
+			idx, logs = run_phase("test", test_tasks, idx, args.cot_count, args.outdir, args.verbose, args.print_each_step, requirements_override=req_override, solution_mode=solution_mode)
 			all_logs.extend(logs)
 
 	if args.plot_acc:
 		plot_acc_curves_by_phase(all_logs, args.outdir)
 	write_accuracy_summary(all_logs, args.outdir)
+	_print_final_test_acc(all_logs)
 
 	print(f"[OK] Pre-train done. outdir={args.outdir}")
 

@@ -1,9 +1,0 @@
-{"phase": "pretrain", "i": 2, "task_id": "medical_qa_51", "ok": 0, "acc": 0, "ts": "2026-01-19T02:28:14"}
-{"phase": "pretrain", "i": 3, "task_id": "medical_qa_563", "ok": 0, "acc": 0, "ts": "2026-01-19T02:28:30"}
-{"phase": "pretrain", "i": 4, "task_id": "medical_qa_501", "ok": 1, "acc": 1, "ts": "2026-01-19T02:28:41"}
-{"phase": "pretrain", "i": 5, "task_id": "medical_qa_457", "ok": 0, "acc": 0, "ts": "2026-01-19T02:29:00"}
-{"phase": "pretrain", "i": 6, "task_id": "medical_qa_285", "ok": 0, "acc": 0, "ts": "2026-01-19T02:29:16"}
-{"phase": "pretrain", "i": 7, "task_id": "medical_qa_209", "ok": 1, "acc": 1, "ts": "2026-01-19T02:29:23"}
-{"phase": "pretrain", "i": 8, "task_id": "medical_qa_1116", "ok": 1, "acc": 1, "ts": "2026-01-19T02:29:33"}
-{"phase": "test", "i": 9, "task_id": "medical_qa_178", "ok": 0, "acc": 0, "ts": "2026-01-19T02:29:54"}
-{"phase": "test", "i": 10, "task_id": "medical_qa_1209", "ok": 0, "acc": 0, "ts": "2026-01-19T02:30:06"}

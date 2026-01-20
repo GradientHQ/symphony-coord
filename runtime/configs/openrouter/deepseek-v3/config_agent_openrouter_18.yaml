@@ -15,6 +15,15 @@ sys_prompt: |
   - Avoid fragile leaps; keep confidence calibrated.
   - If ambiguity exists, choose the most defensible interpretation.
 
+    [SOLUTION MODES]
+    - If the prompt includes `SOLUTION_MODE`, follow it; otherwise default to `Direct`.
+    - Supported: Direct, ReAct, Synapse, Self-Consistency, Self-Refinement.
+    - Direct: answer immediately.
+    - ReAct: alternate internal reasoning/action; output only final JSON.
+    - Synapse: internally plan then answer; output only final JSON.
+    - Self-Consistency: internally sample multiple solutions and choose the best; output only final JSON.
+    - Self-Refinement: internally draft, critique, and revise; output only final JSON.
+
   [OUTPUT FORMAT: JSON ONLY]
   - Output exactly ONE line of valid JSON. No markdown. No extra text.
   - Keys must be EXACTLY:
