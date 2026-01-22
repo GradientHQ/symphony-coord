@@ -171,11 +171,15 @@ class OpenAICompatModel:
                 - prompt_tokens: int
                 - completion_tokens: int
                 - total_tokens: int
+                - response_raw: dict (optional)
+                - finish_reason: str (optional)
         """
         messages = []
         if self.system_prompt:
             messages.append({"role": "system", "content": self.system_prompt})
         messages.append({"role": "user", "content": text})
+        max_tokens = int(max_tokens)
+        max_tokens = max(1, min(max_tokens, 2048))
         payload = {
             "model": self.model,
             "messages": messages,
@@ -183,6 +187,8 @@ class OpenAICompatModel:
             "temperature": temperature,
             "top_p": top_p,
         }
+        if isinstance(self.model, str) and "gpt-5-nano" in self.model:
+            payload["reasoning"] = {"effort": "minimal"}
         
         try:
             r = requests.post(self._url_chat, headers=self._headers, data=json.dumps(payload), timeout=180)
@@ -227,9 +233,10 @@ class OpenAICompatModel:
                     error_data = r.json()
                 except:
                     pass
-                # 400/401/403 are typically logic errors (bad request, auth), don't allow fallback
-                # 429 (rate limit) might allow fallback, but treat as logic_error for now
-                error_type = "logic_error" if r.status_code < 500 else "server_500"
+                if r.status_code in (408, 409, 429):
+                    error_type = "transient"
+                else:
+                    error_type = "logic_error" if r.status_code < 500 else "server_500"
                 return {
                     "success": False,
                     "error_type": error_type,
@@ -243,8 +250,47 @@ class OpenAICompatModel:
             # Success: parse response
             data = r.json()
             usage = data.get("usage", {})
-            response_text = (data.get("choices") or [{}])[0].get("message", {}).get("content", "").strip()
-            
+            choice0 = (data.get("choices") or [{}])[0]
+            response_text = (choice0.get("message") or {}).get("content", "").strip()
+            finish_reason = choice0.get("finish_reason")
+            if not response_text:
+                if finish_reason in {"length", "max_output_tokens"}:
+                    retry_payload = dict(payload)
+                    retry_payload["max_tokens"] = 16
+                    retry_payload["temperature"] = 0.0
+                    retry_payload["top_p"] = 1.0
+                    retry_payload["reasoning"] = {"effort": "none"}
+                    rr = requests.post(self._url_chat, headers=self._headers, data=json.dumps(retry_payload), timeout=180)
+                    if rr.ok:
+                        d2 = rr.json()
+                        c2 = (d2.get("choices") or [{}])[0]
+                        rt = (c2.get("message") or {}).get("content", "") or ""
+                        rt = rt.strip()
+                        if rt:
+                            usage2 = d2.get("usage", {})
+                            return {
+                                "success": True,
+                                "response": rt,
+                                "error_type": None,
+                                "error_message": None,
+                                "prompt_tokens": usage2.get("prompt_tokens", 0),
+                                "completion_tokens": usage2.get("completion_tokens", 0),
+                                "total_tokens": usage2.get("total_tokens", 0),
+                                "response_raw": d2,
+                                "finish_reason": (c2.get("finish_reason")),
+                            }
+                return {
+                    "success": False,
+                    "error_type": "empty_response",
+                    "error_message": "Empty content",
+                    "response": "",
+                    "prompt_tokens": usage.get("prompt_tokens", 0),
+                    "completion_tokens": usage.get("completion_tokens", 0),
+                    "total_tokens": usage.get("total_tokens", 0),
+                    "response_raw": data,
+                    "finish_reason": finish_reason,
+                }
+
             return {
                 "success": True,
                 "response": response_text,
@@ -253,6 +299,8 @@ class OpenAICompatModel:
                 "prompt_tokens": usage.get("prompt_tokens", 0),
                 "completion_tokens": usage.get("completion_tokens", 0),
                 "total_tokens": usage.get("total_tokens", 0),
+                "response_raw": data,
+                "finish_reason": finish_reason,
             }
             
         except requests.exceptions.Timeout:
@@ -267,10 +315,10 @@ class OpenAICompatModel:
                 "total_tokens": 0,
             }
         except requests.exceptions.RequestException as e:
-            # Network errors - treat as logic_error (don't allow fallback)
+            # Network errors - transient
             return {
                 "success": False,
-                "error_type": "logic_error",
+                "error_type": "transient",
                 "error_message": str(e),
                 "response": "",
                 "prompt_tokens": 0,
@@ -330,6 +378,7 @@ class Agent:
         self.system_prompt = config.get("sys_prompt", "You are a helpful AI assistant.")
         self.capabilities = config.get("capabilities", [])
         self._linucb_alpha = float(config.get("linucb_alpha", 1.0))
+        self._latency_penalty_coef = float(config.get("latency_penalty_coef", 0.2))
 
         # ✅ shared blackboard switch + bb instance
         self.use_shared_bb = bool(config.get("use_shared_bb", False))
@@ -417,6 +466,7 @@ class Agent:
         self.system_prompt = system_prompt or "You are a helpful AI assistant."
         self.capabilities = capabilities or []
         self._linucb_alpha = float(config.get("linucb_alpha", 1.0))
+        self._latency_penalty_coef = float(config.get("latency_penalty_coef", 0.2))
 
         self.max_tokens = int(config.get("max_tokens", 512))
         self.temperature = float(config.get("temperature", 0.2))
@@ -477,18 +527,68 @@ class Agent:
         else:
             prompt = self._build_task_description(instruction, previous_context)
 
+        # Force a concise final answer in content (avoid reasoning-only output)
+        prompt = (
+            f"{prompt}\n\n"
+            "OUTPUT REQUIREMENTS:\n"
+            "1) Output ONLY the final answer on a single line.\n"
+            "2) No reasoning, no explanation, no extra words.\n"
+        )
+
         if self.base_model is None:
             raise RuntimeError(f"Agent {self.agent_id} base_model is None (SIMULATED). Check model loading.")
 
         try:
-            result = self.base_model.generate(
+            meta = self.base_model.generate_with_metadata(
                 prompt,
                 max_tokens=self.max_tokens,
                 temperature=self.temperature,
                 top_p=self.top_p,
             )
-        except TypeError:
-            result = self.base_model.generate(prompt)
+            task_id = str(task.get("task_id", ""))
+            step_id = str(task.get("subtask_id", ""))
+            print(
+                f"[CALL] task_id={task_id} step={step_id} agent={self.agent_id} "
+                f"success={meta.get('success')} type={meta.get('error_type')} "
+                f"msg={meta.get('error_message')}"
+            )
+            if not meta.get("success", False):
+                error_type = meta.get("error_type", "unknown_error")
+                error_msg = meta.get("error_message", "API call failed")
+                raw = meta.get("response_raw")
+                if raw is not None:
+                    print(f"[AGENT_RAW] {self.agent_id} {error_type}: {raw}")
+                if error_type == "empty_response" and meta.get("finish_reason") in {"length", "max_output_tokens"}:
+                    # Retry once with stricter prompt and small output budget
+                    retry_prompt = (
+                        f"{prompt}\n"
+                        "FINAL ANSWER ONLY. ONE TOKEN OR ONE SHORT PHRASE."
+                    )
+                    retry = self.base_model.generate_with_metadata(
+                        retry_prompt,
+                        max_tokens=min(32, int(self.max_tokens) if self.max_tokens else 32),
+                        temperature=0.0,
+                        top_p=1.0,
+                    )
+                    if retry.get("success", False):
+                        result = retry.get("response", "")
+                    else:
+                        result = f"[AGENT_ERROR] {error_type}: {error_msg}"
+                else:
+                    result = f"[AGENT_ERROR] {error_type}: {error_msg}"
+            else:
+                result = meta.get("response", "")
+        except AttributeError:
+            # Fallback for models without generate_with_metadata
+            try:
+                result = self.base_model.generate(
+                    prompt,
+                    max_tokens=self.max_tokens,
+                    temperature=self.temperature,
+                    top_p=self.top_p,
+                )
+            except TypeError:
+                result = self.base_model.generate(prompt)
 
         task["previous_results"].append(f"{instruction} Answer: {result}")
 
@@ -511,8 +611,19 @@ class Agent:
             t = task
 
         steps = t.get("steps", {}) or {}
+        if isinstance(steps, list):
+            converted = {}
+            for idx, st in enumerate(steps, start=1):
+                if not isinstance(st, dict):
+                    continue
+                step_id = str(st.get("step_id") or idx)
+                prompt = st.get("prompt") or st.get("instruction") or st.get("task") or ""
+                requirement = st.get("requirement") or st.get("req") or "analysis"
+                converted[step_id] = [prompt, requirement]
+            steps = converted
+        t["steps"] = steps
         if not isinstance(steps, dict) or len(steps) == 0:
-            return ""
+            return "[AGENT_ERROR] empty_steps"
 
         try:
             t["subtask_id"] = int(t.get("subtask_id", 1))
@@ -549,9 +660,7 @@ class Agent:
             f"{self.system_prompt}\n"
             f"Context: {context}\n"
             f"Task: {instruction}\n"
-            f"You may think step-by-step, but output ONLY the final answer.\n"
-            f"The LAST line must start with exactly: Final answer:\n"
-            f"Final answer:"
+            f"Output ONLY the final answer.\n"
         )
 
     # ---------------- beacon handling (executor side) ----------------
@@ -569,21 +678,30 @@ class Agent:
         }
         estimate_cost = float(self._latency_ema_ms) / 1000.0
 
-        response = BeaconResponse(
-            responder_id=self.agent_id,
-            task_id=beacon["task_id"],
-            match_score=match_score,
-            estimate_cost=estimate_cost,
-            available=available,
-            dynamic_state=dynamic_state,
-        )
-
-        if hasattr(response, "to_dict"):
-            payload = response.to_dict()
-        elif isinstance(response, dict):
-            payload = response
+        if BeaconResponse is None:
+            payload = {
+                "responder_id": self.agent_id,
+                "task_id": beacon["task_id"],
+                "match_score": match_score,
+                "estimate_cost": estimate_cost,
+                "available": available,
+                "dynamic_state": dynamic_state,
+            }
         else:
-            payload = {"_raw": str(response)}
+            response = BeaconResponse(
+                responder_id=self.agent_id,
+                task_id=beacon["task_id"],
+                match_score=match_score,
+                estimate_cost=estimate_cost,
+                available=available,
+                dynamic_state=dynamic_state,
+            )
+            if hasattr(response, "to_dict"):
+                payload = response.to_dict()
+            elif isinstance(response, dict):
+                payload = response
+            else:
+                payload = {"_raw": str(response)}
 
         # ✅ shared: write to BB, do not require isep_client
         if bool(getattr(self, "use_shared_bb", False)) and getattr(self, "bb", None) is not None:
@@ -652,6 +770,20 @@ class Agent:
             steps = getattr(task, "steps")
         except Exception:
             steps = task.get("steps", {})
+
+        if isinstance(steps, list):
+            converted = {}
+            for idx, st in enumerate(steps, start=1):
+                if not isinstance(st, dict):
+                    continue
+                step_id = str(st.get("step_id") or idx)
+                prompt = st.get("prompt") or st.get("instruction") or st.get("task") or ""
+                requirement = st.get("requirement") or st.get("req") or "general-reasoning"
+                converted[step_id] = [prompt, requirement]
+            steps = converted
+
+        if not isinstance(steps, dict) or not steps:
+            raise RuntimeError("empty_steps in assign_task")
 
         requirement = steps[str(sub_id)][1]
 
@@ -723,10 +855,17 @@ class Agent:
         latency_ms = (time.time() - t0) * 1000.0
 
         text = str(result.get("result", ""))
-        ok = (text.strip() != "") and (not text.startswith("[ERROR]")) and (not text.startswith("[AGENT_ERROR]"))
+        text_strip = text.strip()
+        ok = (
+            text_strip != ""
+            and (not text_strip.startswith("[ERROR]"))
+            and (not text_strip.startswith("[AGENT_ERROR]"))
+            and any(ch.isalnum() for ch in text_strip)
+        )
 
         lat_norm = min(1.0, latency_ms / 2000.0)
-        reward = (1.0 if ok else 0.0) - 0.2 * (lat_norm ** 0.5)
+        penalty = float(getattr(self, "_latency_penalty_coef", 0.2))
+        reward = (1.0 if ok else 0.0) - penalty * (lat_norm ** 0.5)
         reward = max(0.0, min(1.0, reward))
 
         self._selector.update(x, reward)
@@ -760,9 +899,22 @@ class Agent:
                 ctx = task_obj.get("context", {}) or {}
             except Exception:
                 ctx = getattr(task_obj, "context", {}) or {}
-            dispatch_id = str(ctx.get("dispatch_id", "") or (task_obj.get("task_id", "") if hasattr(task_obj, "get") else ""))
+            dispatch_id = str(
+                ctx.get("dispatch_id", "")
+                or (task_obj.get("task_id", "") if hasattr(task_obj, "get") else "")
+                or getattr(task_obj, "task_id", "")
+            )
 
-            done_text = self.execute_task(task_obj)
+            self._inflight = int(getattr(self, "_inflight", 0)) + 1
+            t_start = time.time()
+            try:
+                done_text = self.execute_task(task_obj)
+            finally:
+                elapsed_ms = (time.time() - t_start) * 1000.0
+                beta = float(getattr(self, "_latency_beta", 0.2))
+                cur = float(getattr(self, "_latency_ema_ms", 500.0))
+                self._latency_ema_ms = (1 - beta) * cur + beta * float(elapsed_ms)
+                self._inflight = max(0, int(getattr(self, "_inflight", 0)) - 1)
 
             # ✅ shared: write to BB; legacy: also send over network
             self.isep_client.submit_result(

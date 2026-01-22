@@ -1,0 +1,10 @@
+phase,task_type,acc,n,macro_acc,k
+cold_start,date_understanding,0.13,100,,
+cold_start,navigate,0.57,100,,
+cold_start,__macro__,,200,0.35,2
+pretrain,boolean_expressions,0.79,100,,
+pretrain,movie_recommendation,0.46,100,,
+pretrain,sports_understanding,0.75,100,,
+pretrain,__macro__,,300,0.6666666666666666,3
+test,web_of_lies,0.45,100,,
+test,__macro__,,100,0.45,1
