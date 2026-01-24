@@ -158,9 +158,17 @@ class OpenAICompatModel:
         error_msg = result.get("error_message", "API call failed")
         raise RuntimeError(f"{error_type}: {error_msg}")
     
-    def generate_with_metadata(self, text: str, max_tokens: int = 10124, temperature: float = 0.2, top_p: float = 0.9) -> Dict[str, Any]:
+    def generate_with_metadata(self, text: str, max_tokens: int = 10124, temperature: float = 0.2, top_p: float = 0.9, 
+                               require_json: bool = False) -> Dict[str, Any]:
         """
         Generate text using API with structured error handling.
+        
+        Args:
+            text: Input prompt
+            max_tokens: Maximum tokens to generate
+            temperature: Sampling temperature
+            top_p: Top-p sampling parameter
+            require_json: If True, force JSON output format (for GSM8K, etc.)
         
         Returns:
             Dict with keys:
@@ -179,7 +187,19 @@ class OpenAICompatModel:
             messages.append({"role": "system", "content": self.system_prompt})
         messages.append({"role": "user", "content": text})
         max_tokens = int(max_tokens)
-        max_tokens = max(1, min(max_tokens, 2048))
+        # 对于需要 JSON 输出的任务，确保有足够的 token（至少 256）
+        if require_json:
+            max_tokens = max(256, min(max_tokens, 2048))
+        else:
+            max_tokens = max(1, min(max_tokens, 2048))
+        
+        # 检测是否是 OpenRouter 的 reasoning model
+        # OpenRouter 的 reasoning models 需要特殊配置来避免 reasoning 占用所有输出 token
+        is_openrouter_reasoning = (
+            isinstance(self.model, str) and 
+            ("openrouter" in self.api_base.lower() or "openrouter.ai" in self.api_base.lower())
+        )
+        
         payload = {
             "model": self.model,
             "messages": messages,
@@ -187,8 +207,18 @@ class OpenAICompatModel:
             "temperature": temperature,
             "top_p": top_p,
         }
-        if isinstance(self.model, str) and "gpt-5-nano" in self.model:
-            payload["reasoning"] = {"effort": "minimal"}
+        
+        # 对于 OpenRouter 的 reasoning models，限制 reasoning 并排除 reasoning 输出
+        # 这样可以确保有 token 留给最终答案
+        if is_openrouter_reasoning:
+            payload["reasoning"] = {
+                "effort": "minimal",
+                "exclude": True  # 不返回 reasoning，只返回 content
+            }
+        
+        # 如果需要 JSON 输出（如 GSM8K），启用 JSON mode
+        if require_json:
+            payload["response_format"] = {"type": "json_object"}
         
         try:
             r = requests.post(self._url_chat, headers=self._headers, data=json.dumps(payload), timeout=180)
@@ -253,15 +283,35 @@ class OpenAICompatModel:
             choice0 = (data.get("choices") or [{}])[0]
             response_text = (choice0.get("message") or {}).get("content", "").strip()
             finish_reason = choice0.get("finish_reason")
-            if not response_text:
-                if finish_reason in {"length", "max_output_tokens"}:
-                    retry_payload = dict(payload)
-                    retry_payload["max_tokens"] = 16
-                    retry_payload["temperature"] = 0.0
-                    retry_payload["top_p"] = 1.0
-                    retry_payload["reasoning"] = {"effort": "none"}
-                    rr = requests.post(self._url_chat, headers=self._headers, data=json.dumps(retry_payload), timeout=180)
-                    if rr.ok:
+            # OpenRouter 可能返回 native_finish_reason
+            native_finish_reason = choice0.get("native_finish_reason", "")
+            
+            # 空 content 或 finish_reason 为 length/max_output_tokens：自动重试
+            if not response_text or finish_reason in {"length", "max_output_tokens"} or native_finish_reason in {"max_output_tokens"}:
+                # 重试：使用最严格的 reasoning 配置，确保 content 有输出
+                retry_payload = dict(payload)
+                # 给最终答案留足空间（256-512 tokens 足够 JSON 输出）
+                # 如果 require_json，至少 256；否则至少 128
+                min_retry_tokens = 256 if require_json else 128
+                retry_max_tokens = min(512, max(min_retry_tokens, max_tokens))
+                retry_payload["max_tokens"] = retry_max_tokens
+                retry_payload["temperature"] = 0.0
+                retry_payload["top_p"] = 0.9
+                
+                # 强制排除 reasoning，确保所有 token 都用于 content
+                if is_openrouter_reasoning:
+                    retry_payload["reasoning"] = {
+                        "effort": "minimal",
+                        "exclude": True
+                    }
+                
+                # 如果原请求需要 JSON，重试时也保持 JSON mode
+                if require_json:
+                    retry_payload["response_format"] = {"type": "json_object"}
+                
+                rr = requests.post(self._url_chat, headers=self._headers, data=json.dumps(retry_payload), timeout=180)
+                if rr.ok:
+                    try:
                         d2 = rr.json()
                         c2 = (d2.get("choices") or [{}])[0]
                         rt = (c2.get("message") or {}).get("content", "") or ""
@@ -279,10 +329,15 @@ class OpenAICompatModel:
                                 "response_raw": d2,
                                 "finish_reason": (c2.get("finish_reason")),
                             }
+                    except Exception as e:
+                        # Retry 解析失败，继续到最终错误返回
+                        pass
+                
+                # 重试失败或没有重试：返回 empty_response 错误
                 return {
                     "success": False,
                     "error_type": "empty_response",
-                    "error_message": "Empty content",
+                    "error_message": f"Empty content (finish_reason={finish_reason}, native={native_finish_reason})",
                     "response": "",
                     "prompt_tokens": usage.get("prompt_tokens", 0),
                     "completion_tokens": usage.get("completion_tokens", 0),
@@ -527,23 +582,50 @@ class Agent:
         else:
             prompt = self._build_task_description(instruction, previous_context)
 
-        # Force a concise final answer in content (avoid reasoning-only output)
-        prompt = (
-            f"{prompt}\n\n"
-            "OUTPUT REQUIREMENTS:\n"
-            "1) Output ONLY the final answer on a single line.\n"
-            "2) No reasoning, no explanation, no extra words.\n"
-        )
+        # For GSM8K/math tasks: allow reasoning, but require JSON format
+        # For other tasks: concise final answer only
+        raw = task.get("raw_data") or {}
+        bench = str(raw.get("benchmark", "")).strip().lower()
+        ctx = task.get("context", {}) or {}
+        if isinstance(ctx, dict):
+            bench = str(ctx.get("benchmark", bench)).strip().lower()
+        
+        # 针对GSM8K任务增加max_tokens，确保有足够空间完成完整推理
+        actual_max_tokens = self.max_tokens
+        if bench in {"gsm8k", "gsm"}:
+            # GSM8K需要更多token来完成逐步推理
+            actual_max_tokens = max(self.max_tokens, 1024)  # 至少1024 tokens
+            # GSM8K: allow reasoning in the model's internal thinking, but output must be JSON
+            # The model can think step-by-step, but final output must be strict JSON
+            prompt = (
+                f"{prompt}\n\n"
+                "OUTPUT REQUIREMENTS:\n"
+                "1) Think through the problem step-by-step (you can reason internally).\n"
+                "2) Output ONLY a JSON object with final_answer, valid, and optional confidence.\n"
+                "3) No extra text outside the JSON object.\n"
+            )
+        else:
+            # Other tasks: concise final answer only
+            prompt = (
+                f"{prompt}\n\n"
+                "OUTPUT REQUIREMENTS:\n"
+                "1) Output ONLY the final answer on a single line.\n"
+                "2) No reasoning, no explanation, no extra words.\n"
+            )
 
         if self.base_model is None:
             raise RuntimeError(f"Agent {self.agent_id} base_model is None (SIMULATED). Check model loading.")
-
+        
+        # 对于 GSM8K，启用 JSON mode 以确保结构化输出
+        require_json = (bench in {"gsm8k", "gsm"})
+        
         try:
             meta = self.base_model.generate_with_metadata(
                 prompt,
-                max_tokens=self.max_tokens,
+                max_tokens=actual_max_tokens,
                 temperature=self.temperature,
                 top_p=self.top_p,
+                require_json=require_json,
             )
             task_id = str(task.get("task_id", ""))
             step_id = str(task.get("subtask_id", ""))
@@ -589,6 +671,35 @@ class Agent:
                 )
             except TypeError:
                 result = self.base_model.generate(prompt)
+        
+        # 改动4: 零容忍解析 - 对于GSM8K，如果输出invalid，自动重试一次（低温度）
+        if bench in {"gsm8k", "gsm"} and result and not result.startswith("[ERROR]") and not result.startswith("[AGENT_ERROR]"):
+            # 导入_parse_strict_json（从symphony模块）
+            try:
+                import symphony
+                parsed, is_valid, err = symphony.SymphonyOrchestrator._parse_strict_json(result, benchmark=bench)
+                if parsed is None or not is_valid:
+                    # invalid输出，重试一次（低温度，强调格式）
+                    retry_prompt = (
+                        f"{prompt}\n\n"
+                        "[CRITICAL RETRY: Your previous output was INVALID]\n"
+                        "Output ONLY one JSON object. NO extra text. NO multiple JSON objects.\n"
+                        'Format: {"final_answer": "<integer>", "valid": 1, "confidence": <0.0-1.0>}\n'
+                    )
+                    retry_meta = self.base_model.generate_with_metadata(
+                        retry_prompt,
+                        max_tokens=min(256, actual_max_tokens),
+                        temperature=0.0,  # 低温度确保格式正确
+                        top_p=0.9,
+                    )
+                    if retry_meta.get("success", False):
+                        retry_result = retry_meta.get("response", "")
+                        # 再次验证
+                        parsed_retry, is_valid_retry, _ = symphony.SymphonyOrchestrator._parse_strict_json(retry_result, benchmark=bench)
+                        if parsed_retry is not None and is_valid_retry:
+                            result = retry_result
+            except Exception:
+                pass  # 如果导入失败，使用原始result
 
         task["previous_results"].append(f"{instruction} Answer: {result}")
 

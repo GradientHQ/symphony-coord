@@ -1,0 +1,12 @@
+phase,benchmark,task_type,difficulty_bin,oracle_best_agent,oracle_acc,n_oracle
+cold_start,gsm8k,unknown,__all__,agent-openrouter-openai-gpt-5-nano-002,0.333333,12
+cold_start,medical_qa,unknown,__all__,agent-openrouter-openai-gpt-oss-120b-003,0.500000,10
+cold_start,bbh,unknown,__all__,agent-openrouter-openai-gpt-oss-120b-003,0.636364,11
+cold_start,humaneval,unknown,__all__,agent-openrouter-gemma-3-4b-it-005,0.272727,11
+pretrain,medical_qa,unknown,__all__,agent-openrouter-qwen-2.5-7b-instruct-004,0.764706,17
+pretrain,humaneval,unknown,__all__,agent-openrouter-openai-gpt-5-nano-002,0.333333,15
+pretrain,amc,unknown,__all__,agent-openrouter-openai-gpt-oss-120b-003,0.000000,73
+pretrain,bbh,unknown,__all__,agent-openrouter-openai-gpt-oss-120b-003,0.457143,35
+pretrain,gsm8k,unknown,__all__,agent-openrouter-openai-gpt-5-nano-002,0.550000,20
+test,bbh,unknown,__all__,agent-openrouter-openai-gpt-oss-120b-003,0.333333,15
+test,amc,unknown,__all__,agent-openrouter-openai-gpt-oss-120b-003,0.000000,18

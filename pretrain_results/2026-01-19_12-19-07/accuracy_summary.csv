@@ -1,7 +1,0 @@
-phase,task_id,node_id,subtask_count,acc,ok,cum_acc
-cold_start,gsm8k_0,agent-openrouter-deepseek-v3-006,0,1,1,1.0
-cold_start,gsm8k_1,agent-openrouter-deepseek-v3-007,0,1,1,1.0
-pretrain,gsm8k_2,"agent-openrouter-deepseek-v3-008,agent-openrouter-deepseek-v3-009,agent-openrouter-deepseek-v3-007,agent-openrouter-deepseek-v3-008,agent-openrouter-deepseek-v3-009,agent-openrouter-deepseek-v3-006,agent-openrouter-deepseek-v3-008",7,0,1,0.0
-pretrain,gsm8k_3,"agent-openrouter-deepseek-v3-006,agent-openrouter-deepseek-v3-008,agent-openrouter-deepseek-v3-007,agent-openrouter-deepseek-v3-008",4,1,1,0.5
-test,gsm8k_4,"agent-openrouter-deepseek-v3-010,agent-openrouter-deepseek-v3-009,agent-openrouter-deepseek-v3-008,agent-openrouter-deepseek-v3-010,agent-openrouter-deepseek-v3-007",5,1,1,1.0
-test,gsm8k_5,"agent-openrouter-deepseek-v3-006,agent-openrouter-deepseek-v3-008,agent-openrouter-deepseek-v3-009,agent-openrouter-deepseek-v3-009,agent-openrouter-deepseek-v3-009,agent-openrouter-deepseek-v3-009,agent-openrouter-deepseek-v3-009",7,1,1,1.0

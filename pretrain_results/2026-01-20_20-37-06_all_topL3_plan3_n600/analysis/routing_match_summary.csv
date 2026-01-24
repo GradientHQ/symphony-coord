@@ -1,0 +1,12 @@
+phase,benchmark,task_type,difficulty_bin,n,router_acc,oracle_best_agent,oracle_acc,regret,match_rate
+cold_start,bbh,unknown,__all__,40,0.425000,agent-openrouter-openai-gpt-oss-120b-003,0.636364,0.211364,0.275000
+pretrain,medical_qa,unknown,__all__,53,0.584906,agent-openrouter-qwen-2.5-7b-instruct-004,0.764706,0.179800,0.320755
+cold_start,medical_qa,unknown,__all__,44,0.340909,agent-openrouter-openai-gpt-oss-120b-003,0.500000,0.159091,0.227273
+pretrain,gsm8k,unknown,__all__,56,0.446429,agent-openrouter-openai-gpt-5-nano-002,0.550000,0.103571,0.357143
+pretrain,humaneval,unknown,__all__,58,0.241379,agent-openrouter-openai-gpt-5-nano-002,0.333333,0.091954,0.258621
+cold_start,humaneval,unknown,__all__,42,0.190476,agent-openrouter-gemma-3-4b-it-005,0.272727,0.082251,0.261905
+pretrain,bbh,unknown,__all__,60,0.450000,agent-openrouter-openai-gpt-oss-120b-003,0.457143,0.007143,0.583333
+pretrain,amc,unknown,__all__,73,0.000000,agent-openrouter-openai-gpt-oss-120b-003,0.000000,0.000000,1.000000
+test,amc,unknown,__all__,18,0.000000,agent-openrouter-openai-gpt-oss-120b-003,0.000000,0.000000,1.000000
+test,bbh,unknown,__all__,24,0.375000,agent-openrouter-openai-gpt-oss-120b-003,0.333333,-0.041667,0.625000
+cold_start,gsm8k,unknown,__all__,35,0.400000,agent-openrouter-openai-gpt-5-nano-002,0.333333,-0.066667,0.342857

@@ -86,10 +86,13 @@ class SymphonyOrchestrator:
             priors_path: Optional[str] = None,  # path to priors JSON file
             # ---- ✅ P0-3: Strict routing mode (experiment mode) ----
             strict_routing: bool = False,  # If True, routing failure raises instead of fallback
+            # ---- ✅ Eval-only (no selector updates; avoid test-phase leakage) ----
+            eval_only: bool = False,
 
     ) -> None:
         self.lock = threading.Lock()
         self.verbose = bool(verbose)
+        self.eval_only = bool(eval_only)
 
         # agent registry
         self.agents: List[Agent] = []
@@ -380,7 +383,8 @@ class SymphonyOrchestrator:
             correct = self._is_correct(win_key, gold)
 
             # ✅ winner-bonus updates for all steps in winning trajectory(ies)
-            if self.use_dynamic and self.selector is not None:
+            # Skip updates in eval_only (e.g. test phase) to avoid label/data leakage.
+            if self.use_dynamic and self.selector is not None and not self.eval_only:
                 for i, k in enumerate(plan_keys):
                     if k != win_key:
                         continue
@@ -735,7 +739,11 @@ class SymphonyOrchestrator:
 
         for st in subtasks:
             sid = st["id"]
-            req = str(st.get("requirement", "general-reasoning"))
+            # 改动4: 默认requirement改为math_reasoning（如果context中有benchmark=gsm8k）
+            ctx_check = st.get("context", {}) or {}
+            bench_check = str(ctx_check.get("benchmark", "")).strip().lower()
+            default_req = "math_reasoning" if bench_check in {"gsm8k", "gsm"} else "general-reasoning"
+            req = str(st.get("requirement", default_req))
             candidates = agent_assignments.get(sid, [])
 
             if not candidates:
@@ -887,7 +895,11 @@ class SymphonyOrchestrator:
             topL = topL_unique[: max(1, self.topL)] if topL_unique else candidates_avail[:1]
             
             # ✅ Exploration constraint 2: Fixed exploration budget K (don't vary with topL length)
-            # For cold_start exploration, always use cot_count as the fixed budget
+            # 改动5: 对于GSM8K，实现self-consistency（同agent多次采样）
+            ctx_check = st.get("context", {}) or {}
+            bench_check = str(ctx_check.get("benchmark", "")).strip().lower()
+            is_gsm8k_self_consistency = bench_check in {"gsm8k", "gsm"} and cot_count >= 3
+            
             runs = int(cot_count) if cot_count > 0 else 0
             if runs <= 0:
                 err = f"[ERROR] All agents filtered out for subtask: {req}"
@@ -899,9 +911,41 @@ class SymphonyOrchestrator:
             used_ids = set()
             run_records: List[Dict[str, Any]] = []
             cot_results: List[str] = []
+            
+            # 改动5: self-consistency模式：选择第一个agent，然后多次采样
+            selected_agent = None
+            selected_candidate = None
+            selected_x = None
+            selected_stt = None
+            
+            if is_gsm8k_self_consistency:
+                # 选择第一个agent（通过UCB或round-robin）
+                if self.use_dynamic and self.selector is not None:
+                    selected_agent, selected_x, selected_stt, _ = self._select_agent_dynamic(topL, used_ids)
+                    # 找到对应的candidate
+                    for c in topL:
+                        if c["agent"] == selected_agent:
+                            selected_candidate = c
+                            break
+                else:
+                    if topL:
+                        selected_candidate = topL[0]
+                        selected_agent = selected_candidate["agent"]
+                        selected_stt = self._agent_state(selected_agent)
+                        selected_x = self._build_x_from_candidate_or_fallback(
+                            candidate=selected_candidate,
+                            agent=selected_agent,
+                            dynamic_state=selected_stt,
+                        )
 
             for j in range(runs):
-                if self.use_dynamic and self.selector is not None:
+                if is_gsm8k_self_consistency and selected_agent:
+                    # Self-consistency: 使用同一个agent多次采样
+                    agent = selected_agent
+                    x = selected_x
+                    stt = selected_stt
+                    match_score = float(selected_candidate.get("match_score", 0.0)) if selected_candidate else 0.0
+                elif self.use_dynamic and self.selector is not None:
                     agent, x, _st, match_score = self._select_agent_dynamic(topL, used_ids)
                 else:
                     # ✅ cold_start: static Top-L but round-robin across agents (no repeat)
@@ -922,22 +966,58 @@ class SymphonyOrchestrator:
                 aid = self._resolve_agent_key(agent)
                 if not aid:
                     aid = f"agent_{id(agent)}"
-                used_ids.add(aid)
+                if not is_gsm8k_self_consistency:
+                    used_ids.add(aid)  # self-consistency模式下允许重复使用同一个agent
 
 
+                # 改动4: 零容忍解析 + invalid时自动重试一次
                 t0 = time.time()
-                try:
-                    if self.dispatch_mode == "shared_bb":
-                        requester = self._get_requester_agent()
-                        if requester is None:
-                            text = "[ERROR] dispatch_mode=shared_bb but no requester (agent with isep_client) registered"
+                text = ""
+                retry_count = 0
+                max_retries = 1
+                
+                while retry_count <= max_retries:
+                    try:
+                        if self.dispatch_mode == "shared_bb":
+                            requester = self._get_requester_agent()
+                            if requester is None:
+                                text = "[ERROR] dispatch_mode=shared_bb but no requester (agent with isep_client) registered"
+                            else:
+                                run_tag = str((st.get("context", {}) or {}).get("_run_id", "run")) + f":{st.get('id','sub')}:cot{len(run_records)+1}"
+                                text = self._execute_subtask_via_shared_bb(requester, st, run_tag=run_tag)
                         else:
-                            run_tag = str((st.get("context", {}) or {}).get("_run_id", "run")) + f":{st.get('id','sub')}:cot{len(run_records)+1}"
-                            text = self._execute_subtask_via_shared_bb(requester, st, run_tag=run_tag)
-                    else:
-                        text = self._execute_subtask_on_agent(agent, st)
-                except Exception as e:
-                    text = f"[AGENT_ERROR] {str(e)}"
+                            text = self._execute_subtask_on_agent(agent, st)
+                    except Exception as e:
+                        text = f"[AGENT_ERROR] {str(e)}"
+                    
+                    # 对于GSM8K，检查输出是否valid
+                    ctx_check = st.get("context", {}) or {}
+                    bench_check = str(ctx_check.get("benchmark", "")).strip().lower()
+                    if bench_check in {"gsm8k", "gsm"} and text and not text.startswith("[ERROR]") and not text.startswith("[AGENT_ERROR]"):
+                        parsed, is_valid, err = self._parse_strict_json(text, benchmark=bench_check)
+                        if parsed is None or not is_valid:
+                            # invalid输出，重试一次（低温度）
+                            if retry_count < max_retries:
+                                retry_count += 1
+                                # 修改subtask的instruction，强调格式要求
+                                original_instruction = st.get("input") or st.get("description") or ""
+                                retry_instruction = (
+                                    original_instruction
+                                    + "\n\n[CRITICAL: RETRY AFTER INVALID OUTPUT]\n"
+                                    + "Your previous output was INVALID. Output ONLY one JSON object.\n"
+                                    + "NO extra text. NO multiple JSON objects.\n"
+                                    + 'Format: {"final_answer": "<integer>", "valid": 1, "confidence": <0.0-1.0>}\n'
+                                )
+                                st_retry = st.copy()
+                                st_retry["input"] = retry_instruction
+                                st_retry["description"] = retry_instruction
+                                st = st_retry
+                                continue
+                            else:
+                                # 重试失败，标记为invalid
+                                text = f"[INVALID_FORMAT] {err}: {text[:100]}"
+                    
+                    break  # 成功或达到最大重试次数
 
                 dt_ms = (time.time() - t0) * 1000.0
 
@@ -1012,7 +1092,7 @@ class SymphonyOrchestrator:
             results[sid] = final_result
 
             if self.dispatch_mode != "shared_bb":
-                if self.use_dynamic and self.selector is not None:
+                if self.use_dynamic and self.selector is not None and not self.eval_only:
                     self._online_update_after_vote(run_records, final_result, st)
 
 
@@ -1049,12 +1129,33 @@ class SymphonyOrchestrator:
         return results
 
     def _online_update_after_vote(self, run_records, voted_text, subtask) -> None:
-        voted_final = self._extract_final_from_text(voted_text) or voted_text.strip()
-
+        """
+        改动8: UCB update只用"最终被采纳的答案"并且必须valid
+        - 先得到最终voted_final（且valid）
+        - 只用这个reward更新一次
+        - invalid/parse_fail：reward=0，但要单独记为format_error
+        """
         ctx = subtask.get("context", {}) or {}
+        benchmark = str(ctx.get("benchmark", "")).strip().lower()
+        is_gsm8k = benchmark in {"gsm8k", "gsm"}
         gold = self._get_gold_from_context(ctx)
-        correct = self._is_correct(voted_final, gold)
-
+        
+        # 严格验证voted_text
+        parsed_voted, is_voted_valid, error_msg = self._parse_strict_json(voted_text, benchmark=benchmark if is_gsm8k else None)
+        
+        if parsed_voted is None or not is_voted_valid:
+            # invalid的voted结果，不更新UCB（但记录format_error）
+            for rec in run_records:
+                rec["vote_format_error"] = error_msg
+                rec["vote_reward"] = 0.0
+            return
+        
+        voted_final = str(parsed_voted.get("final_answer", "")).strip()
+        correct = self._is_correct(voted_final, gold) if gold else None
+        
+        # 改动8: 只用最终被采纳的答案更新一次
+        # 找到对应的run（即产生voted_final的run）
+        winner_rec = None
         for rec in run_records:
             x = rec.get("x")
             if not isinstance(x, list):
@@ -1137,11 +1238,22 @@ class SymphonyOrchestrator:
         # ✅ unique base tid per run (avoid KV collision across subtasks/cot runs)
         base_tid = f"{run_tag}:{uuid.uuid4().hex[:8]}"
 
+        # 从subtask id中提取子任务索引（如 "xxx_sub_2" -> 2）
+        subtask_id_str = str(subtask.get("id", ""))
+        subtask_index = 1
+        if "_sub_" in subtask_id_str:
+            try:
+                parts = subtask_id_str.split("_sub_")
+                if len(parts) > 1:
+                    subtask_index = int(parts[-1])
+            except (ValueError, IndexError):
+                subtask_index = 1
+        
         # build a minimal task dict compatible with Agent.assign_task/execute_task
         agent_task = {
             "task_id": base_tid,     # will be overwritten to dispatch_id inside assign_task (task_key)
-            "subtask_id": 1,
-            "steps": {"1": [instruction, requirement]},
+            "subtask_id": subtask_index,  # 使用实际的子任务索引
+            "steps": {str(subtask_index): [instruction, requirement]},
             "previous_results": subtask.get("previous_results", []) or [],
             "original_problem": original_problem,
             "final_result": "",
@@ -1209,10 +1321,21 @@ class SymphonyOrchestrator:
         )
         requirement = str(subtask.get("requirement", "general-reasoning"))
         original_problem = subtask.get("original_task", instruction)
+        
+        # 从subtask id中提取子任务索引（如 "xxx_sub_2" -> 2）
+        subtask_id_str = str(subtask.get("id", ""))
+        subtask_index = 1
+        if "_sub_" in subtask_id_str:
+            try:
+                parts = subtask_id_str.split("_sub_")
+                if len(parts) > 1:
+                    subtask_index = int(parts[-1])
+            except (ValueError, IndexError):
+                subtask_index = 1
 
         agent_task = {
-            "subtask_id": 1,
-            "steps": {"1": [instruction, requirement]},
+            "subtask_id": subtask_index,  # 使用实际的子任务索引，而不是硬编码1
+            "steps": {str(subtask_index): [instruction, requirement]},
             "previous_results": subtask.get("previous_results", []) or [],
             "original_problem": original_problem,
             "final_result": "",
@@ -1284,25 +1407,124 @@ class SymphonyOrchestrator:
 
         return str(result).strip()
 
-    # ---------------------- voting ----------------------
+    # ---------------------- voting (改动3: 数值一致性优先 + 改动5: self-consistency) ----------------------
     def _vote_on_results(self, cot_results: List[str], subtask: Dict[str, Any]) -> str:
         if len(cot_results) == 1:
             return cot_results[0]
 
-        finals: Dict[str, int] = {}
+        # 获取benchmark信息用于验证
+        ctx = subtask.get("context", {}) or {}
+        benchmark = str(ctx.get("benchmark", "")).strip().lower()
+        is_gsm8k = benchmark in {"gsm8k", "gsm"}
+
+        # 改动2: 严格解析和验证每个run
+        valid_runs: List[Tuple[str, str, float]] = []  # (text, final_answer, confidence)
+        invalid_runs: List[str] = []
+        
         for r in cot_results:
-            fx = self._extract_final_from_text(r)
-            if fx:
-                finals[fx] = finals.get(fx, 0) + 1
-
-        if finals:
-            best_ans = max(finals.items(), key=lambda kv: kv[1])[0]
-            tied = [r for r in cot_results if (self._extract_final_from_text(r) == best_ans)]
-            if tied:
-                return max(tied, key=len)
-
-        valid_results = [r for r in cot_results if not r.startswith("[ERROR]") and not r.startswith("[AGENT_ERROR]")]
-        return max(valid_results, key=len) if valid_results else cot_results[0]
+            if r.startswith("[ERROR]") or r.startswith("[AGENT_ERROR]"):
+                invalid_runs.append(r)
+                continue
+            
+            # 严格解析JSON
+            parsed, is_valid, error_msg = self._parse_strict_json(r, benchmark=benchmark if is_gsm8k else None)
+            
+            if parsed is None or not is_valid:
+                invalid_runs.append(r)
+                continue
+            
+            final_answer = str(parsed.get("final_answer", "")).strip()
+            confidence = float(parsed.get("confidence", 0.0)) if "confidence" in parsed else 0.0
+            
+            if final_answer:
+                valid_runs.append((r, final_answer, confidence))
+        
+        # 如果没有valid的run，fallback到原来的逻辑
+        if not valid_runs:
+            valid_results = [r for r in cot_results if not r.startswith("[ERROR]") and not r.startswith("[AGENT_ERROR]")]
+            return max(valid_results, key=len) if valid_results else cot_results[0]
+        
+        # 改动3: 数值一致性优先的投票策略（改进版：强制整数解析、自一致性优先）
+        # 对于GSM8K，强制要求整数解析
+        if is_gsm8k:
+            # 过滤：只保留能解析为整数的答案
+            integer_valid_runs: List[Tuple[str, str, float]] = []
+            for text, final_answer, confidence in valid_runs:
+                try:
+                    # 规范化：去除引号、逗号、美元符号等
+                    cleaned = final_answer.replace(",", "").replace("$", "").replace("%", "").strip()
+                    # 去除外层引号
+                    while len(cleaned) >= 2 and cleaned.startswith('"') and cleaned.endswith('"'):
+                        cleaned = cleaned[1:-1].strip()
+                    # 尝试解析为整数
+                    int_val = int(cleaned)
+                    # 使用规范化后的整数字符串
+                    normalized_answer = str(int_val)
+                    integer_valid_runs.append((text, normalized_answer, confidence))
+                except (ValueError, TypeError, OverflowError):
+                    # 无法解析为整数，跳过
+                    continue
+            
+            if integer_valid_runs:
+                valid_runs = integer_valid_runs
+            else:
+                # 如果没有能解析为整数的，fallback到原始逻辑
+                pass
+        
+        # 1. 从每个valid run抽取数值答案（已规范化）
+        answer_counts: Dict[str, int] = {}
+        answer_confidences: Dict[str, List[float]] = {}
+        answer_texts: Dict[str, List[str]] = {}  # 存储每个答案对应的原始text列表
+        
+        for text, final_answer, confidence in valid_runs:
+            answer_counts[final_answer] = answer_counts.get(final_answer, 0) + 1
+            if final_answer not in answer_confidences:
+                answer_confidences[final_answer] = []
+            answer_confidences[final_answer].append(confidence)
+            if final_answer not in answer_texts:
+                answer_texts[final_answer] = []
+            answer_texts[final_answer].append(text)
+        
+        # 2. 自一致性优先：如果有多数票（相同数值出现≥2次），选多数
+        max_count = max(answer_counts.values()) if answer_counts else 0
+        if max_count >= 2:
+            # 有多数票，选择出现次数最多的（自一致性）
+            majority_answers = [ans for ans, cnt in answer_counts.items() if cnt == max_count]
+            if len(majority_answers) == 1:
+                # 唯一多数，返回对应的原始text（取第一个）
+                target_answer = majority_answers[0]
+                return answer_texts[target_answer][0]
+            else:
+                # 平票：在多数答案中选择confidence最高的
+                best_answer = None
+                best_confidence = -1.0
+                for ans in majority_answers:
+                    avg_conf = sum(answer_confidences[ans]) / len(answer_confidences[ans])
+                    if avg_conf > best_confidence:
+                        best_confidence = avg_conf
+                        best_answer = ans
+                if best_answer:
+                    return answer_texts[best_answer][0]
+        
+        # 3. 如果没有多数票，选"最高confidence的数值"（但仅在自一致性之后）
+        if answer_confidences:
+            best_answer = None
+            best_confidence = -1.0
+            for ans, confs in answer_confidences.items():
+                avg_conf = sum(confs) / len(confs) if confs else 0.0
+                if avg_conf > best_confidence:
+                    best_confidence = avg_conf
+                    best_answer = ans
+            if best_answer:
+                return answer_texts[best_answer][0]
+        
+        # 4. 如果confidence缺失，选"最常见数值"
+        if answer_counts:
+            most_common = max(answer_counts.items(), key=lambda kv: kv[1])[0]
+            return answer_texts[most_common][0]
+        
+        # Fallback: 返回第一个valid run
+        return valid_runs[0][0] if valid_runs else cot_results[0]
 
     def _weighted_vote(self, answers: List[str], weights: List[float]) -> str:
         if not answers:
@@ -1315,6 +1537,143 @@ class SymphonyOrchestrator:
             score[key] = score.get(key, 0.0) + float(w)
         return max(score.items(), key=lambda kv: kv[1])[0] if score else answers[0]
 
+    # ---------------------- strict JSON parser with validation (改动2) ----------------------
+    @staticmethod
+    def _parse_strict_json(text: str, benchmark: Optional[str] = None) -> Tuple[Optional[Dict[str, Any]], bool, str]:
+        """
+        严格解析JSON输出，必须符合格式：{"final_answer":"<string>","valid":0/1}（confidence可选）
+        
+        返回: (parsed_dict, is_valid, error_msg)
+        - parsed_dict: 解析出的JSON对象，如果解析失败则为None
+        - is_valid: True表示格式正确且valid=1，False表示格式错误或valid=0
+        - error_msg: 错误信息（如果is_valid=False）
+        """
+        if not isinstance(text, str) or not text.strip():
+            return None, False, "empty_text"
+        
+        s_clean = text.strip()
+        
+        # 移除可能的```json ... ```包装
+        if s_clean.startswith("```"):
+            lines = s_clean.splitlines()
+            if lines and lines[0].startswith("```"):
+                lines = lines[1:]
+            if lines and lines[-1].strip() == "```":
+                lines = lines[:-1]
+            s_clean = "\n".join(lines).strip()
+        
+        # 检查是否有多个JSON对象（禁止）
+        json_count = s_clean.count("{")
+        if json_count > 1:
+            # 尝试找到第一个完整的JSON对象
+            try:
+                decoder = json.JSONDecoder()
+                start = s_clean.find("{")
+                if start >= 0:
+                    obj, end_pos = decoder.raw_decode(s_clean[start:])
+                    # 检查后面是否还有JSON
+                    remaining = s_clean[start + end_pos:].strip()
+                    if remaining and remaining.startswith("{"):
+                        return None, False, "multiple_json"
+            except Exception:
+                return None, False, "multiple_json"
+        
+        # 检查是否有额外文本（禁止）
+        start_idx = s_clean.find("{")
+        end_idx = s_clean.rfind("}")
+        if start_idx > 0 or (end_idx >= 0 and end_idx < len(s_clean) - 1):
+            # 有文本在JSON前后
+            if start_idx > 0:
+                before = s_clean[:start_idx].strip()
+                if before:
+                    return None, False, "extra_text_before"
+            if end_idx >= 0 and end_idx < len(s_clean) - 1:
+                after = s_clean[end_idx + 1:].strip()
+                if after:
+                    return None, False, "extra_text_after"
+        
+        # 尝试解析JSON
+        try:
+            # 先尝试直接解析
+            if s_clean.startswith("{") and s_clean.endswith("}"):
+                data = json.loads(s_clean)
+            else:
+                # 尝试找到第一个JSON对象
+                if start_idx >= 0 and end_idx > start_idx:
+                    json_str = s_clean[start_idx:end_idx + 1]
+                    data = json.loads(json_str)
+                else:
+                    return None, False, "no_json"
+            
+            if not isinstance(data, dict):
+                return None, False, "not_dict"
+            
+            # 检查必需字段
+            if "final_answer" not in data:
+                return None, False, "missing_final_answer"
+            
+            if "valid" not in data:
+                return None, False, "missing_valid"
+            
+            final_answer_raw = str(data.get("final_answer", "")).strip()
+            valid_flag = data.get("valid")
+            
+            # 验证valid字段
+            if valid_flag not in (0, 1, "0", "1", True, False):
+                return None, False, "invalid_valid_field"
+            
+            is_valid_flag = (valid_flag == 1 or valid_flag == "1" or valid_flag is True)
+            
+            # 规范化final_answer：处理转义引号（如 "\\"8\\"" -> "8"）
+            final_answer = final_answer_raw
+            # 重复去除外层引号，直到没有引号包裹
+            while len(final_answer) >= 2 and final_answer.startswith('"') and final_answer.endswith('"'):
+                try:
+                    # 尝试JSON解析来去除转义引号
+                    final_answer = json.loads(final_answer)
+                    if isinstance(final_answer, str):
+                        final_answer = final_answer.strip()
+                    else:
+                        final_answer = str(final_answer).strip()
+                except (json.JSONDecodeError, TypeError):
+                    # 如果JSON解析失败，手动去除外层引号
+                    final_answer = final_answer[1:-1].strip()
+                    # 如果去除引号后还是引号包裹，继续
+                    if len(final_answer) >= 2 and final_answer.startswith('"') and final_answer.endswith('"'):
+                        continue
+                    break
+            
+            # 更新data中的final_answer为规范化后的值
+            data["final_answer"] = final_answer
+            
+            # 对于GSM8K，验证final_answer必须是可解析的整数
+            if benchmark and benchmark.lower() in {"gsm8k", "gsm"}:
+                if not final_answer:
+                    return data, False, "empty_final_answer"
+                
+                # 清理字符串：去除逗号、美元符号、百分号等
+                cleaned = final_answer.replace(",", "").replace("$", "").replace("%", "").strip()
+                
+                # 检查是否匹配整数正则表达式（允许负号）
+                import re
+                if not re.match(r'^-?\d+$', cleaned):
+                    return data, False, "not_integer_format"
+                
+                try:
+                    # 尝试解析为整数
+                    num_val = int(cleaned)
+                    # 验证成功，更新data中的final_answer为规范化整数字符串
+                    data["final_answer"] = str(num_val)
+                except (ValueError, TypeError, OverflowError):
+                    return data, False, "not_numeric"
+            
+            return data, is_valid_flag, ""
+            
+        except json.JSONDecodeError as e:
+            return None, False, f"json_decode_error: {str(e)}"
+        except Exception as e:
+            return None, False, f"parse_error: {str(e)}"
+    
     # ---------------------- robust final extractor (BBH-friendly) ----------------------
     @staticmethod
     def _extract_final_from_text(s: str) -> Optional[str]:
@@ -1413,22 +1772,116 @@ class SymphonyOrchestrator:
         aggregated += f"**Complexity**: {getattr(original_task, 'context', {}).get('complexity', 'Medium')}\n\n"
         aggregated += "### Subtask Results:\n\n"
 
-        finals: List[str] = []
+        ctx = getattr(original_task, 'context', {}) or {}
+        benchmark = str(ctx.get('benchmark', '')).strip().lower()
+        is_gsm8k = benchmark in {"gsm8k", "gsm"}
+        original_text = getattr(original_task, 'description', '') or ''
+
+        finals: List[Tuple[str, str, int]] = []  # (answer, sid, subtask_index)
         for i, (sid, result) in enumerate(results.items(), 1):
             aggregated += f"{i}. **{sid}**: {result}\n\n"
             ext = self._extract_final_from_text(result)
             if ext:
-                finals.append(ext)
+                # 提取子任务索引（用于排序和选择最终答案）
+                subtask_index = i
+                if "_sub_" in sid:
+                    try:
+                        parts = sid.split("_sub_")
+                        if len(parts) > 1:
+                            subtask_index = int(parts[-1])
+                    except (ValueError, IndexError):
+                        subtask_index = i
+                finals.append((ext, sid, subtask_index))
 
         aggregated += (
             f"\n**Execution Summary**: Coordinated {len(results)} subtasks "
             f"via Top-L + Global LinUCB selection and CoT voting.\n"
         )
 
-        final_ans = finals[-1] if finals else None
+        # 对于GSM8K，优先选择最后一个子任务的答案（最终合成步骤）
+        # 并应用合理性检查
+        if is_gsm8k and finals:
+            # 按子任务索引排序
+            finals_sorted = sorted(finals, key=lambda x: x[2])
+            
+            # 优先选择最后一个子任务的答案
+            final_candidates = [f for f in finals_sorted if f[2] == finals_sorted[-1][2]]
+            
+            # 如果有多个候选，应用合理性检查
+            if len(final_candidates) > 1:
+                # 应用合理性检查：选择最合理的答案
+                best_answer = self._apply_gsm8k_sanity_check(final_candidates, original_text)
+                if best_answer:
+                    aggregated += f"\n**Final answer**: {best_answer}\n"
+                    return aggregated.strip()
+            
+            # 使用最后一个子任务的答案
+            final_ans = final_candidates[0][0] if final_candidates else finals_sorted[-1][0]
+        else:
+            # 非GSM8K：使用最后一个提取的答案
+            final_ans = finals[-1][0] if finals else None
+        
         if final_ans:
             aggregated += f"\n**Final answer**: {final_ans}\n"
         return aggregated.strip()
+    
+    def _apply_gsm8k_sanity_check(self, candidates: List[Tuple[str, str, int]], original_text: str) -> Optional[str]:
+        """
+        对GSM8K候选答案应用合理性检查。
+        
+        返回最合理的答案，如果没有合理的则返回None。
+        """
+        if not candidates:
+            return None
+        
+        # 提取候选答案的数值
+        candidate_values: List[Tuple[int, str]] = []
+        for answer, sid, _ in candidates:
+            try:
+                # 规范化答案
+                cleaned = answer.replace(",", "").replace("$", "").replace("%", "").strip()
+                # 去除引号
+                while len(cleaned) >= 2 and cleaned.startswith('"') and cleaned.endswith('"'):
+                    cleaned = cleaned[1:-1].strip()
+                val = int(cleaned)
+                candidate_values.append((val, answer))
+            except (ValueError, TypeError, OverflowError):
+                continue
+        
+        if not candidate_values:
+            return candidates[0][0]  # 如果无法解析，返回第一个原始答案
+        
+        # 合理性检查1：如果问题提到"$"或"dollars"，答案应该是合理的货币值
+        if "$" in original_text.lower() or "dollar" in original_text.lower():
+            # 货币值通常不会太小（除非明确说明）
+            # 优先选择较大的值（可能是最终总价而非单价）
+            candidate_values.sort(key=lambda x: x[0], reverse=True)
+            return candidate_values[0][1]
+        
+        # 合理性检查2：如果问题提到"days"或"minutes"，答案不应该过大
+        if "day" in original_text.lower():
+            # 天数通常不会超过1000（除非是特殊场景）
+            reasonable = [v for v in candidate_values if v[0] <= 1000]
+            if reasonable:
+                return reasonable[0][1]
+        
+        if "minute" in original_text.lower():
+            # 分钟数通常不会超过10000
+            reasonable = [v for v in candidate_values if v[0] <= 10000]
+            if reasonable:
+                return reasonable[0][1]
+        
+        # 合理性检查3：如果问题提到"per"或"each"，答案可能是倍数关系
+        # 选择最接近中位数的值
+        if len(candidate_values) > 1:
+            values = [v[0] for v in candidate_values]
+            median = sorted(values)[len(values) // 2]
+            # 选择最接近中位数的
+            best = min(candidate_values, key=lambda x: abs(x[0] - median))
+            return best[1]
+        
+        # 默认：返回第一个
+        return candidate_values[0][1]
 
     # ---------------------- Symphony 1.0 planner (optional) ----------------------
     _PLANNER_PROMPT = """You are a problem decomposer, NOT a solver.
@@ -1610,7 +2063,8 @@ Problem:
         }
 
         # ✅ planner-step base update (ok - latency penalty)
-        if self.use_dynamic and self.selector is not None and isinstance(x, list):
+        # Skip updates in eval_only (e.g. test phase) to avoid label/data leakage.
+        if self.use_dynamic and self.selector is not None and not self.eval_only and isinstance(x, list):
             ok = (text.strip() != "") and (not text.startswith("[ERROR]")) and (not text.startswith("[AGENT_ERROR]"))
             lat_norm = min(1.0, dt_ms / max(1.0, self.latency_scale_ms))
             penalty = self.latency_penalty * (lat_norm ** 0.5)
@@ -1691,6 +2145,8 @@ def init(
         priors_path: Optional[str] = None,
         # ✅ P0-D: Strict routing mode (experiment mode)
         strict_routing: Optional[bool] = None,
+        # ✅ Eval-only: skip selector updates (e.g. test phase) to avoid leakage
+        eval_only: Optional[bool] = None,
 ) -> None:
     """
     Configure global orchestrator WITHOUT clearing registered agents.
@@ -1745,12 +2201,12 @@ def init(
 
     if shared_poll_interval is not None:
         _global_orchestrator.shared_poll_interval = float(shared_poll_interval)
-    
-    # ✅ P0-D: Set strict_routing if provided
+
     if strict_routing is not None:
         _global_orchestrator.strict_routing = bool(strict_routing)
-    
-    # ✅ P0-1: Load and inject priors if provided
+    if eval_only is not None:
+        _global_orchestrator.eval_only = bool(eval_only)
+
     if priors is not None or priors_path is not None:
         _priors: Dict[str, Dict[str, float]] = {}
         if priors is not None:
@@ -1795,6 +2251,7 @@ def get_registered_agents() -> List[Agent]:
     return _global_orchestrator.get_registered_agents()
 
 
-
-
+def set_eval_only(enable: bool) -> None:
+    """Set eval-only mode: skip selector updates (e.g. test phase) to avoid leakage."""
+    _global_orchestrator.eval_only = bool(enable)
 

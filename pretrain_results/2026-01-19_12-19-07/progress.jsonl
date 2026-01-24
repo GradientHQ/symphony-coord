@@ -1,4 +1,0 @@
-{"phase": "pretrain", "i": 3, "task_id": "gsm8k_2", "ok": 1, "acc": 0, "ts": "2026-01-19T12:19:53"}
-{"phase": "pretrain", "i": 4, "task_id": "gsm8k_3", "ok": 1, "acc": 1, "ts": "2026-01-19T12:20:21"}
-{"phase": "test", "i": 5, "task_id": "gsm8k_4", "ok": 1, "acc": 1, "ts": "2026-01-19T12:20:51"}
-{"phase": "test", "i": 6, "task_id": "gsm8k_5", "ok": 1, "acc": 1, "ts": "2026-01-19T12:21:41"}
