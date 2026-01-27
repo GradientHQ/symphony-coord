@@ -1,466 +1,506 @@
-# 🎼 Symphony
-### *A Decentralized Multi-Agent Framework for Edge Devices with Beacon-Guided Task Routing and CoT Voting*
+# Symphony
 
+**A Decentralized Multi-Agent Framework for Edge Devices with Beacon-Guided Task Routing and CoT Voting**
 
-*🚀 Democratizing AI through decentralized multi-agent collaboration on consumer-grade devices*
+Symphony is a decentralized multi-agent framework that enables intelligent agents to collaborate across heterogeneous edge devices through beacon-guided task routing and Chain-of-Thought (CoT) voting mechanisms.
 
-[**📚 Documentation**](docs/) | [**🚀 Quick Start**](#quick-start) | [**💡 Examples**](examples/) | [**📝 Paper**](#citation) | [**🤝 Contributing**](#contributing)
+## Table of Contents
 
-</div>
+- [Overview](#overview)
+- [Key Features](#key-features)
+- [Directory Structure](#directory-structure)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Running Experiments](#running-experiments)
+- [Reproducing Paper Results](#reproducing-paper-results)
+- [Configuration Guide](#configuration-guide)
+- [Citation](#citation)
 
----
+## Overview
 
-## 🌟 Overview
+Symphony employs a three-stage pipeline:
 
-**Symphony** is a groundbreaking decentralized multi-agent framework that enables intelligent agents to collaborate seamlessly across heterogeneous edge devices. Unlike traditional centralized LLM-based agent systems that require expensive server-grade GPUs, Symphony democratizes AI by orchestrating lightweight models on consumer-grade hardware (RTX 3060/4090, Jetson boards, M-series Apple devices) through innovative beacon-guided task routing and Chain-of-Thought (CoT) voting mechanisms.
+1. **Planning Phase**: Multiple planning agents decompose complex queries into executable sub-tasks
+2. **Execution Phase**: Beacon-guided routing matches sub-tasks to specialized agents using LinUCB-based selection
+3. **Voting Phase**: CoT voting aggregates multiple agent responses for robust final answers
 
-## 🎬 Demo
+### Architecture
 
-See Symphony in action! Watch our comprehensive demo showcasing the decentralized multi-agent collaboration:
-
-![DEMO of Symphony](demo/symphony_demo.gif)
-
-*The demo illustrates key features including task decomposition, beacon-guided routing, agent collaboration, and CoT voting mechanisms across multiple edge devices.*
-
-### 🎯 Key Value Propositions
-
-- **💰 Cost-Effective**: Run on consumer-grade GPUs instead of expensive server hardware
-- **⚡ Scalable**: Dynamically expand agent networks without infrastructure bottlenecks
-- **🧠 Intelligent**: Achieve superior reasoning through CoT voting and capability matching
-- **🌐 Accessible**: Deploy across diverse devices and network topologies
-
-## ✨ Key Features
-
-### 🏗️ **Decentralized Architecture**
-- **Trustless Coordination**: No central orchestrator required
-- **Fault Tolerance**: Resilient to individual node failures  
-- **Network Flexibility**: Support for both intranet and public internet deployment
-
-### 🎯 **Intelligent Task Distribution**
-- **Beacon-Based Routing**: Efficient capability-aware task allocation
-- **Dynamic Matching**: Real-time agent selection based on expertise and availability
-- **Load Balancing**: Optimal resource utilization across heterogeneous devices
-
-### 🧠 **Advanced Reasoning**
-- **Multi-Path CoT**: Parallel chains-of-thought for robust problem solving
-- **Majority Voting**: Reliability-weighted consensus mechanisms
-- **Task Decomposition**: Automatic breakdown of complex problems into executable sub-tasks
-
-### 🔧 **Edge-Optimized**
-- **Lightweight Models**: Optimized for consumer-grade hardware
-- **Local Processing**: Minimize bandwidth and latency requirements
-- **Resource Efficiency**: Intelligent model loading and memory management
-
-### 🔗 **Flexible Communication**
-- **ISEP Integration**: Standardized intelligent service exchange
-- **Multi-Topology Support**: Global broadcast and neighbor-based communication
-
-## 🏗️ Architecture Overview
-
-Symphony employs a three-stage pipeline that integrates decentralized coordination with intelligent task execution:
-
-```mermaid
-graph TB
-    subgraph "📋 Planning Phase"
-        U[👤 User Query] --> PA[🧠 Planning Agents]
-        PA --> T1[📝 Task Decomposition 1]
-        PA --> T2[📝 Task Decomposition 2] 
-        PA --> T3[📝 Task Decomposition 3]
-    end
-    
-    subgraph "⚡ Execution Phase"
-        T1 --> B1[📡 Beacon Broadcast]
-        T2 --> B2[📡 Beacon Broadcast]
-        T3 --> B3[📡 Beacon Broadcast]
-        
-        B1 --> CM[🎯 Capability Matching]
-        B2 --> CM
-        B3 --> CM
-        
-        CM --> E1[🤖 Agent Execution 1]
-        CM --> E2[🤖 Agent Execution 2]
-        CM --> E3[🤖 Agent Execution 3]
-    end
-    
-    subgraph "🗳️ Voting Phase"
-        E1 --> V[📊 CoT Voting]
-        E2 --> V
-        E3 --> V
-        V --> R[✅ Final Result]
-    end
-    
-    style U fill:#e1f5fe
-    style R fill:#e8f5e8
+```
+User Query
+    │
+    ▼
+┌─────────────────────────────────────────┐
+│  Planning Phase                         │
+│  - Task decomposition (k plans)         │
+│  - LinUCB plan selection                │
+└─────────────────────────────────────────┘
+    │
+    ▼
+┌─────────────────────────────────────────┐
+│  Execution Phase                        │
+│  - Beacon broadcast for each sub-task   │
+│  - Top-L agent candidate selection      │
+│  - LinUCB agent selection               │
+│  - Parallel CoT execution               │
+└─────────────────────────────────────────┘
+    │
+    ▼
+┌─────────────────────────────────────────┐
+│  Voting Phase                           │
+│  - CoT voting across responses          │
+│  - Final answer aggregation             │
+└─────────────────────────────────────────┘
+    │
+    ▼
+Final Result
 ```
 
-### Core Components
+## Key Features
 
-- **🗂️ Decentralized Ledger**: Tracks agent capabilities, contributions, and reputation
-- **🖥️ Worker Nodes**: Edge devices with local LLM engines and specialized prompts  
-- **🚪 Gateways**: Standardized APIs for registration and inter-agent messaging
-- **📡 Communicator**: Secure, efficient messaging across network topologies
+- **Decentralized Architecture**: No central orchestrator required, fault-tolerant
+- **Intelligent Task Routing**: Beacon-based capability matching with LinUCB learning
+- **Advanced Reasoning**: Multi-path CoT with majority voting
+- **Edge-Optimized**: Runs on consumer-grade GPUs (RTX 3060/4090, Jetson, M-series Mac)
 
-## 📦 Installation
+## Directory Structure
+
+```
+symphony/
+├── README.md                    # This file
+├── requirements.txt             # Python dependencies
+├── pyproject.toml               # Package configuration
+│
+├── core/                        # Core algorithms
+│   ├── capability.py            # Capability matching
+│   ├── linucb_selector.py       # LinUCB bandit selector
+│   ├── routing.py               # Task routing
+│   └── voting.py                # CoT voting mechanisms
+│
+├── agents/                      # Agent implementations
+│   ├── agent.py                 # Main Agent class
+│   └── user.py                  # User client
+│
+├── protocol/                    # Protocol definitions
+│   ├── task_contract.py         # Task data structures
+│   └── beacon.py                # Beacon messages
+│
+├── infra/                       # Infrastructure
+│   └── ISEP.py                  # Service exchange protocol
+│
+├── models/                      # Model loaders
+│   └── base_loader.py           # LLM loading utilities
+│
+├── symphony.py                  # Core orchestrator
+├── main.py                      # Simple entry point
+├── agent_register.py            # Agent registration runner
+├── user_register.py             # User registration runner
+│
+├── experiments/                 # All experiments
+│   ├── README.md                # Experiments overview
+│   ├── pretrain.py              # Main experiment runner
+│   ├── configs/                 # Configuration files
+│   ├── scripts/                 # Shell scripts
+│   ├── exp1/                    # Exp1: Efficiency & Cost
+│   ├── exp2/                    # Exp2: Robustness & Recovery
+│   └── exp3/                    # Exp3: System Optimization
+│
+├── scripts/                     # Utility scripts
+│   ├── plotting/                # Visualization
+│   │   ├── paper_figures/       # Paper figure generation
+│   │   └── routing/             # Routing analysis plots
+│   └── analysis/                # Analysis utilities
+│
+├── docs/                        # Documentation
+├── examples/                    # Example configurations
+└── tests/                       # Test suite
+```
+
+## Installation
+
+### System Requirements
+
+| Requirement | Minimum               | Recommended                 |
+| ----------- | --------------------- | --------------------------- |
+| Python      | 3.9                   | 3.10 or 3.11                |
+| RAM         | 8 GB                  | 16 GB                       |
+| GPU         | Optional              | CUDA-compatible (RTX 3060+) |
+| OS          | Linux, macOS, Windows | Linux (Ubuntu 20.04+)       |
+
+### Step-by-Step Setup
 
 ```bash
-# Clone the repository
-git clone https://github.com/your-org/symphony.git
+# 1. Clone the repository
+git clone https://github.com/anonymous/symphony.git
 cd symphony
 
-# Create virtual environment
+# 2. Create and activate virtual environment
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 
-# Install dependencies
+# 3. Upgrade pip
+pip install --upgrade pip
+
+# 4. Install core dependencies
 pip install -r requirements.txt
 
-# Install in development mode
+# 5. Install Symphony in development mode
 pip install -e .
+
+# 6. Verify installation
+python -c "import symphony; print('Symphony installed successfully')"
 ```
 
-## 🚀 Quick Start
+### Dependencies Overview
 
-### 1. Agent Registration
+The `requirements.txt` includes:
 
-Start a compute agent node:
+**Core Dependencies** (required):
+- `torch>=2.0.0` - Deep learning framework
+- `transformers>=4.30.0` - Hugging Face model library
+- `numpy>=1.24.0` - Numerical computing
+- `pyyaml>=6.0` - Configuration file parsing
+- `requests>=2.28.0` - HTTP client for API calls
+- `pyzmq>=25.0.0` - Distributed messaging
+- `aiohttp>=3.8.0` - Async HTTP client
+
+**Optional Dependencies** (for GPU acceleration):
+- `accelerate>=0.20.0` - Distributed training
+- `bitsandbytes>=0.41.0` - 8-bit quantization
+- `peft>=0.4.0` - Parameter-efficient fine-tuning
+
+### API Key Setup (Required for Real Experiments)
+
+Symphony uses [OpenRouter](https://openrouter.ai/) for LLM API access:
+
+```bash
+# Option 1: Export in terminal (temporary)
+export OPENROUTER_API_KEY="sk-or-v1-your-key-here"
+
+# Option 2: Add to shell profile (persistent)
+echo 'export OPENROUTER_API_KEY="sk-or-v1-your-key-here"' >> ~/.bashrc
+source ~/.bashrc
+
+# Option 3: Create .env file (recommended for development)
+echo 'OPENROUTER_API_KEY=sk-or-v1-your-key-here' > .env
+```
+
+**Verify API key is set:**
+```bash
+python -c "import os; print('API Key configured' if os.getenv('OPENROUTER_API_KEY') else 'API Key NOT set')"
+```
+
+See [docs/OPENROUTER_CONFIG_GUIDE.md](docs/OPENROUTER_CONFIG_GUIDE.md) for detailed API setup instructions.
+
+## Quick Start
+
+### Running a Simple Task
 
 ```python
-# agent_register.py
-from symphony import Agent
-from symphony.runtime.config import load_config
+from symphony import SymphonyOrchestrator
+from agents.agent import Agent
 
-# Load agent configuration
-config = load_config("config_agent1.yaml")
-
-# Initialize and register agent
-agent = Agent(
-    node_id="agent_001",
-    capabilities=["text-generation", "reasoning", "math"],
-    config=config
+# Initialize orchestrator
+orchestrator = SymphonyOrchestrator(
+    agents=["agent1", "agent2", "agent3"],
+    topL=3,
+    cot_count=3
 )
 
-# Start the agent
-agent.start()
-print(f"🤖 Agent {agent.node_id} is now online and ready to collaborate!")
-```
-
-### 2. User Registration
-
-Submit tasks to the Symphony network:
-
-```python
-# user_register.py
-from symphony import User
-from symphony.runtime.config import load_config
-
-# Load user configuration  
-config = load_config("config_user.yaml")
-
-# Initialize user client
-user = User(
-    node_id="user_001",
-    config=config
+# Execute a task
+result = orchestrator.run_task(
+    task_description="Solve: What is 25 * 37?",
+    requirements=["math"]
 )
 
-# Connect to the network
-user.connect()
-
-# Submit a complex reasoning task
-task = """
-Analyze the environmental impact of renewable energy adoption in developing countries. 
-Consider economic factors, technological challenges, and policy implications.
-Provide a comprehensive assessment with actionable recommendations.
-"""
-
-result = user.submit_task(task)
-print(f"📊 Task completed! Result: {result}")
+print(f"Result: {result['final_answer']}")
 ```
 
-### 3. Configuration Example
+### Using OpenRouter API
 
-```yaml
-# config_agent1.yaml
-node:
-  id: "agent_001"
-  type: "compute_provider"
-  
-model:
-  path: "mistralai/Mistral-7B-Instruct-v0.3"
-  device: "cuda:0"
-  max_tokens: 512
-  temperature: 0.7
-  
-capabilities:
-  - "text-generation"
-  - "mathematical-reasoning" 
-  - "code-analysis"
-  
-network:
-  host: "0.0.0.0"
-  port: 8001
-  neighbors:
-    - "192.168.1.100:8002"
-    - "192.168.1.101:8003"
-    
-storage:
-  lora_path: "./lora_cache"
-  memory_limit: "8GB"
+```bash
+# Set API key
+export OPENROUTER_API_KEY="sk-or-v1-..."
+
+# Run with OpenRouter models
+python experiments/pretrain.py \
+  --task-pool path/to/tasks.jsonl \
+  --agents "deepseek-v3" \
+  --runtime-dir experiments/configs \
+  --n 100
 ```
 
-## 📖 Detailed Usage
+## Running Experiments
 
-### Multi-Agent Task Execution
+All experiments are in the `experiments/` directory. See [experiments/README.md](experiments/README.md) for detailed documentation.
 
-```python
-from symphony.agents.agent import Agent
-from symphony.protocol.task_contract import Task
-from symphony.core.capability import CapabilityManager
+### Overview of Experiments
 
-# Initialize multiple specialized agents
-math_agent = Agent(
-    node_id="math_specialist",
-    capabilities=["mathematical-reasoning", "calculus", "statistics"]
-)
-
-code_agent = Agent(
-    node_id="code_specialist", 
-    capabilities=["code-generation", "debugging", "optimization"]
-)
-
-research_agent = Agent(
-    node_id="research_specialist",
-    capabilities=["web-search", "data-analysis", "summarization"]
-)
-
-# Create a complex task requiring multiple specialties
-complex_task = Task(
-    description="Build a machine learning model to predict stock prices using financial data",
-    requirements=["data-collection", "mathematical-modeling", "code-implementation"],
-    context={"domain": "finance", "complexity": "high"}
-)
-
-# The framework automatically:
-# 1. Decomposes the task into specialized sub-tasks
-# 2. Broadcasts beacons to find suitable agents
-# 3. Routes sub-tasks to best-matching specialists
-# 4. Aggregates results through CoT voting
-
-result = symphony.execute_task(complex_task)
-```
-
-### Custom Capability Matching
-
-```python
-from symphony.core.capability import CapabilityManager
-
-# Create custom capability manager
-cm = CapabilityManager([
-    "natural-language-processing",
-    "computer-vision", 
-    "time-series-analysis",
-    "recommendation-systems"
-])
-
-# Add new agent capabilities dynamically
-cm.add_capability("multimodal-reasoning")
-
-# Find best agents for specific requirements
-task_requirements = ["computer-vision", "natural-language-processing"]
-matches = cm.match_and_filter(task_requirements, threshold=0.8)
-
-print(f"🎯 Found {len(matches)} agents matching requirements")
-```
-
-## ⚙️ Configuration Guide
-
-### Network Topologies
-
-Symphony supports multiple network configurations:
-
-#### 1. Global Broadcast (Fully Connected)
-```yaml
-network:
-  topology: "global_broadcast"
-  discovery_method: "multicast"
-  broadcast_port: 5555
-```
-
-#### 2. Neighbor Broadcast (P2P)
-```yaml
-network:
-  topology: "neighbor_broadcast"
-  neighbors:
-    - host: "192.168.1.100"
-      port: 8001
-      capabilities: ["math", "reasoning"]
-    - host: "192.168.1.101"  
-      port: 8002
-      capabilities: ["vision", "nlp"]
-```
-
-### Model Configuration
-
-```yaml
-model:
-  # Supported models
-  name: "mistralai/Mistral-7B-Instruct-v0.3"  # or "deepseek-ai/deepseek-llm-7b-chat"
-  
-  # Optimization settings
-  quantization: "int8"  # int4, int8, fp16
-  max_memory: "8GB"
-  device_map: "auto"
-  
-  # Inference parameters
-  generation:
-    max_tokens: 512
-    temperature: 0.5
-    top_p: 0.9
-    do_sample: true
-    
-  # LoRA settings for distributed training
-  lora:
-    r: 16
-    alpha: 32
-    dropout: 0.1
-    target_modules: ["q_proj", "v_proj"]
-```
-
-### Capability Profiles
-
-Define agent specializations:
-
-```yaml
-capabilities:
-  # Core reasoning abilities
-  reasoning:
-    - "logical-reasoning"
-    - "mathematical-reasoning" 
-    - "causal-reasoning"
-  
-  # Domain expertise  
-  domains:
-    - "healthcare"
-    - "finance"
-    - "legal-analysis"
-    
-  # Technical skills
-  technical:
-    - "code-generation"
-    - "data-analysis"
-    - "system-administration"
-    
-  # Language support
-  languages:
-    - "english"
-    - "chinese"
-    - "spanish"
-```
-
-## 🔌 API Reference
-
-### Core Classes
-
-#### `Agent`
-The main agent implementation for task execution.
-
-```python
-class Agent:
-    def __init__(self, node_id: str, capabilities: List[str], config: Dict):
-        """Initialize agent with capabilities and configuration."""
-        
-    def register(self) -> bool:
-        """Register agent with the network."""
-        
-    def assign_task(self, task: Task) -> TaskResult:
-        """Execute assigned task and return result."""
-        
-    def _decompose_task(self, task: Task) -> List[SubTask]:
-        """Decompose complex task into executable sub-tasks."""
-```
-
-#### `User`
-User interface for submitting tasks to the network.
-
-```python
-class User:
-    def __init__(self, node_id: str, config: Dict):
-        """Initialize user client."""
-        
-    def submit_task(self, description: str, **kwargs) -> TaskResult:
-        """Submit task for distributed execution."""
-        
-    def get_task_status(self, task_id: str) -> TaskStatus:
-        """Check status of submitted task."""
-```
-
-#### `CapabilityManager`
-Manages agent capabilities and matching.
-
-```python
-class CapabilityManager:
-    def match(self, requirement: str, threshold: float = 0.7) -> List[float]:
-        """Match requirement against registered capabilities."""
-        
-    def add_capability(self, capability: str) -> None:
-        """Add new capability to the manager."""
-        
-    def match_and_filter(self, requirements: List[str], threshold: float) -> List[Tuple[int, float]]:
-        """Find and filter agents meeting requirements."""
-```
-
-### Protocol Messages
-
-#### `Task`
-Represents a distributed computation task.
-
-```python
-@dataclass
-class Task:
-    task_id: str
-    description: str
-    requirements: List[str]
-    context: Dict[str, Any]
-    subtask_id: int = 0
-    steps: List[str] = None
-    previous_results: List[str] = None
-```
-
-#### `Beacon`
-Service discovery and capability advertisement.
-
-```python
-@dataclass  
-class Beacon:
-    beacon_id: str
-    source_id: str
-    task_requirements: List[str]
-    ttl: int = 5
-    context: Dict[str, Any] = None
-```
-
-## 🤝 Contributing
-
-We welcome contributions from the community! Symphony is designed to be an open, collaborative platform for advancing decentralized AI research.
-
-## 📝 Citation
-
-If you use Symphony in your research or projects, please cite our paper:
-
-```bibtex
-@article{anonymous2026symphony,
-  title={Symphony: A Decentralized Multi-Agent Framework on Edge Devices with Beacon-Guided Task Routing and CoT Voting},
-  author={Anonymous},
-  journal={Under Review},
-  year={2026}
-}
-```
+| Experiment   | Description                | Type              | Estimated Time                |
+| ------------ | -------------------------- | ----------------- | ----------------------------- |
+| **Exp1**     | Efficiency & Cost Analysis | Simulation + Real | 30 min (sim) / 2-4 hrs (real) |
+| **Exp2**     | Robustness & Recovery      | Simulation + Real | 1-2 hrs                       |
+| **Exp3**     | System Optimization        | Simulation        | 30 min                        |
+| **Pretrain** | Main benchmark evaluation  | Real              | 4-8 hrs per benchmark         |
 
 ---
 
-<div align="center">
+### Experiment 1: Efficiency & Cost Analysis
 
-**🚀 Ready to build the future of decentralized AI?**
+**Goal**: Compare agent selection strategies (Always-A, Static Rule, Random, LinUCB).
 
-[Get Started](docs/getting-started.md)
+**Simulation Mode** (no API key needed):
+```bash
+cd experiments/exp1/sim
+python sim_efficiency_cost.py --n 1000 --seed 42
 
-</div>
+# Output: Results saved to exp1_sim_results/
+```
+
+**Real Mode** (requires OpenRouter API key):
+```bash
+cd experiments/exp1/real
+python exp1_real_openrouter.py --n 100
+
+# Output: Results saved to exp1_real_results/
+```
+
+**Expected Output Files**:
+- `accuracy_by_strategy.csv` - Accuracy comparison
+- `cost_by_strategy.csv` - API cost comparison
+- `selection_trace.json` - Agent selection decisions
+
+---
+
+### Experiment 2: Robustness & Recovery
+
+**Goal**: Evaluate adaptation when agents become unavailable or degraded.
+
+**Run both simulation and real:**
+```bash
+bash experiments/exp2/scripts/run_exp2_both.sh
+
+# Or run separately:
+python experiments/exp2/sim/exp2_sim.py --shock-type A_unavailable
+python experiments/exp2/real/exp2_real.py --shock-type A_degraded
+```
+
+**Shock Types**:
+- `A_unavailable`: Agent suddenly becomes unavailable
+- `A_degraded`: Agent performance drops significantly
+
+**Expected Output Files**:
+- `recovery_curve.csv` - Accuracy over time after shock
+- `adaptation_metrics.json` - Recovery time and final accuracy
+
+---
+
+### Experiment 3: System Optimization
+
+**Goal**: Evaluate routing optimization under latency and load variations.
+
+```bash
+bash experiments/exp3/run_exp3.sh
+
+# Or run directly:
+python experiments/exp3/sim_system_optimization.py --scenario latency_heterogeneous
+```
+
+**Scenarios** (defined in `experiments/exp3/configs/scenarios.yaml`):
+- `latency_heterogeneous`: Agents with different response latencies
+- `load_burst`: Dynamic load spikes
+- `combined`: Both latency and load variations
+
+**Expected Output Files**:
+- `latency_comparison.csv` - Response time metrics
+- `load_balance_metrics.csv` - Task distribution across agents
+
+---
+
+### Main Pretrain Experiments (Benchmark Evaluation)
+
+**Goal**: Evaluate Symphony on standard benchmarks (GSM8K, BBH, Medical QA).
+
+**Run individual benchmarks:**
+```bash
+# GSM8K (math reasoning)
+bash experiments/scripts/run_gsm8k_pretrain.sh
+
+# BBH (Big-Bench Hard)
+bash experiments/scripts/run_bbh_pretrain.sh
+
+# Balanced sampling across all tasks
+bash experiments/scripts/run_balanced_pretrain.sh
+
+# All datasets sequentially
+bash experiments/scripts/run_all_datasets.sh
+```
+
+**Run with custom parameters:**
+```bash
+python experiments/pretrain.py \
+  --task-pool data/gsm8k_full.jsonl \
+  --benchmark gsm8k \
+  --n 600 \
+  --cold-n 200 \
+  --pretrain-n 300 \
+  --test-n 100 \
+  --topL 3 \
+  --plan-k 3 \
+  --cot-count 3 \
+  --agents "deepseek-v3,openai-gpt-5-nano,openai-gpt-4-1-nano" \
+  --runtime-dir experiments/configs
+```
+
+**Expected Output** (saved to `pretrain_results/<timestamp>/`):
+- `accuracy_summary.csv` - Per-phase accuracy
+- `ucb_trace.md` - LinUCB arm selection trace
+- `progress_state.json` - Checkpoint for resumption
+
+## Reproducing Paper Results
+
+This section provides step-by-step instructions to reproduce all results in the paper.
+
+### Step 1: Environment Setup
+
+```bash
+# Create fresh environment
+python -m venv venv && source venv/bin/activate
+
+# Install dependencies
+pip install --upgrade pip
+pip install -r requirements.txt
+pip install -e .
+
+# Set API key
+export OPENROUTER_API_KEY="sk-or-v1-your-key"
+
+# Verify setup
+python -c "import symphony; import os; print('Ready!' if os.getenv('OPENROUTER_API_KEY') else 'Missing API key')"
+```
+
+### Step 2: Run All Experiments
+
+```bash
+# Exp1: Efficiency & Cost Analysis (Table 2 in paper)
+python experiments/exp1/real/exp1_real_openrouter.py --n 2000
+
+# Exp2: Robustness & Recovery (Figure 4 in paper)
+bash experiments/exp2/scripts/run_all_experiments.sh
+
+# Exp3: System Optimization (Figure 5 in paper)
+bash experiments/exp3/run_exp3.sh
+
+# Main Benchmark Results (Table 1 in paper)
+bash experiments/scripts/run_all_datasets.sh
+```
+
+### Step 3: Generate Paper Figures
+
+```bash
+# Figure 3: Robustness bar charts
+python scripts/plotting/paper_figures/plot_robustness_bars.py
+
+# Figure 4: 3D robustness surface
+python scripts/plotting/paper_figures/plot_robustness_3d_surface.py
+
+# Figure 5: Gap analysis
+python scripts/plotting/paper_figures/plot_gap_analysis.py
+
+# Figure 6: Parallel coordinates
+python scripts/plotting/paper_figures/plot_parallel_coordinates.py
+
+# Routing analysis visualizations
+python scripts/plotting/routing/plot_from_json.py pretrain_results/<your-result-dir>
+python scripts/plotting/routing/plot_agent_donut.py pretrain_results/<your-result-dir>
+```
+
+### Expected Results Summary
+
+| Experiment        | Key Metric                         | Expected Range |
+| ----------------- | ---------------------------------- | -------------- |
+| Exp1 (Efficiency) | LinUCB vs Always-A cost reduction  | 15-25%         |
+| Exp2 (Robustness) | Recovery time after shock          | < 50 tasks     |
+| Exp3 (Latency)    | Load-balanced vs naive improvement | 10-20%         |
+| GSM8K             | Test accuracy (LinUCB)             | 75-85%         |
+| BBH               | Macro-average accuracy             | 60-70%         |
+
+---
+
+## Troubleshooting
+
+### Common Issues
+
+**1. `ModuleNotFoundError: No module named 'symphony'`**
+```bash
+# Ensure you're in the project root and installed in dev mode
+pip install -e .
+```
+
+**2. `OPENROUTER_API_KEY not set`**
+```bash
+# Check if key is exported
+echo $OPENROUTER_API_KEY
+
+# If empty, set it
+export OPENROUTER_API_KEY="sk-or-v1-your-key"
+```
+
+**3. `CUDA out of memory`**
+```bash
+# Use CPU-only mode or reduce batch size
+export CUDA_VISIBLE_DEVICES=""  # Force CPU
+```
+
+**4. `Connection timeout` or `Rate limit exceeded`**
+```bash
+# Reduce concurrent requests in config
+# Edit experiments/configs/openrouter/<model>/config_*.yaml
+# Add: rate_limit_delay: 1.0
+```
+
+**5. `FileNotFoundError: task-pool not found`**
+```bash
+# Ensure task data files exist
+# Download from paper supplementary materials or generate:
+python scripts/analysis/balanced_task_pool.py --output data/tasks.jsonl
+```
+
+### Getting Help
+
+- Check [experiments/README.md](experiments/README.md) for experiment-specific issues
+- Check [docs/OPENROUTER_CONFIG_GUIDE.md](docs/OPENROUTER_CONFIG_GUIDE.md) for API setup
+- Verify Python version: `python --version` (requires 3.9+)
+
+## Configuration Guide
+
+### Agent Configuration
+
+Configs in `experiments/configs/openrouter/<model>/`:
+
+```yaml
+debug: false
+role: "agent"
+node_id: "agent-openrouter-016"
+base_model: "openrouter:deepseek/deepseek-chat"
+capabilities: [math, reasoning, code]
+max_tokens: 512
+temperature: 0.2
+```
+
+### Key Experiment Parameters
+
+| Parameter     | Description       | Default  |
+| ------------- | ----------------- | -------- |
+| `--task-pool` | Task JSONL file   | Required |
+| `--n`         | Total tasks       | 100      |
+| `--topL`      | Top-L candidates  | 3        |
+| `--plan-k`    | Plans to generate | 3        |
+| `--cot-count` | CoT paths         | 3        |
+| `--agents`    | Agent IDs         | Required |
+
+See [docs/OPENROUTER_CONFIG_GUIDE.md](docs/OPENROUTER_CONFIG_GUIDE.md) for detailed setup.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

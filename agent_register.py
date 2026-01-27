@@ -21,7 +21,7 @@ import threading
 from typing import Optional
 import argparse
 
-from runtime.config import load_config_from_file
+from experiments.configs.config import load_config_from_file
 from agents.agent import Agent
 
 

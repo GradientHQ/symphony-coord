@@ -1,6 +1,0 @@
-policy,n,p_hard,shock_type,shock_point,success_rate_pre_shock,success_rate_post_shock,success_rate_overall,recovery_time,deadlock_rate,avg_latency_ms,cost_per_correct,worst_rolling_window,choose_A,choose_B,choose_C,choose_D,choose_E,choose_A_pre,choose_B_pre,choose_C_pre,choose_D_pre,choose_E_pre,choose_A_post,choose_B_post,choose_C_post,choose_D_post,choose_E_post,recovery_status,success_rate_drop
-static_rule,1000,0.692,A_degraded,500,0.922,0.388,0.655,-1,0.12,1423.3972131881442,1.1035114503816852,0.26,692,308,0,0,0,349,151,0,0,0,343,157,0,0,0,Not Recovered,0.534
-random,1000,0.692,A_degraded,500,0.462,0.406,0.434,-1,0.104,910.975162881336,1.0592396313364218,0.24,203,196,193,198,210,99,95,78,107,121,104,101,115,91,89,Not Recovered,0.055999999999999994
-random_topL,1000,0.692,A_degraded,500,0.4,0.342,0.371,350,0.138,892.4083716089756,1.0851482479784553,0.0,101,101,237,337,224,53,49,118,167,113,48,52,119,170,111,Recovered,0.057999999999999996
-linucb,1000,0.692,A_degraded,500,0.472,0.498,0.485,80,0.068,785.819388283882,0.5166804123711285,0.0,5,303,105,457,130,5,146,62,213,74,0,157,43,244,56,Recovered,-0.026000000000000023
-linucb_frozen,1000,0.692,A_degraded,500,0.426,0.492,0.459,-1,0.072,793.6504074348487,0.5306971677559857,0.0,4,304,99,477,116,4,147,81,208,60,0,157,18,269,56,Not Recovered,-0.066

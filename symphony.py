@@ -401,7 +401,7 @@ class SymphonyOrchestrator:
                             self.selector.update(x, bonus)
 
             if return_mode == "trace":
-                # ✅ Build traces dict compatible with non-planner mode for Pre-train.py
+                # Build traces dict compatible with non-planner mode for pretrain.py
                 # Extract runs from winning plan's records to build a compatible trace structure
                 traces_dict: Dict[str, Any] = {}
                 all_runs: List[Dict[str, Any]] = []
@@ -416,7 +416,7 @@ class SymphonyOrchestrator:
                             # records are the run_records from plan chain execution
                             all_runs = records
                 
-                # Build a single trace entry compatible with Pre-train.py (expects {"traces": {"sub_1": {...}}})
+                # Build a single trace entry compatible with pretrain.py (expects {"traces": {"sub_1": {...}}})
                 if all_runs or final_text:
                     traces_dict["sub_1"] = {
                         "requirement": "planning",

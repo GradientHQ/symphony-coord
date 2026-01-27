@@ -12,6 +12,9 @@ Symphony 2.0 changes (important):
 3) Make optional deps (vllm / pythonmonkey / regex) import-safe for reproducibility.
 """
 
+# Set to True to enable verbose debug output
+DEBUG_VERBOSE = False
+
 from __future__ import annotations
 
 import re
@@ -329,8 +332,9 @@ OUTPUT:
 
         # Lower temperature for structured JSON output stability
         result = self.generate(prompt, max_new_tokens=768, temperature=0.2, top_p=0.9)
-        print(f"Raw result: {result}")
-        print(f"[DEBUG] repr: {repr(result)}")
+        if DEBUG_VERBOSE:
+            print(f"Raw result: {result}")
+            print(f"[DEBUG] repr: {repr(result)}")
 
         try:
             cleaned = result.strip().lstrip("\ufeff")
@@ -432,8 +436,9 @@ Input:
 Output:""".format(user_input=user_input.strip())
 
         result = self.generate(prompt, temperature=0.2, max_new_tokens=512, top_p=0.9)
-        print(f"Raw Result: {result}")
-        print(f"[DEBUG] repr: {repr(result)}")
+        if DEBUG_VERBOSE:
+            print(f"Raw Result: {result}")
+            print(f"[DEBUG] repr: {repr(result)}")
 
         try:
             cleaned = result.strip().lstrip("\ufeff")

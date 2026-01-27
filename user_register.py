@@ -24,7 +24,7 @@ import argparse
 from typing import List, Dict, Any, Tuple, Optional
 from collections import Counter
 
-from runtime.config import load_config_from_file
+from experiments.configs.config import load_config_from_file
 from agents.user import User
 
 

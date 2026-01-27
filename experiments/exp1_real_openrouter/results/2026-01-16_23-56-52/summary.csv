@@ -1,5 +1,0 @@
-policy,n,p_hard,topL,success_rate,total_cost,avg_cost,avg_latency_ms,fallback_rate,choose_A,choose_B,choose_C,choose_D,choose_E,choose_F,choose_G
-sop_strong,100,0.45,3,0.0,0.0,0.0,68.81596803665161,0.0,0,0,0,100,0,0,0
-sop_rule,100,0.45,3,0.0,0.0,0.0,66.82811737060547,0.0,55,0,0,45,0,0,0
-random,100,0.45,3,0.0,0.0,0.0,84.77285623550415,0.0,27,44,29,0,0,0,0
-linucb,100,0.45,3,0.0,0.0,0.0,72.18675136566162,0.0,35,32,33,0,0,0,0

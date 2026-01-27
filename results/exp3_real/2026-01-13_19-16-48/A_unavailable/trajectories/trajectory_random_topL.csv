@@ -1,3 +1,0 @@
-t,shock_type,shock_point,policy,task_difficulty,chosen_agent,match_score,latency_ms,call_cost,success,error_type,phase
-0,A_unavailable,1,random_topL,hard,D,0.95,3590.0256633758545,1.0,0,api_fail,pre
-1,A_unavailable,1,random_topL,simple,H,0.95,618.8130378723145,0.075,1,none,post

@@ -119,11 +119,11 @@ TASK_STREAMS = {
         "n_tasks": 1000,
         "description": "Balanced-50:50 for Exp2 (50% easy, 50% hard)",
     },
-    "exp4_robustness": {
+    "exp3_system_opt": {
         "benchmarks": ["humaneval", "gsm8k"],
         "difficulty_split": "80:20",
         "n_tasks": 1000,
-        "description": "Task stream for Exp4 robustness testing",
+        "description": "Task stream for Exp3 system optimization testing",
     },
 }
 
