@@ -442,21 +442,16 @@ class Beacon:
 
 We welcome contributions from the community! Symphony is designed to be an open, collaborative platform for advancing decentralized AI research.
 
-## 🤝 Contact
-
-If you are interested in our research, please contact tianyu@gradient.network. 
-
-
 ## 📝 Citation
 
 If you use Symphony in your research or projects, please cite our paper:
 
 ```bibtex
-@article{wang2024symphony,
+@article{anonymous2026symphony,
   title={Symphony: A Decentralized Multi-Agent Framework on Edge Devices with Beacon-Guided Task Routing and CoT Voting},
-  author={Wang, Ji and Chen, Kashing and Song, Xinyuan and Ai, Lynn and Yang, Eric and Zhang, Ke and Shi, Bill},
-  journal={arXiv preprint arXiv:2024.xxxx},
-  year={2024}
+  author={Anonymous},
+  journal={Under Review},
+  year={2026}
 }
 ```
 
@@ -466,7 +461,6 @@ If you use Symphony in your research or projects, please cite our paper:
 
 **🚀 Ready to build the future of decentralized AI?**
 
-[Get Started](docs/getting-started.md) | [Join Our Community](https://discord.gg/symphony-ai) | [Follow Updates](https://twitter.com/symphony_ai)
-
+[Get Started](docs/getting-started.md)
 
 </div>
