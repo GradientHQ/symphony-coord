@@ -13,3 +13,15 @@ __pycache__/
 *.so
 *.dylib
 *.dll
+
+.DS_Store
+**/.DS_Store
+
+.DS_Store
+**/.DS_Store
+
+pretrain_results/
+select_only_results/
+**/*.png
+**/*.pdf
+**/*.jsonl
