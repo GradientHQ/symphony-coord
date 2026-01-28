@@ -12,6 +12,7 @@ Symphony is a decentralized multi-agent framework that enables intelligent agent
 - [Installation](#installation)
 - [Quick Start](#quick-start)
 - [Running Experiments](#running-experiments)
+- [Benchmark Data Generation](#benchmark-data-generation)
 - [Reproducing Paper Results](#reproducing-paper-results)
 - [Configuration Guide](#configuration-guide)
 - [Citation](#citation)
@@ -110,6 +111,11 @@ symphony/
 │   │   ├── paper_figures/       # Paper figure generation
 │   │   └── routing/             # Routing analysis plots
 │   └── analysis/                # Analysis utilities
+│
+├── symphony-data-generator/     # Benchmark data generation
+│   ├── config/data_config.yaml  # Benchmark configurations
+│   ├── src/data_generator.py    # Core difficulty scoring module
+│   └── src/quick_start.py       # Quick start script
 │
 ├── docs/                        # Documentation
 ├── examples/                    # Example configurations
@@ -357,6 +363,79 @@ python experiments/pretrain.py \
 - `ucb_trace.md` - LinUCB arm selection trace
 - `progress_state.json` - Checkpoint for resumption
 
+## Benchmark Data Generation
+
+Symphony includes a unified data generator for creating experiment-ready task pools with difficulty scoring across 5 benchmarks.
+
+### Quick Start
+
+```bash
+cd symphony-data-generator
+pip install -r requirements.txt
+python src/quick_start.py
+```
+
+### Supported Benchmarks
+
+| Benchmark      | Source                              | Tasks  | Type                   |
+| -------------- | ----------------------------------- | ------ | ---------------------- |
+| **HumanEval**  | `openai_humaneval`                  | 164    | Code Generation        |
+| **GSM8K**      | `gsm8k`                             | 1,319  | Mathematical Reasoning |
+| **BBH**        | `lukaemon/bbh`                      | 2,437  | Multi-hop Reasoning    |
+| **AMC**        | `AI-MO/aimo-validation-amc`         | 83     | Competition Math       |
+| **MedicalQA**  | `GBaker/MedQA-USMLE-4-options`      | 1,273  | Domain-Specific QA     |
+
+### Difficulty Scoring Formulas
+
+Each benchmark uses a domain-specific difficulty scoring function:
+
+**HumanEval (Code Generation)**:
+$$d_{\text{code}} = 0.6 \cdot \frac{n_{\text{asserts}}}{\hat{a}} + 0.4 \cdot \frac{|\text{prompt}|}{\hat{p}}$$
+
+**GSM8K (Mathematical Reasoning)**:
+$$d_{\text{math}} = \frac{\text{reasoning\_steps}}{\hat{s}}$$
+
+**BBH (Multi-hop Reasoning)**:
+$$d_{\text{BBH}} = c_{\text{task}} + 0.3 \cdot \frac{|\text{input}|}{\hat{i}}$$
+
+**AMC (Competition Mathematics)**:
+$$d_{\text{AMC}} = 0.7 \cdot \frac{|\text{problem}|}{\hat{p}} + 0.3 + 0.12 \cdot \mathbb{1}[\text{math\_notation}]$$
+
+**Medical QA (Domain-Specific)**:
+$$d_{\text{med}} = 0.4 \cdot \bar{q} + 0.3 \cdot \bar{k} + 0.2 \cdot \bar{o} + 0.2 \cdot \mathbb{1}[\text{clinical}]$$
+
+Where $\hat{\cdot}$ denotes 95th percentile normalizers computed from the full dataset.
+
+### Difficulty Binning
+
+Tasks are categorized using percentile-based thresholds (P20/P80):
+- **Easy**: score ≤ P20
+- **Hard**: score ≥ P80
+- **Medium**: P20 < score < P80
+
+### Generating Task Pools
+
+```python
+from src.data_generator import DatasetBuilder
+
+builder = DatasetBuilder('config/data_config.yaml')
+
+# Preprocess all benchmarks (one-time)
+builder.preprocess_all_benchmarks(output_dir='data/benchmarks/full')
+
+# Generate experiment stream
+tasks = builder.build_task_stream(
+    benchmarks_to_include=['humaneval', 'gsm8k'],
+    difficulty_split='80:20',  # 80% easy, 20% hard
+    n_total_tasks=1000,
+    random_seed=2025,
+)
+
+builder.save_task_pool(tasks, 'data/exp1/task_pool.jsonl')
+```
+
+---
+
 ## Reproducing Paper Results
 
 This section provides step-by-step instructions to reproduce all results in the paper.
@@ -500,6 +579,66 @@ temperature: 0.2
 | `--agents`    | Agent IDs         | Required |
 
 See [docs/OPENROUTER_CONFIG_GUIDE.md](docs/OPENROUTER_CONFIG_GUIDE.md) for detailed setup.
+
+## Citation
+
+If you use Symphony in your research, please cite:
+
+```bibtex
+@article{symphony2025,
+  title={Symphony: A Decentralized Multi-Agent Framework for Edge Devices with Beacon-Guided Task Routing and CoT Voting},
+  author={Anonymous},
+  journal={arXiv preprint},
+  year={2025}
+}
+```
+
+### Benchmark Citations
+
+```bibtex
+% HumanEval
+@article{chen2021evaluating,
+  title={Evaluating Large Language Models Trained on Code},
+  author={Chen, Mark and others},
+  journal={arXiv preprint arXiv:2107.03374},
+  year={2021}
+}
+
+% GSM8K
+@article{cobbe2021training,
+  title={Training Verifiers to Solve Math Word Problems},
+  author={Cobbe, Karl and others},
+  journal={arXiv preprint arXiv:2110.14168},
+  year={2021}
+}
+
+% BIG-Bench Hard (BBH)
+@article{suzgun2022challenging,
+  title={Challenging BIG-Bench Tasks and Whether Chain-of-Thought Can Solve Them},
+  author={Suzgun, Mirac and others},
+  journal={arXiv preprint arXiv:2210.09261},
+  year={2022}
+}
+
+% AMC (AIMO validation)
+@misc{aimo2024,
+  title={AI Mathematical Olympiad - Validation AMC Problems},
+  author={{AI-MO}},
+  year={2024},
+  howpublished={\url{https://huggingface.co/datasets/AI-MO/aimo-validation-amc}}
+}
+
+% MedQA-USMLE
+@article{jin2021disease,
+  title={What Disease does this Patient Have? A Large-scale Open Domain Question Answering Dataset from Medical Exams},
+  author={Jin, Di and Pan, Eileen and Oufattole, Nassim and Weng, Wei-Hung and Fang, Hanyi and Szolovits, Peter},
+  journal={Applied Sciences},
+  volume={11},
+  number={14},
+  pages={6421},
+  year={2021}
+}
+```
 
 ## License
 
