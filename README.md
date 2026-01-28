@@ -377,13 +377,13 @@ python src/quick_start.py
 
 ### Supported Benchmarks
 
-| Benchmark      | Source                              | Tasks  | Type                   |
-| -------------- | ----------------------------------- | ------ | ---------------------- |
-| **HumanEval**  | `openai_humaneval`                  | 164    | Code Generation        |
-| **GSM8K**      | `gsm8k`                             | 1,319  | Mathematical Reasoning |
-| **BBH**        | `lukaemon/bbh`                      | 2,437  | Multi-hop Reasoning    |
-| **AMC**        | `AI-MO/aimo-validation-amc`         | 83     | Competition Math       |
-| **MedicalQA**  | `GBaker/MedQA-USMLE-4-options`      | 1,273  | Domain-Specific QA     |
+| Benchmark     | Source                         | Tasks | Type                   |
+| ------------- | ------------------------------ | ----- | ---------------------- |
+| **HumanEval** | `openai_humaneval`             | 164   | Code Generation        |
+| **GSM8K**     | `gsm8k`                        | 1,319 | Mathematical Reasoning |
+| **BBH**       | `lukaemon/bbh`                 | 2,437 | Multi-hop Reasoning    |
+| **AMC**       | `AI-MO/aimo-validation-amc`    | 83    | Competition Math       |
+| **MedicalQA** | `GBaker/MedQA-USMLE-4-options` | 1,273 | Domain-Specific QA     |
 
 ### Difficulty Scoring Formulas
 
@@ -592,54 +592,3 @@ If you use Symphony in your research, please cite:
   year={2025}
 }
 ```
-
-### Benchmark Citations
-
-```bibtex
-% HumanEval
-@article{chen2021evaluating,
-  title={Evaluating Large Language Models Trained on Code},
-  author={Chen, Mark and others},
-  journal={arXiv preprint arXiv:2107.03374},
-  year={2021}
-}
-
-% GSM8K
-@article{cobbe2021training,
-  title={Training Verifiers to Solve Math Word Problems},
-  author={Cobbe, Karl and others},
-  journal={arXiv preprint arXiv:2110.14168},
-  year={2021}
-}
-
-% BIG-Bench Hard (BBH)
-@article{suzgun2022challenging,
-  title={Challenging BIG-Bench Tasks and Whether Chain-of-Thought Can Solve Them},
-  author={Suzgun, Mirac and others},
-  journal={arXiv preprint arXiv:2210.09261},
-  year={2022}
-}
-
-% AMC (AIMO validation)
-@misc{aimo2024,
-  title={AI Mathematical Olympiad - Validation AMC Problems},
-  author={{AI-MO}},
-  year={2024},
-  howpublished={\url{https://huggingface.co/datasets/AI-MO/aimo-validation-amc}}
-}
-
-% MedQA-USMLE
-@article{jin2021disease,
-  title={What Disease does this Patient Have? A Large-scale Open Domain Question Answering Dataset from Medical Exams},
-  author={Jin, Di and Pan, Eileen and Oufattole, Nassim and Weng, Wei-Hung and Fang, Hanyi and Szolovits, Peter},
-  journal={Applied Sciences},
-  volume={11},
-  number={14},
-  pages={6421},
-  year={2021}
-}
-```
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
