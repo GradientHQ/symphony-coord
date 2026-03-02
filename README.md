@@ -19,7 +19,11 @@ Symphony is a decentralized multi-agent framework that enables intelligent agent
 
 ## Project Demo
 
-[![Watch the demo](https://img.youtube.com/vi/VYHErytbD3U/0.jpg)](https://www.youtube.com/watch?v=VYHErytbD3U)
+<p align="center">
+  <a href="https://www.youtube.com/watch?v=Qnh4lrXGprE">
+    <img src="https://img.youtube.com/vi/Qnh4lrXGprE/maxresdefault.jpg" width="900">
+  </a>
+</p>
 
 ## Overview
 
