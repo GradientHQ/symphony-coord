@@ -33,6 +33,8 @@ Symphony employs a three-stage pipeline:
 2. **Execution Phase**: Beacon-guided routing matches sub-tasks to specialized agents using LinUCB-based selection
 3. **Voting Phase**: CoT voting aggregates multiple agent responses for robust final answers
 
+<img src="Overview.png" width="900">
+
 ### Architecture
 
 ```
