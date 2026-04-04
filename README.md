@@ -1,8 +1,8 @@
-# Symphony
+# Symphony-coord
 
-**A Decentralized Multi-Agent Framework for Edge Devices with Beacon-Guided Task Routing and CoT Voting**
+**Symphony-Coord: Emergent Coordination in Decentralized Agent Systems**
 
-Symphony is a decentralized multi-agent framework that enables intelligent agents to collaborate across heterogeneous edge devices through beacon-guided task routing and Chain-of-Thought (CoT) voting mechanisms.
+Symphony-Coord is a decentralized multi-agent framework that transforms agent selection into an online multi-armed bandit problem, enabling roles to emerge organically through interaction.
 
 ## Table of Contents
 
@@ -595,10 +595,10 @@ See [docs/OPENROUTER_CONFIG_GUIDE.md](docs/OPENROUTER_CONFIG_GUIDE.md) for detai
 If you use Symphony in your research, please cite:
 
 ```bibtex
-@article{symphony2025,
-  title={Symphony: A Decentralized Multi-Agent Framework for Edge Devices with Beacon-Guided Task Routing and CoT Voting},
-  author={Anonymous},
-  journal={arXiv preprint},
-  year={2025}
+@article{guan2026symphony,
+  title={Symphony-Coord: Emergent Coordination in Decentralized Agent Systems},
+  author={Guan, Zhaoyang and Cao, Huixi and Zhong, Ming and Yang, Eric and Ai, Lynn and Ni, Yongxin and Shi, Bill},
+  journal={arXiv preprint arXiv:2602.00966},
+  year={2026}
 }
 ```
