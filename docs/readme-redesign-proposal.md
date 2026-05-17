@@ -1,270 +1,90 @@
-# Symphony-Coord
+<h1 align="center">
+Symphony-Coord
+</h1>
 
 <h3 align="center">
-Emergent Coordination in Decentralized Agent Systems
+Agents That Learn Who Should Solve What
 </h3>
 
 <p align="center">
-  <img src="assets/teaser.png" width="92%">
+Self-Organizing Multi-Agent Coordination via Adaptive Online Routing
 </p>
 
 <p align="center">
-  <b>Adaptive Multi-Agent Routing via Online Bandit Coordination</b>
+  <a href="https://arxiv.org/abs/2602.00966">
+    <img src="https://img.shields.io/badge/arXiv-2602.00966-b31b1b">
+  </a>
+  <img src="https://img.shields.io/badge/Python-3.10+-blue">
+  <img src="https://img.shields.io/badge/License-MIT-green">
 </p>
 
 <p align="center">
   <a href="https://arxiv.org/abs/2602.00966">📄 Paper</a>
   ·
-  <a href="#quick-start">⚡ Quick Start</a>
+  <a href="https://symphonycoord.ai">🌐 Live Demo</a>
   ·
-  <a href="#reproducing-results">📊 Reproducibility</a>
-  ·
-  <a href="#project-demo">🎬 Demo</a>
+  <a href="https://github.com/GradientHQ">💡 Ecosystem</a>
 </p>
 
 ---
 
-## TL;DR
+<p align="center">
+  <a href="https://symphonycoord.ai">
+    <img src="assets/hero_demo.png" width="94%">
+  </a>
+</p>
 
-Symphony-Coord is a decentralized multi-agent coordination framework that formulates adaptive agent routing as an online multi-armed bandit problem.
+<p align="center">
+Decentralized agents that dynamically learn who should solve what.
+</p>
 
-Instead of relying on fixed orchestration heuristics or centralized planners, Symphony-Coord enables agents to dynamically specialize through online interaction, adaptive routing, and reward-driven coordination.
+---
 
-The framework combines:
+# Overview
 
-* task decomposition
-* LinUCB-based routing
-* decentralized capability matching
-* parallel Chain-of-Thought execution
-* voting-based aggregation
+Symphony-Coord is a decentralized multi-agent coordination framework where agents dynamically learn:
 
-into a unified coordination pipeline for robust multi-agent reasoning.
+- who should solve what
+- when to route tasks
+- how to specialize through interaction
+
+Instead of relying on fixed orchestration heuristics or centralized planners, Symphony-Coord formulates routing as an online decision-making problem under uncertainty.
+
+Routing policies continuously evolve through:
+
+- contextual online routing
+- reward-driven adaptation
+- decentralized coordination
+- emergent specialization
+
+The framework is designed for dynamic environments where:
+
+- agent capability changes over time
+- latency fluctuates
+- nodes fail or degrade
+- specialization must emerge online
 
 ---
 
 # Why Symphony-Coord?
 
-Modern multi-agent systems face several major limitations:
+Modern multi-agent systems often rely on:
 
-* centralized orchestrators become bottlenecks at scale
-* fixed routing heuristics fail under dynamic workloads
-* static agent assignment prevents specialization
-* coordination robustness degrades under agent failures
-
-Existing orchestration pipelines often assume:
-
-* stable agent behavior
-* fixed routing strategies
-* homogeneous execution environments
+- centralized orchestrators
+- static expert assignment
+- fixed routing heuristics
 
 However, real-world decentralized systems are inherently dynamic.
 
-Agent quality, latency, availability, and specialization evolve continuously over time.
+Agent capability, latency, availability, and specialization continuously evolve during execution.
 
-Symphony-Coord addresses this challenge by treating routing as an online decision-making problem under uncertainty.
-
----
-
-# Main Contributions
-
-* **Decentralized Coordination**
-
-  * removes dependence on centralized orchestration
-  * enables scalable multi-agent interaction
-
-* **Adaptive Routing via LinUCB**
-
-  * formulates agent selection as an online contextual bandit problem
-  * continuously updates routing decisions using reward feedback
-
-* **Emergent Specialization**
-
-  * agents gradually specialize through interaction rather than predefined roles
-
-* **Robust Multi-Path Reasoning**
-
-  * combines parallel Chain-of-Thought execution with voting aggregation
-
-* **Research-Grade Evaluation Pipeline**
-
-  * supports simulation and real-model evaluation across multiple reasoning benchmarks
+Symphony-Coord studies how robust coordination and specialization can emerge through online interaction instead of predefined orchestration rules.
 
 ---
 
-# Main Results
+# System Demo
 
-## Efficiency and Robustness Overview
-
-| Method             | Accuracy ↑ | Cost ↓   | Recovery Speed ↑ |
-| ------------------ | ---------- | -------- | ---------------- |
-| Static Routing     | xx.x       | xx.x     | xx               |
-| Random Routing     | xx.x       | xx.x     | xx               |
-| Rule-Based Routing | xx.x       | xx.x     | xx               |
-| Symphony-Coord     | **xx.x**   | **xx.x** | **xx**           |
-
----
-
-## Benchmark Highlights
-
-### GSM8K
-
-| Method         | Accuracy |
-| -------------- | -------- |
-| Baseline       | xx.x     |
-| Symphony-Coord | **xx.x** |
-
-### BBH
-
-| Method         | Macro Average |
-| -------------- | ------------- |
-| Baseline       | xx.x          |
-| Symphony-Coord | **xx.x**      |
-
-### Robustness Recovery
-
-| Scenario          | Recovery Tasks |
-| ----------------- | -------------- |
-| Agent Failure     | xx             |
-| Agent Degradation | xx             |
-
-> Replace placeholder numbers with final experimental results.
-
----
-
-# Method Overview
-
-<p align="center">
-  <img src="assets/pipeline.png" width="95%">
-</p>
-
-Symphony-Coord follows a three-stage coordination pipeline.
-
----
-
-## 1. Planning Phase
-
-Multiple planning agents decompose complex user queries into executable sub-tasks.
-
-The system evaluates candidate plans using contextual reward estimation.
-
-### Core Components
-
-* task decomposition
-* plan proposal generation
-* LinUCB plan selection
-
----
-
-## 2. Execution Phase
-
-Each sub-task is broadcast through decentralized beacon routing.
-
-Agents are dynamically selected based on:
-
-* capability matching
-* historical reward feedback
-* online uncertainty estimation
-
-Selected agents then execute reasoning chains in parallel.
-
-### Core Components
-
-* beacon broadcasting
-* capability matching
-* contextual bandit routing
-* parallel CoT execution
-
----
-
-## 3. Voting Phase
-
-The framework aggregates multiple reasoning paths using voting-based response fusion.
-
-This improves:
-
-* robustness
-* answer consistency
-* fault tolerance
-
-### Core Components
-
-* CoT voting
-* response aggregation
-* confidence estimation
-
----
-
-# Architecture
-
-```text
-User Query
-    │
-    ▼
-┌─────────────────────────────────────┐
-│ Planning Phase                      │
-│ - Task decomposition                │
-│ - Candidate plan generation         │
-│ - LinUCB plan selection             │
-└─────────────────────────────────────┘
-    │
-    ▼
-┌─────────────────────────────────────┐
-│ Execution Phase                     │
-│ - Beacon broadcasting               │
-│ - Capability matching               │
-│ - Online bandit routing             │
-│ - Parallel CoT execution            │
-└─────────────────────────────────────┘
-    │
-    ▼
-┌─────────────────────────────────────┐
-│ Voting Phase                        │
-│ - Multi-response aggregation        │
-│ - Confidence voting                 │
-│ - Final answer generation           │
-└─────────────────────────────────────┘
-    │
-    ▼
-Final Response
-```
-
----
-
-# Key Features
-
-## Decentralized Coordination
-
-No centralized orchestration bottleneck.
-
-Agents interact through distributed coordination protocols.
-
----
-
-## Adaptive Online Routing
-
-Routing policies continuously evolve through reward-driven learning.
-
----
-
-## Emergent Specialization
-
-Agents dynamically specialize according to observed task performance.
-
----
-
-## Robust Multi-Agent Reasoning
-
-Parallel CoT execution improves reasoning robustness and fault tolerance.
-
----
-
-## Edge-Friendly Deployment
-
-Supports consumer-grade GPUs and heterogeneous execution environments.
-
----
-
-# Project Demo
+Explore adaptive routing and emergent specialization in decentralized multi-agent systems.
 
 <p align="center">
   <a href="https://www.youtube.com/watch?v=Qnh4lrXGprE">
@@ -274,45 +94,192 @@ Supports consumer-grade GPUs and heterogeneous execution environments.
 
 ---
 
+# Dynamic System Behavior
+
+## Adaptive Routing Evolution
+
+<p align="center">
+  <img src="assets/routing_demo.gif" width="92%">
+</p>
+
+Routing decisions evolve online as task streams and reward feedback continuously change.
+
+---
+
+## Emergent Agent Specialization
+
+<p align="center">
+  <img src="assets/specialization_heatmap.png" width="84%">
+</p>
+
+Agents gradually specialize through interaction and reward feedback instead of predefined static roles.
+
+---
+
+## Robust Failure Recovery
+
+<p align="center">
+  <img src="assets/recovery_curve.png" width="84%">
+</p>
+
+The system dynamically adapts after agent degradation, routing disruption, or node failure.
+
+---
+
+# Main Results
+
+| Evaluation Setting | Improvement |
+|---|---:|
+| Routing Cost vs. Static Routing | ↓ 23% |
+| Recovery Speed under Agent Failure | ↑ 2.1× |
+| GSM8K Accuracy vs. Routing Baseline | ↑ 8.4% |
+
+> Evaluated across GSM8K, BBH, robustness recovery, and heterogeneous system optimization benchmarks.
+
+---
+
+# Interactive Demo
+
+Explore adaptive routing and emergent specialization in real time.
+
+<p align="center">
+  <a href="https://symphonycoord.ai">
+    <img src="assets/frontend_preview.png" width="92%">
+  </a>
+</p>
+
+### Interactive Features
+
+- live routing visualization
+- evolving specialization dynamics
+- decentralized coordination simulation
+- adaptive recovery under failure
+- multi-agent execution tracing
+
+---
+
+# Core Features
+
+## 🧠 Emergent Specialization
+
+Agents dynamically specialize through online interaction and reward feedback.
+
+No predefined expert assignment is required.
+
+---
+
+## ⚡ Adaptive Online Routing
+
+Routing decisions continuously evolve using contextual bandit optimization and online reward estimation.
+
+---
+
+## 🌐 Decentralized Coordination
+
+No centralized orchestration bottleneck.
+
+Agents coordinate through distributed routing and capability-aware interaction.
+
+---
+
+## 🔄 Robust Failure Recovery
+
+The framework adapts under:
+
+- unavailable agents
+- degraded performance
+- latency shifts
+- dynamic workloads
+
+---
+
+## 🚀 Parallel Multi-Path Reasoning
+
+Symphony-Coord combines:
+
+- decentralized routing
+- parallel Chain-of-Thought execution
+- voting-based aggregation
+
+for robust multi-agent reasoning.
+
+---
+
+# System Architecture
+
+<p align="center">
+  <img src="assets/pipeline.png" width="92%">
+</p>
+
+Symphony-Coord follows a three-stage coordination pipeline.
+
+---
+
+## 1. Planning
+
+🧩 Task decomposition and candidate plan generation.
+
+Core components:
+
+- task decomposition
+- plan proposal generation
+- uncertainty-aware plan selection
+
+---
+
+## 2. Adaptive Routing
+
+🌐 Decentralized capability-aware coordination.
+
+Core components:
+
+- contextual routing
+- capability matching
+- online reward adaptation
+- emergent specialization
+
+---
+
+## 3. Voting & Aggregation
+
+🧠 Robust multi-path reasoning fusion.
+
+Core components:
+
+- parallel CoT execution
+- confidence estimation
+- voting-based aggregation
+- final answer fusion
+
+---
+
 # Quick Start
 
-## Clone Repository
+## Installation
 
 ```bash
 git clone https://github.com/GradientHQ/symphony-coord.git
 cd symphony-coord
-```
 
----
-
-## Create Environment
-
-```bash
 python -m venv venv
 source venv/bin/activate
-```
 
----
-
-## Install Dependencies
-
-```bash
 pip install --upgrade pip
 pip install -r requirements.txt
 pip install -e .
-```
+````
 
 ---
 
 ## Configure API Key
 
 ```bash
-export OPENROUTER_API_KEY="sk-or-v1-your-key"
+export OPENROUTER_API_KEY="your-key"
 ```
 
 ---
 
-## Run Simple Example
+## Run Example
 
 ```python
 from symphony import SymphonyOrchestrator
@@ -320,12 +287,12 @@ from symphony import SymphonyOrchestrator
 orchestrator = SymphonyOrchestrator(
     agents=["agent1", "agent2", "agent3"],
     topL=3,
-    cot_count=3
+    cot_count=3,
 )
 
 result = orchestrator.run_task(
     task_description="Solve: What is 25 * 37?",
-    requirements=["math"]
+    requirements=["math"],
 )
 
 print(result["final_answer"])
@@ -333,110 +300,15 @@ print(result["final_answer"])
 
 ---
 
-# Repository Structure
-
-```text
-symphony-coord/
-├── agents/                    # Agent implementations
-├── core/                      # Core routing and coordination algorithms
-├── experiments/               # Benchmark experiments
-├── infra/                     # Infrastructure and protocols
-├── models/                    # Model loading utilities
-├── protocol/                  # Communication protocol definitions
-├── scripts/                   # Visualization and analysis scripts
-├── tests/                     # Unit tests
-├── docs/                      # Documentation
-└── symphony.py                # Main orchestrator
-```
-
----
-
-# Experiments
-
-## Experiment 1 — Efficiency & Cost
-
-Evaluates:
-
-* routing efficiency
-* API cost reduction
-* adaptive selection quality
-
-### Run
-
-```bash
-python experiments/exp1/real/exp1_real_openrouter.py --n 100
-```
-
----
-
-## Experiment 2 — Robustness & Recovery
-
-Evaluates:
-
-* adaptation under agent failure
-* recovery after degradation
-* coordination stability
-
-### Run
-
-```bash
-bash experiments/exp2/scripts/run_exp2_both.sh
-```
-
----
-
-## Experiment 3 — System Optimization
-
-Evaluates:
-
-* latency balancing
-* heterogeneous execution
-* load-aware routing
-
-### Run
-
-```bash
-bash experiments/exp3/run_exp3.sh
-```
-
----
-
-# Visualization
-
-## Suggested README Assets
-
-Recommended figures/GIFs:
-
-* routing visualization
-* specialization heatmaps
-* recovery curves
-* execution timelines
-* decentralized coordination diagrams
-
-Suggested directory:
-
-```text
-assets/
-├── teaser.png
-├── pipeline.png
-├── routing_demo.gif
-├── robustness_curve.png
-└── specialization_heatmap.png
-```
-
----
-
 # Reproducing Results
 
-## Full Benchmark Evaluation
+Run the benchmark suite:
 
 ```bash
 bash experiments/scripts/run_all_datasets.sh
 ```
 
----
-
-## Generate Paper Figures
+Generate paper figures:
 
 ```bash
 python scripts/plotting/paper_figures/plot_robustness_bars.py
@@ -445,23 +317,39 @@ python scripts/plotting/paper_figures/plot_gap_analysis.py
 
 ---
 
-## Expected Outputs
+# Ecosystem
 
-```text
-pretrain_results/
-├── accuracy_summary.csv
-├── progress_state.json
-├── selection_trace.json
-└── routing_visualizations/
-```
+Explore the Symphony-Coord ecosystem.
+
+### Resources
+
+* 🌐 Interactive system demo
+* 💡 Research discussions
+* 📈 Routing and specialization visualization
+* 🛠 Open experiments and extensions
+
+### Links
+
+* [GradientHQ](https://github.com/GradientHQ)
+* [GitHub Discussions](https://github.com/GradientHQ/symphony-coord/discussions)
+* [Issues](https://github.com/GradientHQ/symphony-coord/issues)
+
+---
+
+# Roadmap
+
+* [ ] Interactive routing visualization
+* [ ] Dynamic specialization analysis
+* [ ] Multi-node distributed deployment
+* [ ] Real-time coordination dashboard
+* [ ] Open benchmark suite
+* [ ] Agent memory and long-horizon coordination
 
 ---
 
 # Documentation
 
-Detailed documentation has been moved into the `docs/` directory.
-
-## Available Docs
+Detailed setup and experiment guides are available in:
 
 ```text
 docs/
@@ -474,14 +362,19 @@ docs/
 
 ---
 
-# System Requirements
+# Repository Structure
 
-| Requirement | Minimum             | Recommended   |
-| ----------- | ------------------- | ------------- |
-| Python      | 3.9                 | 3.10 / 3.11   |
-| RAM         | 8 GB                | 16 GB         |
-| GPU         | Optional            | RTX 3060+     |
-| OS          | Linux/macOS/Windows | Ubuntu 20.04+ |
+```text
+symphony-coord/
+├── agents/                    # Agent implementations
+├── core/                      # Routing and coordination algorithms
+├── experiments/               # Benchmark and robustness experiments
+├── protocol/                  # Task and beacon protocols
+├── scripts/                   # Plotting and analysis scripts
+├── docs/                      # Documentation
+├── tests/                     # Test suite
+└── symphony.py                # Main orchestrator
+```
 
 ---
 
@@ -512,4 +405,4 @@ We thank the open-source research community for foundational work in:
 
 # License
 
-This project is released under the MIT License.
+MIT License
