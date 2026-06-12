@@ -1,23 +1,117 @@
-# Symphony-coord
+<h1 align="center">
+Symphony-Coord
+</h1>
 
-**Symphony-Coord: Emergent Coordination in Decentralized Agent Systems**
+<h3 align="center">
+Adaptive Routing for Multi-Agent LLM Systems
+</h3>
 
-Symphony-Coord is a decentralized multi-agent framework that transforms agent selection into an online multi-armed bandit problem, enabling roles to emerge organically through interaction.
+<p align="center">
+Agents That Learn Who Should Solve What
+</p>
 
-## Table of Contents
+<p align="center">
+  <a href="https://arxiv.org/abs/2602.00966">
+    <img src="https://img.shields.io/badge/arXiv-2602.00966-b31b1b">
+  </a>
+  <img src="https://img.shields.io/badge/Python-3.10+-blue">
+  <img src="https://img.shields.io/badge/License-MIT-green">
+</p>
 
+<p align="center">
+  <a href="https://arxiv.org/abs/2602.00966">📄 Paper</a>
+  ·
+  <a href="https://symphonycoord.ai">🌐 Live Demo</a>
+  ·
+  <a href="https://github.com/GradientHQ">💡 Ecosystem</a>
+</p>
+
+
+---
+## Contents
+
+- [Main Results](#main-results)
 - [Overview](#overview)
-- [Key Features](#key-features)
-- [Directory Structure](#directory-structure)
-- [Installation](#installation)
+- [Why Symphony-Coord?](#why-symphony-coord)
+- [Demo](#demo)
+- [System Architecture](#system-architecture)
 - [Quick Start](#quick-start)
-- [Running Experiments](#running-experiments)
-- [Benchmark Data Generation](#benchmark-data-generation)
-- [Reproducing Paper Results](#reproducing-paper-results)
-- [Configuration Guide](#configuration-guide)
+- [Reproducing Results](#reproducing-results)
 - [Citation](#citation)
 
-## Project Demo
+---
+
+<p align="center">
+  <img src="assets/overview.png" width="92%">
+</p>
+
+<p align="center">
+Three-stage coordination pipeline:
+Planning → Adaptive Routing → Voting & Aggregation
+</p>
+
+---
+# Main Results
+
+Symphony-Coord consistently outperforms both single-agent and multi-agent baselines across mathematical reasoning, multi-hop reasoning, and domain-specific QA benchmarks.
+
+Compared with single-agent baselines across evaluated backbones, Symphony-Coord achieves:
+
+| Benchmark | Accuracy Gain |
+|------------|------------|
+| GSM8K | +8.5 to +22.0 |
+| BBH | +16.5 to +23.5 |
+| MedicalQA | +27.0 to +33.0 |
+
+Across all evaluated backbones, Symphony-Coord achieves the strongest average performance while remaining robust under heterogeneous agent capabilities and cold-start conditions.
+
+---
+# Overview
+
+Symphony-Coord is a decentralized multi-agent LLM framework that formulates adaptive routing as an online contextual bandit problem.
+
+Instead of relying on static expert assignment or handcrafted orchestration policies, Symphony continuously learns routing decisions from interaction outcomes.
+
+The framework consists of three stages:
+
+1. Planning
+2. Adaptive Routing
+3. Voting & Aggregation
+
+Core mechanisms include:
+
+- beacon-based capability advertisement
+- Top-L candidate selection
+- LinUCB-based adaptive routing
+- reward-driven adaptation
+- Chain-of-Thought voting
+
+Through continual feedback, routing policies evolve online and improve coordination quality over time.
+
+---
+
+# Why Symphony-Coord?
+Existing multi-agent systems often rely on:
+
+- centralized orchestrators
+- static expert assignment
+- fixed routing heuristics
+
+However, real-world decentralized systems are inherently dynamic.
+
+Agent capability, latency, availability, and specialization continuously evolve during execution.
+
+Symphony-Coord studies how adaptive routing policies can continuously improve coordination quality under changing execution conditions.
+
+By formulating routing as an online contextual bandit problem, the system learns which agents should solve which tasks while balancing capability, uncertainty, and reward feedback.
+
+---
+
+# Demo
+
+## Video Demo
+
+Explore adaptive routing and emergent specialization in decentralized multi-agent systems.
 
 <p align="center">
   <a href="https://www.youtube.com/watch?v=Qnh4lrXGprE">
@@ -25,580 +119,274 @@ Symphony-Coord is a decentralized multi-agent framework that transforms agent se
   </a>
 </p>
 
-## Overview
+---
 
-Symphony employs a three-stage pipeline:
+## Interactive Demo
 
-1. **Planning Phase**: Multiple planning agents decompose complex queries into executable sub-tasks
-2. **Execution Phase**: Beacon-guided routing matches sub-tasks to specialized agents using LinUCB-based selection
-3. **Voting Phase**: CoT voting aggregates multiple agent responses for robust final answers
+<p align="center">
+  <a href="https://symphonycoord.ai">
+    <img src="assets/frontend_preview.png" width="92%">
+  </a>
+</p>
 
-<img src="Overview.png" width="900">
+Interactive features include:
 
-### Architecture
+- live routing visualization
+- evolving specialization dynamics
+- decentralized coordination simulation
+- adaptive recovery under failure
+- multi-agent execution tracing
 
-```
-User Query
-    │
-    ▼
-┌─────────────────────────────────────────┐
-│  Planning Phase                         │
-│  - Task decomposition (k plans)         │
-│  - LinUCB plan selection                │
-└─────────────────────────────────────────┘
-    │
-    ▼
-┌─────────────────────────────────────────┐
-│  Execution Phase                        │
-│  - Beacon broadcast for each sub-task   │
-│  - Top-L agent candidate selection      │
-│  - LinUCB agent selection               │
-│  - Parallel CoT execution               │
-└─────────────────────────────────────────┘
-    │
-    ▼
-┌─────────────────────────────────────────┐
-│  Voting Phase                           │
-│  - CoT voting across responses          │
-│  - Final answer aggregation             │
-└─────────────────────────────────────────┘
-    │
-    ▼
-Final Result
-```
+---
 
-## Key Features
+# System Architecture
 
-- **Decentralized Architecture**: No central orchestrator required, fault-tolerant
-- **Intelligent Task Routing**: Beacon-based capability matching with LinUCB learning
-- **Advanced Reasoning**: Multi-path CoT with majority voting
-- **Edge-Optimized**: Runs on consumer-grade GPUs (RTX 3060/4090, Jetson, M-series Mac)
+## 1. Planning
 
-## Directory Structure
+🧩 Task decomposition and candidate plan generation.
 
-```
-symphony/
-├── README.md                    # This file
-├── requirements.txt             # Python dependencies
-├── pyproject.toml               # Package configuration
-│
-├── core/                        # Core algorithms
-│   ├── capability.py            # Capability matching
-│   ├── linucb_selector.py       # LinUCB bandit selector
-│   ├── routing.py               # Task routing
-│   └── voting.py                # CoT voting mechanisms
-│
-├── agents/                      # Agent implementations
-│   ├── agent.py                 # Main Agent class
-│   └── user.py                  # User client
-│
-├── protocol/                    # Protocol definitions
-│   ├── task_contract.py         # Task data structures
-│   └── beacon.py                # Beacon messages
-│
-├── infra/                       # Infrastructure
-│   └── ISEP.py                  # Service exchange protocol
-│
-├── models/                      # Model loaders
-│   └── base_loader.py           # LLM loading utilities
-│
-├── symphony.py                  # Core orchestrator
-├── main.py                      # Simple entry point
-├── agent_register.py            # Agent registration runner
-├── user_register.py             # User registration runner
-│
-├── experiments/                 # All experiments
-│   ├── README.md                # Experiments overview
-│   ├── pretrain.py              # Main experiment runner
-│   ├── configs/                 # Configuration files
-│   ├── scripts/                 # Shell scripts
-│   ├── exp1/                    # Exp1: Efficiency & Cost
-│   ├── exp2/                    # Exp2: Robustness & Recovery
-│   └── exp3/                    # Exp3: System Optimization
-│
-├── scripts/                     # Utility scripts
-│   ├── plotting/                # Visualization
-│   │   ├── paper_figures/       # Paper figure generation
-│   │   └── routing/             # Routing analysis plots
-│   └── analysis/                # Analysis utilities
-│
-├── symphony-data-generator/     # Benchmark data generation
-│   ├── config/data_config.yaml  # Benchmark configurations
-│   ├── src/data_generator.py    # Core difficulty scoring module
-│   └── src/quick_start.py       # Quick start script
-│
-├── docs/                        # Documentation
-├── examples/                    # Example configurations
-└── tests/                       # Test suite
-```
+Core components:
+
+- task decomposition
+- candidate plan generation
+- plan selection
+
+---
+
+## 2. Adaptive Routing
+
+🌐 Beacon-guided decentralized coordination.
+
+Core components:
+
+- beacon broadcasting
+- capability matching
+- Top-L candidate selection
+- LinUCB routing
+- online reward updates
+
+---
+
+## 3. Voting & Aggregation
+
+🧠 Multi-path reasoning fusion.
+
+Core components:
+
+- parallel Chain-of-Thought execution
+- confidence estimation
+- voting-based aggregation
+- final answer synthesis
+
+---
+
+# Quick Start
+
+## Requirements
+
+* Python 3.10+
+* OpenRouter API key
+
+---
 
 ## Installation
 
-### System Requirements
+```bash
+git clone https://github.com/GradientHQ/symphony-coord.git
+cd symphony-coord
 
-| Requirement | Minimum               | Recommended                 |
-| ----------- | --------------------- | --------------------------- |
-| Python      | 3.9                   | 3.10 or 3.11                |
-| RAM         | 8 GB                  | 16 GB                       |
-| GPU         | Optional              | CUDA-compatible (RTX 3060+) |
-| OS          | Linux, macOS, Windows | Linux (Ubuntu 20.04+)       |
+python -m venv venv
+source venv/bin/activate
 
-### Step-by-Step Setup
+pip install --upgrade pip
+pip install -r requirements.txt
+pip install -e .
+```
+
+Verify installation:
 
 ```bash
-# 1. Clone the repository
-git clone https://github.com/anonymous/symphony.git
-cd symphony
-
-# 2. Create and activate virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# 3. Upgrade pip
-pip install --upgrade pip
-
-# 4. Install core dependencies
-pip install -r requirements.txt
-
-# 5. Install Symphony in development mode
-pip install -e .
-
-# 6. Verify installation
 python -c "import symphony; print('Symphony installed successfully')"
 ```
 
-### Dependencies Overview
+---
 
-The `requirements.txt` includes:
-
-**Core Dependencies** (required):
-- `torch>=2.0.0` - Deep learning framework
-- `transformers>=4.30.0` - Hugging Face model library
-- `numpy>=1.24.0` - Numerical computing
-- `pyyaml>=6.0` - Configuration file parsing
-- `requests>=2.28.0` - HTTP client for API calls
-- `pyzmq>=25.0.0` - Distributed messaging
-- `aiohttp>=3.8.0` - Async HTTP client
-
-**Optional Dependencies** (for GPU acceleration):
-- `accelerate>=0.20.0` - Distributed training
-- `bitsandbytes>=0.41.0` - 8-bit quantization
-- `peft>=0.4.0` - Parameter-efficient fine-tuning
-
-### API Key Setup (Required for Real Experiments)
-
-Symphony uses [OpenRouter](https://openrouter.ai/) for LLM API access:
+## Configure API Key
 
 ```bash
-# Option 1: Export in terminal (temporary)
-export OPENROUTER_API_KEY="sk-or-v1-your-key-here"
-
-# Option 2: Add to shell profile (persistent)
-echo 'export OPENROUTER_API_KEY="sk-or-v1-your-key-here"' >> ~/.bashrc
-source ~/.bashrc
-
-# Option 3: Create .env file (recommended for development)
-echo 'OPENROUTER_API_KEY=sk-or-v1-your-key-here' > .env
+export OPENROUTER_API_KEY="your-key"
 ```
 
-**Verify API key is set:**
+Verify API configuration:
+
 ```bash
 python -c "import os; print('API Key configured' if os.getenv('OPENROUTER_API_KEY') else 'API Key NOT set')"
 ```
 
-See [docs/OPENROUTER_CONFIG_GUIDE.md](docs/OPENROUTER_CONFIG_GUIDE.md) for detailed API setup instructions.
+---
 
-## Quick Start
-
-### Running a Simple Task
+## Run Example
 
 ```python
 from symphony import SymphonyOrchestrator
-from agents.agent import Agent
 
-# Initialize orchestrator
 orchestrator = SymphonyOrchestrator(
     agents=["agent1", "agent2", "agent3"],
     topL=3,
-    cot_count=3
+    cot_count=3,
 )
 
-# Execute a task
 result = orchestrator.run_task(
     task_description="Solve: What is 25 * 37?",
-    requirements=["math"]
+    requirements=["math"],
 )
 
-print(f"Result: {result['final_answer']}")
+print(result["final_answer"])
 ```
-
-### Using OpenRouter API
-
-```bash
-# Set API key
-export OPENROUTER_API_KEY="sk-or-v1-..."
-
-# Run with OpenRouter models
-python experiments/pretrain.py \
-  --task-pool path/to/tasks.jsonl \
-  --agents "deepseek-v3" \
-  --runtime-dir experiments/configs \
-  --n 100
-```
-
-## Running Experiments
-
-All experiments are in the `experiments/` directory. See [experiments/README.md](experiments/README.md) for detailed documentation.
-
-### Overview of Experiments
-
-| Experiment   | Description                | Type              | Estimated Time                |
-| ------------ | -------------------------- | ----------------- | ----------------------------- |
-| **Exp1**     | Efficiency & Cost Analysis | Simulation + Real | 30 min (sim) / 2-4 hrs (real) |
-| **Exp2**     | Robustness & Recovery      | Simulation + Real | 1-2 hrs                       |
-| **Exp3**     | System Optimization        | Simulation        | 30 min                        |
-| **Pretrain** | Main benchmark evaluation  | Real              | 4-8 hrs per benchmark         |
 
 ---
+# Reproducing Results
 
-### Experiment 1: Efficiency & Cost Analysis
+This section provides the commands used to reproduce the main experimental results reported in the paper.
 
-**Goal**: Compare agent selection strategies (Always-A, Static Rule, Random, LinUCB).
+## Main Benchmark Results
 
-**Simulation Mode** (no API key needed):
+Run all benchmark evaluations:
+
 ```bash
-cd experiments/exp1/sim
-python sim_efficiency_cost.py --n 1000 --seed 42
-
-# Output: Results saved to exp1_sim_results/
+bash experiments/scripts/run_all_datasets.sh
 ```
 
-**Real Mode** (requires OpenRouter API key):
-```bash
-cd experiments/exp1/real
-python exp1_real_openrouter.py --n 100
-
-# Output: Results saved to exp1_real_results/
-```
-
-**Expected Output Files**:
-- `accuracy_by_strategy.csv` - Accuracy comparison
-- `cost_by_strategy.csv` - API cost comparison
-- `selection_trace.json` - Agent selection decisions
-
----
-
-### Experiment 2: Robustness & Recovery
-
-**Goal**: Evaluate adaptation when agents become unavailable or degraded.
-
-**Run both simulation and real:**
-```bash
-bash experiments/exp2/scripts/run_exp2_both.sh
-
-# Or run separately:
-python experiments/exp2/sim/exp2_sim.py --shock-type A_unavailable
-python experiments/exp2/real/exp2_real.py --shock-type A_degraded
-```
-
-**Shock Types**:
-- `A_unavailable`: Agent suddenly becomes unavailable
-- `A_degraded`: Agent performance drops significantly
-
-**Expected Output Files**:
-- `recovery_curve.csv` - Accuracy over time after shock
-- `adaptation_metrics.json` - Recovery time and final accuracy
-
----
-
-### Experiment 3: System Optimization
-
-**Goal**: Evaluate routing optimization under latency and load variations.
+Run individual benchmarks:
 
 ```bash
-bash experiments/exp3/run_exp3.sh
-
-# Or run directly:
-python experiments/exp3/sim_system_optimization.py --scenario latency_heterogeneous
-```
-
-**Scenarios** (defined in `experiments/exp3/configs/scenarios.yaml`):
-- `latency_heterogeneous`: Agents with different response latencies
-- `load_burst`: Dynamic load spikes
-- `combined`: Both latency and load variations
-
-**Expected Output Files**:
-- `latency_comparison.csv` - Response time metrics
-- `load_balance_metrics.csv` - Task distribution across agents
-
----
-
-### Main Pretrain Experiments (Benchmark Evaluation)
-
-**Goal**: Evaluate Symphony on standard benchmarks (GSM8K, BBH, Medical QA).
-
-**Run individual benchmarks:**
-```bash
-# GSM8K (math reasoning)
 bash experiments/scripts/run_gsm8k_pretrain.sh
-
-# BBH (Big-Bench Hard)
 bash experiments/scripts/run_bbh_pretrain.sh
-
-# Balanced sampling across all tasks
 bash experiments/scripts/run_balanced_pretrain.sh
-
-# All datasets sequentially
-bash experiments/scripts/run_all_datasets.sh
 ```
 
-**Run with custom parameters:**
-```bash
-python experiments/pretrain.py \
-  --task-pool data/gsm8k_full.jsonl \
-  --benchmark gsm8k \
-  --n 600 \
-  --cold-n 200 \
-  --pretrain-n 300 \
-  --test-n 100 \
-  --topL 3 \
-  --plan-k 3 \
-  --cot-count 3 \
-  --agents "deepseek-v3,openai-gpt-5-nano,openai-gpt-4-1-nano" \
-  --runtime-dir experiments/configs
-```
+Benchmarks include:
 
-**Expected Output** (saved to `pretrain_results/<timestamp>/`):
-- `accuracy_summary.csv` - Per-phase accuracy
-- `ucb_trace.md` - LinUCB arm selection trace
-- `progress_state.json` - Checkpoint for resumption
-
-## Benchmark Data Generation
-
-Symphony includes a unified data generator for creating experiment-ready task pools with difficulty scoring across 5 benchmarks.
-
-### Quick Start
-
-```bash
-cd symphony-data-generator
-pip install -r requirements.txt
-python src/quick_start.py
-```
-
-### Supported Benchmarks
-
-| Benchmark     | Source                         | Tasks | Type                   |
-| ------------- | ------------------------------ | ----- | ---------------------- |
-| **HumanEval** | `openai_humaneval`             | 164   | Code Generation        |
-| **GSM8K**     | `gsm8k`                        | 1,319 | Mathematical Reasoning |
-| **BBH**       | `lukaemon/bbh`                 | 2,437 | Multi-hop Reasoning    |
-| **AMC**       | `AI-MO/aimo-validation-amc`    | 83    | Competition Math       |
-| **MedicalQA** | `GBaker/MedQA-USMLE-4-options` | 1,273 | Domain-Specific QA     |
-
-### Difficulty Scoring Formulas
-
-Each benchmark uses a domain-specific difficulty scoring function:
-
-**HumanEval (Code Generation)**:
-$$d_{\text{code}} = 0.6 \cdot \frac{n_{\text{asserts}}}{\hat{a}} + 0.4 \cdot \frac{|\text{prompt}|}{\hat{p}}$$
-
-**GSM8K (Mathematical Reasoning)**:
-$$d_{\text{math}} = \frac{\text{reasoning\_steps}}{\hat{s}}$$
-
-**BBH (Multi-hop Reasoning)**:
-$$d_{\text{BBH}} = c_{\text{task}} + 0.3 \cdot \frac{|\text{input}|}{\hat{i}}$$
-
-**AMC (Competition Mathematics)**:
-$$d_{\text{AMC}} = 0.7 \cdot \frac{|\text{problem}|}{\hat{p}} + 0.3 + 0.12 \cdot \mathbb{1}[\text{math\_notation}]$$
-
-**Medical QA (Domain-Specific)**:
-$$d_{\text{med}} = 0.4 \cdot \bar{q} + 0.3 \cdot \bar{k} + 0.2 \cdot \bar{o} + 0.2 \cdot \mathbb{1}[\text{clinical}]$$
-
-Where $\hat{\cdot}$ denotes 95th percentile normalizers computed from the full dataset.
-
-### Difficulty Binning
-
-Tasks are categorized using percentile-based thresholds (P20/P80):
-- **Easy**: score ≤ P20
-- **Hard**: score ≥ P80
-- **Medium**: P20 < score < P80
-
-### Generating Task Pools
-
-```python
-from src.data_generator import DatasetBuilder
-
-builder = DatasetBuilder('config/data_config.yaml')
-
-# Preprocess all benchmarks (one-time)
-builder.preprocess_all_benchmarks(output_dir='data/benchmarks/full')
-
-# Generate experiment stream
-tasks = builder.build_task_stream(
-    benchmarks_to_include=['humaneval', 'gsm8k'],
-    difficulty_split='80:20',  # 80% easy, 20% hard
-    n_total_tasks=1000,
-    random_seed=2025,
-)
-
-builder.save_task_pool(tasks, 'data/exp1/task_pool.jsonl')
-```
+| Benchmark | Task Type              |
+| --------- | ---------------------- |
+| GSM8K     | Mathematical Reasoning |
+| BBH       | Multi-hop Reasoning    |
+| MedicalQA | Domain-Specific QA     |
 
 ---
 
-## Reproducing Paper Results
+## System-Level Experiments
 
-This section provides step-by-step instructions to reproduce all results in the paper.
-
-### Step 1: Environment Setup
+### Exp1: Efficiency & Cost Analysis
 
 ```bash
-# Create fresh environment
-python -m venv venv && source venv/bin/activate
-
-# Install dependencies
-pip install --upgrade pip
-pip install -r requirements.txt
-pip install -e .
-
-# Set API key
-export OPENROUTER_API_KEY="sk-or-v1-your-key"
-
-# Verify setup
-python -c "import symphony; import os; print('Ready!' if os.getenv('OPENROUTER_API_KEY') else 'Missing API key')"
-```
-
-### Step 2: Run All Experiments
-
-```bash
-# Exp1: Efficiency & Cost Analysis (Table 2 in paper)
 python experiments/exp1/real/exp1_real_openrouter.py --n 2000
-
-# Exp2: Robustness & Recovery (Figure 4 in paper)
-bash experiments/exp2/scripts/run_all_experiments.sh
-
-# Exp3: System Optimization (Figure 5 in paper)
-bash experiments/exp3/run_exp3.sh
-
-# Main Benchmark Results (Table 1 in paper)
-bash experiments/scripts/run_all_datasets.sh
 ```
 
-### Step 3: Generate Paper Figures
+### Exp2: Robustness & Recovery
 
 ```bash
-# Figure 3: Robustness bar charts
-python scripts/plotting/paper_figures/plot_robustness_bars.py
-
-# Figure 4: 3D robustness surface
-python scripts/plotting/paper_figures/plot_robustness_3d_surface.py
-
-# Figure 5: Gap analysis
-python scripts/plotting/paper_figures/plot_gap_analysis.py
-
-# Figure 6: Parallel coordinates
-python scripts/plotting/paper_figures/plot_parallel_coordinates.py
-
-# Routing analysis visualizations
-python scripts/plotting/routing/plot_from_json.py pretrain_results/<your-result-dir>
-python scripts/plotting/routing/plot_agent_donut.py pretrain_results/<your-result-dir>
+bash experiments/exp2/scripts/run_all_experiments.sh
 ```
 
-### Expected Results Summary
+### Exp3: System Optimization
 
-| Experiment        | Key Metric                         | Expected Range |
-| ----------------- | ---------------------------------- | -------------- |
-| Exp1 (Efficiency) | LinUCB vs Always-A cost reduction  | 15-25%         |
-| Exp2 (Robustness) | Recovery time after shock          | < 50 tasks     |
-| Exp3 (Latency)    | Load-balanced vs naive improvement | 10-20%         |
-| GSM8K             | Test accuracy (LinUCB)             | 75-85%         |
-| BBH               | Macro-average accuracy             | 60-70%         |
+```bash
+bash experiments/exp3/run_exp3.sh
+```
 
 ---
 
-## Troubleshooting
+## Generate Paper Figures
 
-### Common Issues
-
-**1. `ModuleNotFoundError: No module named 'symphony'`**
 ```bash
-# Ensure you're in the project root and installed in dev mode
-pip install -e .
+python scripts/plotting/paper_figures/plot_robustness_bars.py
+python scripts/plotting/paper_figures/plot_gap_analysis.py
+python scripts/plotting/paper_figures/plot_parallel_coordinates.py
 ```
 
-**2. `OPENROUTER_API_KEY not set`**
+Additional routing visualizations:
+
 ```bash
-# Check if key is exported
-echo $OPENROUTER_API_KEY
-
-# If empty, set it
-export OPENROUTER_API_KEY="sk-or-v1-your-key"
+python scripts/plotting/routing/plot_from_json.py pretrain_results/<result-dir>
+python scripts/plotting/routing/plot_agent_donut.py pretrain_results/<result-dir>
 ```
 
-**3. `CUDA out of memory`**
-```bash
-# Use CPU-only mode or reduce batch size
-export CUDA_VISIBLE_DEVICES=""  # Force CPU
+---
+
+## Detailed Experiment Documentation
+
+For complete experiment configurations, task generation procedures, benchmark preprocessing, troubleshooting, and advanced settings, see:
+
+```text
+experiments/README.md
+docs/EXPERIMENTS.md
+docs/CONFIGS.md
+docs/TROUBLESHOOTING.md
+docs/OPENROUTER_CONFIG_GUIDE.md
 ```
 
-**4. `Connection timeout` or `Rate limit exceeded`**
-```bash
-# Reduce concurrent requests in config
-# Edit experiments/configs/openrouter/<model>/config_*.yaml
-# Add: rate_limit_delay: 1.0
+---
+
+# Documentation
+
+Detailed setup and experiment guides are available in:
+
+```text
+docs/
+├── INSTALL.md
+├── EXPERIMENTS.md
+├── CONFIGS.md
+├── TROUBLESHOOTING.md
+└── OPENROUTER_CONFIG_GUIDE.md
 ```
 
-**5. `FileNotFoundError: task-pool not found`**
-```bash
-# Ensure task data files exist
-# Download from paper supplementary materials or generate:
-python scripts/analysis/balanced_task_pool.py --output data/tasks.jsonl
+---
+
+# Repository Structure
+
+```text
+symphony-coord/
+├── agents/                    # Agent implementations
+├── core/                      # Routing and coordination algorithms
+├── experiments/               # Benchmark and robustness experiments
+├── protocol/                  # Task and beacon protocols
+├── scripts/                   # Plotting and analysis scripts
+├── docs/                      # Documentation
+├── tests/                     # Test suite
+└── symphony.py                # Main orchestrator
 ```
 
-### Getting Help
+---
 
-- Check [experiments/README.md](experiments/README.md) for experiment-specific issues
-- Check [docs/OPENROUTER_CONFIG_GUIDE.md](docs/OPENROUTER_CONFIG_GUIDE.md) for API setup
-- Verify Python version: `python --version` (requires 3.9+)
-
-## Configuration Guide
-
-### Agent Configuration
-
-Configs in `experiments/configs/openrouter/<model>/`:
-
-```yaml
-debug: false
-role: "agent"
-node_id: "agent-openrouter-016"
-base_model: "openrouter:deepseek/deepseek-chat"
-capabilities: [math, reasoning, code]
-max_tokens: 512
-temperature: 0.2
-```
-
-### Key Experiment Parameters
-
-| Parameter     | Description       | Default  |
-| ------------- | ----------------- | -------- |
-| `--task-pool` | Task JSONL file   | Required |
-| `--n`         | Total tasks       | 100      |
-| `--topL`      | Top-L candidates  | 3        |
-| `--plan-k`    | Plans to generate | 3        |
-| `--cot-count` | CoT paths         | 3        |
-| `--agents`    | Agent IDs         | Required |
-
-See [docs/OPENROUTER_CONFIG_GUIDE.md](docs/OPENROUTER_CONFIG_GUIDE.md) for detailed setup.
-
-## Citation
-
-If you use Symphony in your research, please cite:
+# Citation
 
 ```bibtex
-@article{guan2026symphony,
-  title={Symphony-Coord: Emergent Coordination in Decentralized Agent Systems},
-  author={Guan, Zhaoyang and Cao, Huixi and Zhong, Ming and Yang, Eric and Ai, Lynn and Ni, Yongxin and Shi, Bill},
-  journal={arXiv preprint arXiv:2602.00966},
-  year={2026}
+@misc{guan2026symphonycoordadaptiveroutingmultiagent,
+      title={Symphony-Coord: Adaptive Routing for Multi-Agent LLM Systems}, 
+      author={Zhaoyang Guan and Huixi Cao and Ming Zhong and Yin Wang and Guanyu Liu and Eric Yang and Lynn Ai and Yongxin Ni and Bill Shi},
+      year={2026},
+      eprint={2602.00966},
+      archivePrefix={arXiv},
+      primaryClass={cs.MA},
+      url={https://arxiv.org/abs/2602.00966}, 
 }
 ```
+
+---
+
+# Acknowledgements
+
+We thank the open-source research community for foundational work in:
+
+* decentralized systems
+* online bandit optimization
+* multi-agent reasoning
+* Chain-of-Thought coordination
+* distributed inference systems
+
+---
+
+# License
+
+MIT License
