@@ -111,18 +111,6 @@ By formulating routing as an online contextual bandit problem, the system learns
 
 # Demo
 
-## Video Demo
-
-Explore adaptive routing and emergent specialization in decentralized multi-agent systems.
-
-<p align="center">
-  <a href="https://www.youtube.com/watch?v=Qnh4lrXGprE">
-    <img src="https://img.youtube.com/vi/Qnh4lrXGprE/maxresdefault.jpg" width="900">
-  </a>
-</p>
-
----
-
 ## Interactive Demo
 
 <p align="center">
