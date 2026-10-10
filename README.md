@@ -30,7 +30,6 @@ Agents That Learn Who Should Solve What
 ---
 ## Contents
 
-- [Main Results](#main-results)
 - [Overview](#overview)
 - [Citation](#citation)
 
@@ -45,21 +44,6 @@ Agents That Learn Who Should Solve What
 <p align="center">
 Task & Plan-K → Capability-Guided Screening (CGS) → Contextual Bandit Routing (CBR) & CoT-P → Aggregate & Learn
 </p>
-
----
-# Main Results
-
-Symphony-Coord consistently outperforms both single-agent and multi-agent baselines across mathematical reasoning, multi-hop reasoning, and domain-specific QA benchmarks.
-
-Compared with single-agent baselines across evaluated backbones, Symphony-Coord achieves:
-
-| Benchmark | Accuracy Gain |
-|------------|------------|
-| GSM8K | +8.5 to +22.0 |
-| BBH | +16.5 to +23.5 |
-| MedicalQA | +27.0 to +33.0 |
-
-Across all evaluated backbones, Symphony-Coord achieves the strongest average performance while remaining robust under heterogeneous agent capabilities and cold-start conditions.
 
 ---
 # Overview
