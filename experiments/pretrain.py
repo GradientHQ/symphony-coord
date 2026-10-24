@@ -675,8 +675,7 @@ def _exec_with_timeout(code: str, timeout_s: int = 6) -> None:
         signal.alarm(max(1, int(timeout_s)))
     try:
         globals_dict = {"__builtins__": __builtins__}
-        locals_dict: Dict[str, Any] = {}
-        exec(code, globals_dict, locals_dict)
+        exec(code, globals_dict)
     finally:
         if hasattr(signal, "SIGALRM"):
             signal.alarm(0)
